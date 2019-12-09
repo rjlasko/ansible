@@ -1,0 +1,73 @@
+---
+nut_config_path: /etc/nut
+
+nut_ups_conf:
+  globals:
+    chroot:
+    driverpath:
+    maxstartdelay:
+    maxretry: 3
+    retrydelay:
+    pollinterval:
+    synchronous:
+    user:
+  upses:
+    avr1350:
+      driver: usbhid-ups
+      port: auto
+      desc: '"Cyberpower CP1350AVR-G UPS @ mountain.powdahaus.lan"'
+    avr685:
+      driver: usbhid-ups
+      port: auto
+      desc: '"Cyberpower CP685AVR-G UPS @ thermostat.powdahaus.lan"'
+
+nut_upsd_conf:
+  MAXAGE:
+  STATEPATH:
+  LISTEN: []
+  MAXCONN:
+  CERTFILE:
+  CERTPATH:
+  CERTIDENT:
+  CERTREQUEST:
+
+nut_upsd_users:
+  monuser:
+    password: "{{ nut_default_password | mandatory }}"
+    upsmon master: ''
+    actions:
+      - set
+      - fsd
+    instcmds: all
+
+nut_upsmon_conf:
+  DEADTIME: 15
+  FINALDELAY: 60
+  HOSTSYNC: 15
+  MINSUPPLIES: 1
+  MONITOR: "{{ monitor_name | mandatory }} 1 {{ nut.user | mandatory }} {{ nut_upsd_users[nut.user].password | mandatory }} {{ monitor_mode | mandatory }}"
+  NOCOMMWARNTIME: 300
+  NOTIFYCMD: '"/etc/nut/notify.sh"'
+  NOTIFYMSG: []
+  NOTIFYFLAG:
+    - "ONLINE    SYSLOG+WALL+EXEC"
+    - "ONBATT    SYSLOG+WALL+EXEC"
+    - "LOWBATT   SYSLOG+WALL+EXEC"
+    - "FSD       SYSLOG+WALL+EXEC"
+    - "COMMOK    SYSLOG+WALL+EXEC"
+    - "COMMBAD   SYSLOG+WALL+EXEC"
+    - "SHUTDOWN  SYSLOG+WALL+EXEC"
+    - "REPLBATT  SYSLOG+WALL+EXEC"
+    - "NOCOMM    SYSLOG+WALL+EXEC"
+    - "NOPARENT  SYSLOG+WALL+EXEC"
+  POLLFREQ: 5
+  POLLFREQALERT: 5
+  POWERDOWNFLAG: '"/etc/killpower"'
+  RBWARNTIME: 43200
+  RUN_AS_USER:
+  SHUTDOWNCMD: '"/sbin/shutdown -h +0"'
+  CERTPATH:
+  CERTIDENT:
+  CERTHOST:
+  CERTVERIFY:
+  FORCESSL:

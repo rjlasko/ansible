@@ -1,0 +1,15 @@
+---
+## ----------------------------------- ##
+## Installs & configures a SAMBA share ##
+## ----------------------------------- ##
+
+- name: create share with option
+  loop: "{{ samba_share.options }}"
+  loop_control:
+    loop_var: samba_share_option
+  ini_file:
+    path: /etc/samba/smb.conf
+    section: "{{ samba_share.section }}"
+    option: "{{ samba_share_option[0] }}"
+    value: "{{ samba_share_option[1] }}"
+    no_extra_spaces: no

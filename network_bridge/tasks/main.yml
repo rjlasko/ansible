@@ -1,0 +1,44 @@
+---
+## -------------------------- ##
+## Creates a bridge interface ##
+## -------------------------- ##
+
+- name: install bridge-utils
+  package:
+    name: bridge-utils
+    state: present
+
+- shell: brctl show
+  register: bridge_found_result
+
+- name: Configure network bridge from best device
+  when: bridge_found_result.stdout is not search(bridge_name)
+  block:
+    - name: mktemp dir
+      tempfile:
+        state: directory
+        suffix: build
+      register: tmp_dir
+
+    - copy:
+        src: "{{ role_path }}/files/best_interface.sh"
+        dest: "{{ tmp_dir.path }}/best_interface.sh"
+        owner: root
+        mode: u=rx
+
+    - command: "{{ tmp_dir.path }}/best_interface.sh {{ bridge_name | mandatory }}"
+      register: best_interface_result
+
+    - set_fact:
+        source_interface: "{{ best_interface_result.stdout }}"
+
+    - name: "/etc/network/interfaces.d/{{ bridge_name | mandatory }}"
+      template:
+        src: bridge.j2
+        dest: "/etc/network/interfaces.d/{{ bridge_name | mandatory }}"
+        owner: root
+        group: root
+        mode: 0644
+
+    - reboot:
+        reboot_timeout: 600

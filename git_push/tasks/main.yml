@@ -1,0 +1,23 @@
+---
+## ------------------------------------------------------------- ##
+## Pushes Git repositories from 'control' node to 'managed' node ##
+## ------------------------------------------------------------- ##
+
+- name: check if git is accessible via path
+  shell: 'type git'
+  ignore_errors: true
+  register: git_exists
+
+- name: system install git
+  when: git_exists.rc != 0
+  become: true
+  package:
+    name: git
+    state: present
+
+- name: push repositories
+  loop: "{{ git_pushes | mandatory }}"
+  loop_control:
+    loop_var: git_push
+  include: git_push.yml
+

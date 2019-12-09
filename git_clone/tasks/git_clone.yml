@@ -1,0 +1,16 @@
+---
+## ----------------------- ##
+## Clones a Git repository ##
+## ----------------------- ##
+
+- name: create user space directory
+  file:
+    state: directory
+    path: "{{ git_clone.dest | dirname | mandatory }}"
+
+- name: clone the repo
+  git:
+    repo: "{{ git_clone.src | mandatory }}"
+    dest: "{{ git_clone.dest | mandatory }}"
+    accept_hostkey: true
+    update: false

@@ -1,0 +1,36 @@
+---
+## ----------------------------- ##
+## Backup and reset a given file ##
+## ----------------------------- ##
+
+- name: "check if file: {{ br_target }}"
+  stat:
+    path: "{{ br_target | mandatory }}"
+  register: target_check
+  failed_when: >
+    target_check.stat.isdir or
+    target_check.stat.islnk or
+    target_check.stat.issock or
+    target_check.stat.isfifo
+
+- set_fact:
+    br_backup: "{{ br_target }}.BAK"
+
+- name: check for {{ br_backup }}
+  stat:
+    path: "{{ br_backup }}"
+  register: bak_exists
+
+- name: backup {{ br_target }}
+  when: bak_exists.stat.exists == False
+  copy:
+    src: "{{ br_target }}"
+    dest: "{{ br_backup }}"
+    remote_src: yes
+
+- name: restore {{ br_target }}
+  when: bak_exists.stat.exists == True
+  copy:
+    src: "{{ br_backup }}"
+    dest: "{{ br_target }}"
+    remote_src: yes

@@ -1,0 +1,87 @@
+---
+## --------------------- ##
+## Sets up a unison user ##
+## --------------------- ##
+
+- name: check archive override directory
+  become: true
+  become_user: "{{ unison_user_def.user | mandatory}}"
+  when: unison_user_def.archive is defined
+  stat:
+    path: "{{ unison_user_def.archive }}"
+  register: archive_override
+  failed_when: >
+    not archive_override.stat.exists
+    or
+    archive_override.stat.isdir is not defined
+    or
+    not archive_override.stat.isdir
+
+- name: resolve archive directory
+  become: true
+  become_user: "{{ unison_user_def.user | mandatory}}"
+  block:
+    - name: check default archive directory
+      stat:
+        path: "~/.unison"
+      register: archive_default
+      failed_when: >
+        archive_default.stat.exists
+        and
+        archive_default.stat.islnk is defined
+        and
+        (
+          (
+            not archive_default.stat.islnk
+            and
+            unison_user_def.archive is defined
+          )
+          or
+          (
+            archive_default.stat.islnk
+            and
+            archive_default.stat.lnk_target != unison_user_def.archive
+            and
+            archive_default.stat.lnk_source != unison_user_def.archive
+          )
+        )
+
+    - name: create archive default directory
+      when: not archive_default.stat.exists and unison_user_def.archive is not defined
+      file:
+        path: "~/.unison"
+        state: directory
+        mode: u=rwx,g-rwx,o-rwx
+
+    - name: link to archive override directory
+      when: not archive_default.stat.exists and unison_user_def.archive is defined
+      file:
+        path: "~/.unison"
+        state: link
+        src: "{{ unison_user_def.archive }}"
+
+- name: resolve default profile
+  when: unison_user_def.profile is defined
+  become: true
+  become_user: "{{ unison_user_def.user }}"
+  block:
+    - name: discover prexisting profiles
+      find:
+        paths: "~/.unison"
+        patterns: "*.prf"
+      register: profiles_to_delete
+
+    - name: delete prexisting profiles
+      loop: "{{ profiles_to_delete.files }}"
+      loop_control:
+        loop_var: profile_to_delete
+      file:
+        path: "{{ profile_to_delete.path }}"
+        state: absent
+
+    - name: install default profile
+      copy:
+        src: "{{ unison_user_def.profile }}"
+        dest: "~/.unison/default.prf"
+        owner: root
+        mode: u=rw,g-rwx,o-rwx

@@ -1,0 +1,24 @@
+---
+## --------------------------------------------------------- ##
+## Mounts the specified filesystems to the given mount point ##
+## --------------------------------------------------------- ##
+
+- name: drop old NFS mounts
+  block:
+    - name: find pre-existing NFS mounts
+      shell: cat /etc/fstab | grep ' nfs ' | awk '{print $2}'
+      register: preexisting_NFS_mounts
+    - name: remove NFS mounts
+      loop: "{{ preexisting_NFS_mounts.stdout_lines }}"
+      loop_control:
+        loop_var: old_mount
+      mount:
+        path: "{{ old_mount }}"
+        state: absent
+
+- name: apply new NFS mounts
+  become: true
+  loop: "{{ nfs_mounts }}"
+  loop_control:
+    loop_var: mount
+  include: mount.yml

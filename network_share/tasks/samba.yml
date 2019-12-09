@@ -1,0 +1,29 @@
+---
+## ----------------------- ##
+## Installs Samba & shares ##
+## ----------------------- ##
+
+- name: install SAMBA packages
+  package:
+    name: "{{ samba_packages }}"
+    state: present
+  vars:
+    samba_packages:
+      - samba
+#      # Are there other things we need?
+#      - samba-client
+#      - samba-common
+#      - cifs-utils
+#      - system-config-samba
+
+- name: SAMBA shares
+  loop: "{{ net_share.samba }}"
+  loop_control:
+    loop_var: samba_share
+  include: samba_share.yml
+
+- name: restart SAMBA service
+  service:
+    name: smbd
+    state: restarted
+    enabled: true

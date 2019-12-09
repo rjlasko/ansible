@@ -1,0 +1,76 @@
+---
+## --------------------- ##
+## Installs NFS & shares ##
+## --------------------- ##
+
+- name: install NFS packages
+  package:
+    name: "{{ nfs_packages }}"
+    state: present
+  vars:
+    nfs_packages:
+      - nfs-kernel-server
+
+# XXX: NFSv4 has an interesting property where all shares exported as a
+#      single virtual-filesystem. Bind-mounting the directories to be shared
+#      under a common root is the suggested best practice.
+# see: https://help.ubuntu.com/community/NFSv4Howto
+# see: https://wiki.archlinux.org/index.php/NFS#Server
+- name: create NFS share root
+  file:
+    path: /srv/nfs
+    state: directory
+    # the parent of any shared directory also needs the following permissions
+    # for its contents to be mountable by clients. This is because 'root' is
+    # treated as 'nobody' by the NFS server, and so would never have permission
+    # to see the path in the exported NFS virtual filesystem.
+    mode: o=rx
+
+- name: clear pre-existing NFS exports
+  block:
+    - name: clear uncommented lines in /etc/exports
+      lineinfile:
+        path: /etc/exports
+        regexp: "^(?!#).+"
+        state: absent
+    - name: turn off cleared NFS exports
+      command: "exportfs -r"
+
+- name: remove pre-existing bind mounts in NFS root (/srv/nfs)
+  block:
+    - name: find pre-existing bind mounts in NFS root (/srv/nfs)
+      shell: cat /etc/fstab | grep '/srv/nfs' | awk '{print $2}'
+      register: preexisting_bind_mounts
+
+    - name: remove bind mounts in NFS root (/srv/nfs)
+      loop: "{{ preexisting_bind_mounts.stdout_lines }}"
+      loop_control:
+        loop_var: bind_mount_point
+      mount:
+        path: "{{ bind_mount_point }}"
+        state: absent
+
+    - name: clear out all mount points
+      command: find /srv/nfs -mindepth 1 -type d -empty -delete
+
+    - name: fail if leftovers in NFS root (/srv/nfs)
+      command: find /srv/nfs -mindepth 1
+      register: nfs_root_leftovers
+      failed_when: nfs_root_leftovers.stdout != ""
+
+- name: build NFS exports
+  block:
+    - name: defined NFS share
+      loop: "{{ net_share.nfs }}"
+      loop_control:
+        loop_var: nfs_share
+      include: nfs_share.yml
+
+    - name: export udpated NFS shares
+      command: "exportfs -r"
+
+- name: restart NFS service
+  service:
+    name: nfs-server
+    state: restarted
+    enabled: true

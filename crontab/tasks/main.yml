@@ -1,0 +1,20 @@
+---
+## ------------------------------------------------------------------------------- ##
+## This script installs the preconfigured crontab, and other tools useful for cron ##
+## ------------------------------------------------------------------------------- ##
+# install cronic to cleanup cron outputs for mailing errors
+# requires 'bash'
+- name: install cronic
+  get_url:
+    url: https://habilis.net/cronic/cronic
+    dest: /usr/bin/cronic
+    mode: a=rx
+    force: yes
+
+- name: setup crontab user
+  loop: "{{ crontabs | default([])}}"
+  loop_control:
+    loop_var: crontabs_item
+  include: crontab_user.yml
+  vars:
+    crontab_user_def: "{{ crontabs_item }}"

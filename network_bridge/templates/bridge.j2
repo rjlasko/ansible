@@ -1,0 +1,8 @@
+# {{ ansible_managed }}
+
+auto {{ bridge_name }}
+iface {{ bridge_name }} inet dhcp
+    bridge_ports {{ source_interface }}
+    bridge_stp off
+    bridge_waitport 0
+    bridge_fd 0

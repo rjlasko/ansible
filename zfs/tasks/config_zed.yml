@@ -1,0 +1,55 @@
+---
+## -------------------------------- ##
+## Configure ZFS Event Daemon (ZED) ##
+## -------------------------------- ##
+
+# https://wiki.archlinux.org/index.php/ZFS#Monitoring_/_Mailing_on_Events
+
+- set_fact:
+    zed_rc_path: /etc/zfs/zed.d/zed.rc
+
+- include_role:
+    name: backup_restore
+  vars:
+    br_target: "{{ zed_rc_path }}"
+
+# TODO? is “ZED_NOTIFY_INTERVAL_SECS” normally uncommented & properly set?
+
+- name: zed email address
+  lineinfile:
+    dest: "{{ zed_rc_path }}"
+    state: present
+    regexp: '^#?ZED_EMAIL_ADDR'
+    line: "ZED_EMAIL_ADDR=\"{{ zfs.email }}\""
+
+- name: zed email program
+  lineinfile:
+    dest: "{{ zed_rc_path }}"
+    state: present
+    regexp: '^#?ZED_EMAIL_PROG'
+    line: 'ZED_EMAIL_PROG="mail"'
+
+- name: zed verbose
+  lineinfile:
+    dest: "{{ zed_rc_path }}"
+    state: present
+    regexp: '^#?ZED_NOTIFY_VERBOSE'
+    line: 'ZED_NOTIFY_VERBOSE=1'
+
+- name: zed email options
+  lineinfile:
+    dest: "{{ zed_rc_path }}"
+    state: present
+    regexp: '^#?ZED_EMAIL_OPTS'
+    line: "ZED_EMAIL_OPTS=\"-s '@SUBJECT@' @ADDRESS@\""
+
+- name: set permissions
+  file:
+    path: "{{ zed_rc_path }}"
+    mode: u=r
+
+- name: restart ZED
+  service:
+    name: zed
+    state: restarted
+    enabled: true

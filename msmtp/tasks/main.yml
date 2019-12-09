@@ -1,0 +1,43 @@
+---
+## ---------------------------------------------------------------------------------------- ##
+## Install the MSMTP client and associated MTA (mail transfer agent) used to forward emails ##
+## ---------------------------------------------------------------------------------------- ##
+# TODO: https://unix.stackexchange.com/questions/26666/can-i-change-roots-email-address-or-forward-it-to-an-external-address
+# does this conflict with the msmtprc configuration?
+
+- package:
+    name: "{{ msmtp_packages }}"
+    state: present
+  vars:
+    msmtp_packages:
+      - msmtp
+      - msmtp-mta
+      - ca-certificates
+
+- name: copy msmtp config file
+  copy:
+    src: "{{ msmtprc_path | mandatory }}"
+    dest: /etc/msmtprc
+    mode: u=r,g=r,o-rwx
+    owner: root
+    group: mail
+    force: yes
+
+- name: detect if /etc/aliases exists
+  stat:
+    path: /etc/aliases
+  register: aliases_exists
+
+- name: update config if /etc/aliases exists
+  when: aliases_exists.stat.exists
+  lineinfile:
+    dest: /etc/msmtprc
+    regexp: "^.*aliases"
+    line: "aliases /etc/aliases"
+
+- name: update config if /etc/aliases exists
+  when: aliases_exists.stat.exists == False
+  lineinfile:
+    dest: /etc/msmtprc
+    regexp: "^.*aliases"
+    line: "#aliases"

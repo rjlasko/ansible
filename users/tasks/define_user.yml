@@ -1,0 +1,26 @@
+---
+## ------------------------------------------------ ##
+## Creates or updates a user and its associated IDs ##
+## ------------------------------------------------ ##
+
+- name: create or update user
+  when: >
+    user_def.uid is defined or
+    user_def.group is defined or
+    user_def.groups is defined or
+    user_def.create_home is defined
+  user:
+    name: "{{ user_def.name | mandatory }}"
+    uid: "{{ user_def.uid | default(omit) }}"
+    group: "{{ user_def.group | default(omit) }}"
+    groups: "{{ user_def.groups | default([]) }}"
+    append: true
+    create_home: "{{ user_def.create_home | default(false) }}"
+
+- name: update email
+  when: user_def.email is defined
+  lineinfile:
+    dest: /etc/aliases
+    create: true
+    regexp: "^{{ user_def.name }}"
+    line: "{{ user_def.name }}: {{ user_def.email }}"

@@ -1,0 +1,70 @@
+---
+## ----------------------- ##
+## Pushes a Git repository ##
+## ----------------------- ##
+
+# TODO: if already exists, then put into a mode where branches and commits can be obliterated, instead of deleting
+# FIXME: it seems that remote branches, that have a different history than the local, are not being overwritten
+
+- name: check that directory exists
+  stat:
+    path: "{{ git_push.dest | mandatory }}/.git"
+  register: preexist_repo_dir
+
+- name: convert dest to bare, if pre-exists
+  when: preexist_repo_dir.stat.exists and preexist_repo_dir.stat.isdir
+  block:
+    - name: move .git dir
+      command: "mv {{ git_push.dest }}/.git {{ git_push.dest }}.git"
+    - name: clear old directory
+      command: "rm -rf {{ git_push.dest }}"
+    - name: create user space directory
+      file:
+        state: directory
+        path: "{{ git_push.dest }}"
+    - name: move .git dir
+      command: "mv {{ git_push.dest }}.git {{ git_push.dest }}/.git"
+    - name: convert to bare repo
+      command: "git config --bool core.bare true"
+      args:
+        chdir: "{{ git_push.dest }}/.git"
+
+- name: create new dest, if not pre-exists
+  when: preexist_repo_dir.stat.exists == False or preexist_repo_dir.stat.isdir == False
+  block:
+    - name: create .git directory
+      file:
+        state: directory
+        path: "{{ git_push.dest | mandatory }}"
+    - name: Create the bare repo
+      command: "git init --bare {{ git_push.dest }}/.git"
+
+- set_fact:
+    gitpush_host: "{{ ansible_host }}"
+
+- name: Push that repo!
+  local_action: "command git --git-dir={{ git_push.src | mandatory }}/.git push {{ ansible_user_id }}@{{ gitpush_host }}:{{ git_push.dest }}/.git --mirror --prune"
+  changed_when: push_response.stderr != "Everything up-to-date"
+  register: push_response
+  # We never use "become" on this local action because we're on the control machine and become_user
+  # is probably a user that doesn't exist!
+  become: no
+
+- name: convert to non-bare repository
+  command: "git config --local --bool core.bare false"
+  args:
+    chdir: "{{ git_push.dest }}"
+
+- name: Determine local checkout branch
+  local_action: "command git --git-dir={{ git_push.src | mandatory }}/.git rev-parse --abbrev-ref HEAD"
+  register: current_branch
+
+- name: Remote checkout current_branch
+  command: "git checkout {{ current_branch.stdout }}"
+  args:
+    chdir: "{{ git_push.dest }}"
+
+- name: reset repo
+  command: "git reset --hard"
+  args:
+    chdir: "{{ git_push.dest }}"

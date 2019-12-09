@@ -1,0 +1,44 @@
+---
+## --------------------- ##
+## Installs ZFS on Linux ##
+## --------------------- ##
+
+- name: check if ZFS is installed
+  shell: 'type zfs'
+  ignore_errors: true
+  register: zfs_exists
+
+- when: ansible_distribution != "Debian" or ansible_distribution_major_version != "9"
+  fail:
+    msg: "Only supports Debian 9 (stretch). Found {{ ansible_distribution }} {{ ansible_distribution_version }} ({{ ansible_distribution_release }})"
+
+# currently using the older version of ZFS.  Upgrade later.
+# TODO: consider using the Debian "backports" version of ZFS for newer features as guided
+- name: install ZFS
+  when: zfs_exists.rc != 0
+  block:
+    - apt_repository:
+        repo: "deb http://ftp.us.debian.org/debian/ stretch main contrib non-free"
+        state: present
+        update_cache: yes
+    - apt_repository:
+        repo: "deb-src http://ftp.us.debian.org/debian/ stretch main contrib non-free"
+        state: present
+        update_cache: yes
+    - package:
+        name: "{{ zfs_packages }}"
+        state: present
+      vars:
+        zfs_packages:
+          - "linux-headers-{{ ansible_kernel }}"
+          - linux-image-amd64
+          - zfs-dkms
+          - zfsutils-linux # auto scrubbing
+          - zfs-auto-snapshot # auto snapshot
+    - modprobe:
+        name: zfs
+        state: present
+    - shell: modinfo zfs | grep -v parm
+      register: zfs_module_info
+    - name: module info
+      debug: msg="{{ zfs_module_info.stdout_lines }}"

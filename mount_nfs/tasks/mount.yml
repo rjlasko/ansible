@@ -1,0 +1,20 @@
+---
+## -------------------------------------------------------- ##
+## Mounts the specified filesystem to the given mount point ##
+## -------------------------------------------------------- ##
+
+- name: create mount point
+  file:
+    path: "{{ mount.path | mandatory }}"
+    state: directory
+    owner: "{{ mount.owner | default(omit) }}"
+    group: "{{ mount.group | default(omit) }}"
+    mode: "{{ mount.mode | default(omit) }}"
+
+- name: mount filesystem
+  mount:
+    fstype: nfs
+    src: "{{ mount.src | mandatory }}"
+    path: "{{ mount.path | mandatory }}"
+    opts: "{{ mount.opts | default(omit) }}"
+    state: mounted

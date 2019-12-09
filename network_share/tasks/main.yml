@@ -1,0 +1,14 @@
+---
+## ---------------------------------------------------------------- ##
+## Installs the packages to support SAMBA and common configurations ##
+## ---------------------------------------------------------------- ##
+
+- name: install and configure SAMBA server
+  when: net_share.samba is defined
+  become: true
+  include: samba.yml
+
+- name: install and configure NFS server
+  when: net_share.nfs is defined
+  become: true
+  include: nfs.yml

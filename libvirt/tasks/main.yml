@@ -1,0 +1,75 @@
+---
+## ---------------------------------------------- ##
+## Installs KVM and related libraries & utilities ##
+## ---------------------------------------------- ##
+# TODO: figure out how to auto-shutdown KVM instances when UPS goes down
+
+# XXX: is not compatible with Docker in the default configuration:
+# https://serverfault.com/questions/963759/docker-breaks-libvirt-bridge-network
+# https://serverfault.com/questions/948339/networking-between-kvm-vm-and-docker-container-on-same-host
+# https://bbs.archlinux.org/viewtopic.php?id=233727
+# https://www.reddit.com/r/linuxadmin/comments/7tlkve/libvirt_network_configuration_conflicts_with/
+
+
+- name: install libvirt & KVM
+  become: true
+  block:
+    - package:
+        name: "{{ kvm_packages }}"
+        state: present
+      vars:
+        kvm_packages:
+          - qemu-kvm
+          - libvirt-clients
+          - qemu-utils
+          - libvirt-daemon-system
+          - virtinst
+# TODO: checkout "ovirt" instead of "virt-manager"
+          - virt-manager
+# XXX: enables UEFI support for VMs
+          # - ovmf
+# XXX: evaluate purpose
+          # - libguestfs-tools
+          # - genisoimage
+    - name: restart libvirtd
+      service:
+        name: libvirtd
+        state: restarted
+        enabled: true
+
+    - name: create bridge network config
+      when: libvirt.bridge is defined
+      lineinfile:
+        line: "allow {{ libvirt.bridge }}"
+        path: /etc/qemu/bridge.conf
+        create: true
+        state: present
+        owner: root
+        group: libvirt
+        mode: u=rw,g=r,o-rwx
+
+# FIXME: seems to miss adding the group to 'libvirt_qemu'
+    - name: grant user permissions to run Virtual Machine Manager
+      loop: "{{ libvirt.users | default([]) }}"
+      loop_control:
+        loop_var: libvirt_user
+      user:
+        name: "{{ libvirt_user }}"
+        groups: libvirt,libvirt-qemu
+        append: true
+        create_home: false
+
+    - name: create storage pools
+      loop: "{{ libvirt.pools | default([]) }}"
+      loop_control:
+        loop_var: libvirt_pool_item
+      include: create_pool.yml
+      vars:
+        libvirt_pool: "{{ libvirt_pool_item }}"
+
+    - name: grant user 'libvirt-qemu' read-write access to libvirt pools
+      user:
+        name: libvirt-qemu
+        groups: libvirt
+        append: true
+        create_home: false

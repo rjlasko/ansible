@@ -1,0 +1,7 @@
+---
+- name: update APT package info
+  apt:
+    autoclean: true
+    autoremove: true
+    update_cache: true
+    upgrade: safe

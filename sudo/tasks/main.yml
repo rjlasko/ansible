@@ -1,0 +1,21 @@
+---
+## ---------------------------------- ##
+## Adds a user to the list of sudoers ##
+## ---------------------------------- ##
+# TODO: add to "wheel" or "admin" groups when needed on OSx/BSD
+# https://stackoverflow.com/questions/33359404/ansible-best-practice-for-maintaining-list-of-sudoers
+
+- package:
+    name: sudo
+    state: present
+
+- group:
+    name: sudo
+    state: present
+
+- lineinfile:
+    dest: /etc/sudoers
+    state: present
+    regexp: '^%sudo'
+    line: '%sudo ALL=(ALL) NOPASSWD: ALL'
+    validate: visudo -cf %s

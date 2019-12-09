@@ -1,0 +1,27 @@
+---
+## ----------------------------------------------- ##
+## Authorizes SSH self-login for the targeted user ##
+## ----------------------------------------------- ##
+
+- find:
+    patterns: "*.pub"
+    paths: ~/.ssh
+  register: find_pubkey_result
+
+- when: find_pubkey_result.matched != 1
+  fail:
+    msg: "found too many pub keys"
+
+- command: "cat {{ find_pubkey_result.files[0].path }}"
+  register: user_pubkey
+
+- name: SSH authorized_keys file exists
+  file:
+    path: "~/.ssh/authorized_keys"
+    state: touch
+
+- name: write authorized public key
+  lineinfile:
+    dest: ~/.ssh/authorized_keys
+    state: present
+    line: "{{ user_pubkey.stdout }}"

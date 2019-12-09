@@ -1,0 +1,31 @@
+---
+## ---------------- ##
+## Creates SSH keys ##
+## ---------------- ##
+
+
+- name: glob for files
+  find:
+    paths: ~/.ssh
+    patterns: '*.pub'
+  register: file_glob_results
+
+- name: if public key doesn't already exist
+  when: file_glob_results.matched < 1
+  block:
+    - set_fact:
+        key_type: "{{ ssh_key_type | default('ed25519') }}"
+    
+    - set_fact:
+        private_key: "~/.ssh/id_{{ key_type }}"
+    
+    - name: "Create ssh keys for '{{ ansible_user_id }}'"
+      user:
+        name: "{{ ansible_user_id }}"
+        generate_ssh_key: yes
+        ssh_key_file: "{{ private_key }}"
+        ssh_key_type: "{{ key_type }}"
+        ssh_key_comment: "{{ ansible_user_id }}@{{ ansible_hostname }}"
+        state: present
+        # prevent overwrite of existing keys
+        force: false

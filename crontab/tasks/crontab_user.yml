@@ -1,0 +1,40 @@
+---
+## ---------------------- ##
+## Sets up a crontab user ##
+## ---------------------- ##
+
+- name: install crontabs for given user
+  become: true
+  become_user: "{{ crontab_user_def.user | mandatory }}"
+  block:
+    - name: clear crontab
+      when: crontab_user_def.reset | default(false)
+      command: crontab -r
+      ignore_errors: true
+
+    - name: crontab contents
+      when: crontab_user_def.file is defined
+      block:
+        - copy:
+            src: "{{ crontab_user_def.file }}"
+            dest: ~/cron.tab
+            force: yes
+        - command: crontab ~/cron.tab
+        - file:
+            path: ~/cron.tab
+            state: absent
+
+    - name: MAILTO
+      cron:
+        env: true
+        name: MAILTO
+        job: "{{ crontab_user_def.mailto | mandatory }}"
+
+    - name: PATH
+      when: crontab_user_def.path is defined
+      cron:
+        env: true
+        insertafter: MAILTO
+        name: PATH
+        job: "{{ crontab_user_def.path }}"
+

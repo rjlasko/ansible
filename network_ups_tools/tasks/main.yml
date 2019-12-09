@@ -1,0 +1,54 @@
+---
+## --------------------------------------------------------------------------- ##
+## This script seeks to automate the installation of a Network UPS Tools (NUT) ##
+## --------------------------------------------------------------------------- ##
+# XXX: With inspiration from - https://github.com/ykuksenko/ansible.nut
+
+# TODO: send emails on relevant status changes
+# https://unix.stackexchange.com/questions/164788/run-various-shell-commands-when-nut-reports-a-low-ups-battery
+# https://networkupstools.org/docs/user-manual.chunked/ar01s07.html
+# XXX: https://networkupstools.org/docs/user-manual.chunked/index.html
+# XXX: https://wiki.archlinux.org/index.php/Network_UPS_Tools
+# XXX: NUT has a HTML option, possibly useful...
+
+
+- when: nut.mode != "standalone" and nut.mode != "netclient"
+  fail:
+    msg: "Only supports 'standalone' and 'netclient' modes of operation."
+
+- set_fact:
+    nut_default_password: "{{ 9999999999999999999999 | random | to_uuid }}"
+
+- when: nut.mode == "standalone"
+  set_fact:
+    monitor_name: "{{ nut.upsname | mandatory }}"
+    monitor_mode: "master"
+
+- when: nut.mode == "netclient"
+  set_fact:
+    monitor_name: "{{ nut.upsname | mandatory }}@{{ nut.server | mandatory }}"
+    monitor_mode: "slave"
+
+- package:
+    name: nut
+    state: present
+
+- name: nut.conf
+  lineinfile:
+    dest: "{{ nut_config_path }}/nut.conf"
+    state: present
+    regexp: '^MODE'
+    line: "MODE={{ nut.mode }}"
+
+- when: nut.mode == "standalone"
+  import_tasks: server.yml
+  
+- when: nut.mode == "netclient" or nut.mode == "standalone"
+  import_tasks: monitor.yml
+
+- name: check ups connection
+  command: "upsc {{ monitor_name }}"
+  register: upsc_out
+
+- name: display ups info
+  debug: msg="{{ upsc_out.stdout_lines }}"

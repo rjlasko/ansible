@@ -1,0 +1,4 @@
+---
+xrdp_filepath: /usr/sbin/xrdp
+
+xorgxrdp_filepath: /usr/lib/xorg/modules/libxorgxrdp.so

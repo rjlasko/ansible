@@ -1,0 +1,23 @@
+---
+## --------------------------------- ##
+## Installs & configures a NFS share ##
+## --------------------------------- ##
+
+- name: bind mount under nfs root directory
+  mount:
+    src: "{{ nfs_share.src }}"
+    path: "/srv/nfs/{{ nfs_share.name }}"
+    fstype: none
+    opts: "bind{% if nfs_share.bind_opts is defined %},{{nfs_share.bind_opts}}{%endif%}"
+    
+    state: mounted
+
+- name: create share with options
+  lineinfile:
+    path: /etc/exports
+    state: present
+    regexp: "^/srv/nfs/{{ nfs_share.name }}"
+    line: "/srv/nfs/{{ nfs_share.name }}        {{ nfs_share.options }}"
+
+# This is only applicable to those guests trying to mount the directory
+#    validate: "mount {{ nfs_share.path }}"

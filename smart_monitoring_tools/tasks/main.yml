@@ -1,0 +1,49 @@
+---
+## ---------------------------------------------------------------- ##
+## Installs SMART monitoring tools, and configures smartd as desired ##
+## ---------------------------------------------------------------- ##
+# https://www.smartmontools.org
+# https://www.lisenet.com/2014/using-smartctl-smartd-and-hddtemp-on-debian/
+# https://help.ubuntu.com/community/Smartmontools#Advanced:_Running_as_Smartmontools_as_a_Daemon
+# https://wiki.archlinux.org/index.php/S.M.A.R.T.
+
+- package:
+    name: smartmontools
+    state: present
+
+# Notes on scheduling choices:
+# "DEVICESCAN" - scans all connected disk devices
+# "-a" - monitors all attributes
+# "-S on" - enable attribute auto-save
+# "-o off" - disable SMART Automatic Offline Testing (in favor of daily short tests)
+# "-R 190 -R 194 -R 231" - use raw values (celsius) for Airflow Temp and Temperature for monitoring
+# "-W 4,35,40" - track temperature changes (log 4deg changes, log hit 35deg, log & email warning @ 40deg)
+# "-m ${ALERT_EMAIL}" - email alerts to that account
+# "-M test" - send test email for each device on SMART daemon restart
+# "-s (S/../(02|10|18|26)/./03|L/../28/./03)" - short @ 3am (2nd,10th,18th,26th of the month), long @ 3am (28th of the month)
+
+- name: smartd scheduling
+  lineinfile:
+    dest: /etc/smartd.conf
+    state: present
+    regexp: '^DEVICESCAN'
+    line: "DEVICESCAN -a -S on -o off -R 190 -R 194 -R 231 -W 4,35,40 -m {{ smartmontools_email | mandatory }} -M test -s (S/../(02|10|18|26)/./03|L/../28/./03)"
+
+# smartd monitoring will poll the devices every 30 mins, by default
+# otherwise uncomment & change the smartd_opts="--interval=1800"
+- name: configure
+  lineinfile:
+    dest: /etc/default/smartmontools
+    state: present
+    regexp: '.*?start_smartd'
+    line: 'start_smartd=yes'
+
+- name: restart
+  service:
+    name: smartmontools
+    state: restarted
+    enabled: true
+
+- name: wait for smartmontools to restart
+  pause:
+    seconds: 10

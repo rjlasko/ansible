@@ -1,0 +1,13 @@
+---
+## ---------------------------------------- ##
+## Build + install Unison, then setup users ##
+## ---------------------------------------- ##
+
+- become: true
+  include: install_unison.yml
+
+- name: setup unison user
+  loop: "{{ unison.user_defs | default([])}}"
+  include: unison_user.yml
+  vars:
+    unison_user_def: "{{ item }}"

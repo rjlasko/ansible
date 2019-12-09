@@ -1,0 +1,44 @@
+---
+## -------------------------------------------------------- ##
+## This script will setup NUT to monitor its associated UPS ##
+## -------------------------------------------------------- ##
+
+# XXX: notifications are handled via email
+# XXX: With inspiration from - https://freekode.org/nut-sending-emails/
+
+
+- name: add 'nut' user to 'mail' group
+  user:
+    name: nut
+    groups: mail
+    append: true
+    create_home: false
+
+- name: copy NOTIFYCMD script
+  copy:
+    src: "{{ role_path }}/files/notify.sh"
+    dest: "{{ nut_config_path }}/notify.sh"
+    owner: root
+    group: nut
+    mode: u=rw,g=rx,o-rwx
+
+- name: update EMAIL address
+  lineinfile:
+    dest: "{{ nut_config_path }}/notify.sh"
+    state: present
+    regexp: '^EMAIL'
+    line: "EMAIL={{ nut.email }}"
+
+- name: upsmon.conf
+  template:
+    src: upsmon.conf.j2
+    dest: "{{ nut_config_path }}/upsmon.conf"
+    owner: root
+    group: nut
+    mode: 0640
+
+- name: restart nut-monitor
+  service:
+    name: nut-monitor
+    state: restarted
+    enabled: true

@@ -1,0 +1,50 @@
+---
+## ---------------------------------------------------------------------- ##
+## This script will setup NUT server for its own physically connected UPS ##
+## ---------------------------------------------------------------------- ##
+
+- name: ups.conf
+  template:
+    src: ups.conf.j2
+    dest: "{{ nut_config_path }}/ups.conf"
+    owner: root
+    group: nut
+    mode: 0640
+
+# Need to install ups.conf and reboot, before attempting to restart the nut services.
+# Upon reboot, the NUT-installed udev rules will assign correct group ownership to the device
+# file handle based upon the manufacturer & model information accessed by the device driver.
+# https://askubuntu.com/questions/113994/trouble-starting-network-ups-tools-with-a-eaton-3s-ups
+
+- name: Reboot to properly load UPS driver
+  reboot:
+    reboot_timeout: 600
+
+- name: upsd.conf
+  template:
+    src: upsd.conf.j2
+    dest: "{{ nut_config_path }}/upsd.conf"
+    owner: root
+    group: nut
+    mode: 0640
+
+- name: upsd.users
+  template:
+    src: upsd.users.j2
+    dest: "{{ nut_config_path }}/upsd.users"
+    owner: root
+    group: nut
+    mode: 0640
+
+- name: restart nut-driver
+  service:
+    name: nut-driver
+    state: restarted
+    enabled: yes
+
+- name: restart nut-server
+  service:
+    name: nut-server
+    state: restarted
+    enabled: yes
+

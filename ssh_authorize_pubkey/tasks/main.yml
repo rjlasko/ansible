@@ -1,0 +1,19 @@
+---
+## --------------------------------------------------- ##
+## Authorizes SSH root login with the given public key ##
+## --------------------------------------------------- ##
+
+- name: SSH directory exists
+  file:
+    path: "~/.ssh"
+    state: directory
+
+- name: SSH authorized_keys file exists
+  file:
+    path: "~/.ssh/authorized_keys"
+    state: touch
+
+- name: write authorized public key
+  lineinfile:
+    path: "~/.ssh/authorized_keys"
+    line: "{{ pubkey | mandatory }}"

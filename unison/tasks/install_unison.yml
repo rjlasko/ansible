@@ -1,0 +1,50 @@
+---
+## -------------------------- ##
+## Builds and installs Unison ##
+## -------------------------- ##
+
+- command: which unison
+  ignore_errors: true
+  register: detected_filepath
+
+- command: unison -version
+  ignore_errors: true
+  register: detected_version
+
+- name: install Unison if missing or wrong version
+  when: >
+    detected_filepath.rc != 0
+    or
+    detected_version.stdout is not search(unison.versions.unison)
+    or
+    detected_version.stdout is not search(unison.versions.ocaml)
+  block:
+    - name: delete prior install
+      when: detected_filepath.rc == 0
+      file:
+        path: detected_filepath.stdout
+        state: absent
+
+    - package:
+        name: "{{ unison_packages }}"
+        state: present
+      vars:
+        unison_packages:
+          - curl
+          - gcc
+          - make
+          - libc6
+
+    - name: mktemp dir
+      tempfile:
+        state: directory
+        suffix: build
+      register: tmp_dir
+
+    - copy:
+        src: "{{ role_path }}/files/build.sh"
+        dest: "{{ tmp_dir.path }}/build_unison.sh"
+        owner: root
+        mode: u=rx
+
+    - command: "{{ tmp_dir.path }}/build_unison.sh {{ unison.versions.unison }} {{ unison.versions.ocaml }}"

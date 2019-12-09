@@ -1,0 +1,44 @@
+---
+## ------------------------------------------------------- ##
+## Installs & ZFS, configures ZED, and imports given pools ##
+## ------------------------------------------------------- ##
+
+# https://github.com/zfsonlinux/zfs/wiki/Debian
+
+# FIXME: https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=867034
+
+# Debian
+# https://github.com/AlbanAndrieu/ansible-zfs/blob/master/tasks/zfs.yml
+# CentOS
+# https://github.com/mmoole/ansible-role-zfs/blob/master/tasks/zfs_redhat.yml
+# Detects os version
+# https://github.com/CSCfi/ansible-role-zfsonlinux/blob/master/tasks/main.yml
+
+# Modules
+# https://docs.ansible.com/ansible/latest/modules/zpool_facts_module.html
+# https://docs.ansible.com/ansible/latest/modules/zfs_module.html
+
+- name: install zfs
+  become: true
+  import_tasks: install_zfs.yml
+
+- name: configure ZED
+  when: zfs is defined and zfs.email is defined
+  become: true
+  import_tasks: config_zed.yml
+
+- name: import ZFS pools
+  when: zfs is defined and zfs.pools is defined
+  become: true
+  block:
+    - name: import ZFS pool
+      loop: "{{ zfs.pools }}"
+      loop_control:
+        loop_var: zfs_pool
+      include: import_zpool.yml
+
+- command: zfs list
+  become: true
+  register: zfs_dataset_listing
+
+- debug: msg="{{ zfs_dataset_listing.stdout_lines }}"
