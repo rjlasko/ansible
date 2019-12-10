@@ -37,4 +37,3 @@
         insertafter: MAILTO
         name: PATH
         job: "{{ crontab_user_def.path }}"
-

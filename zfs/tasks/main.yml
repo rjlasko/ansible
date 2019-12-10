@@ -1,6 +1,6 @@
 ---
 ## ------------------------------------------------------- ##
-## Installs & ZFS, configures ZED, and imports given pools ##
+## Installs ZFS, configures ZED, and imports given pools ##
 ## ------------------------------------------------------- ##
 
 # https://github.com/zfsonlinux/zfs/wiki/Debian
