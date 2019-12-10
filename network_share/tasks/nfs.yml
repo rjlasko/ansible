@@ -28,11 +28,12 @@
 
 - name: clear pre-existing NFS exports
   block:
-    - name: clear uncommented lines in /etc/exports
-      lineinfile:
-        path: /etc/exports
-        regexp: "^(?!#).+"
-        state: absent
+    - name: backup & restore /etc/exports
+      include_role:
+        name: backup_restore
+      vars:
+        br_target: /etc/exports
+
     - name: turn off cleared NFS exports
       command: "exportfs -r"
 

@@ -16,6 +16,12 @@
 #      - cifs-utils
 #      - system-config-samba
 
+- name: backup & restore /etc/samba/smb.conf
+  include_role:
+    name: backup_restore
+  vars:
+    br_target: /etc/samba/smb.conf
+
 - name: SAMBA shares
   loop: "{{ net_share.samba }}"
   loop_control:

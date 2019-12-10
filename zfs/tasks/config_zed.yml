@@ -8,7 +8,8 @@
 - set_fact:
     zed_rc_path: /etc/zfs/zed.d/zed.rc
 
-- include_role:
+- name: "backup & restore {{ zed_rc_path }}"
+  include_role:
     name: backup_restore
   vars:
     br_target: "{{ zed_rc_path }}"
