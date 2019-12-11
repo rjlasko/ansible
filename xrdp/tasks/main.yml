@@ -18,13 +18,19 @@
   block:
     - import_tasks: from_source.yml
     ### update configuration and service ###
-    
+
     # TODO: additional XRDP configuration
     # XXX: 'man xrdp.ini', as in /etc/xrdp/xrdp.ini
     # XXX: 'man sesman.ini', as in /etc/xrdp/sesman.ini
-    
+    - name: disable thinclient_drives
+      lineinfile:
+        dest: /etc/xrdp/xrdp.ini
+        state: present
+        regexp: '^#?;?allow_channels'
+        line: 'allow_channels=false'
+
     # TODO: Generate certificate /etc/xrdp/{cert,key}.pem if you don't want to use the self-signed certificate
-    
+
     # allow anybody to start X.
     # Necessary to run XRDP as a terminal server (Xorg).
     # default is 'console'
