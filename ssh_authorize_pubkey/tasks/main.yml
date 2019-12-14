@@ -1,7 +1,7 @@
 ---
-## --------------------------------------------------- ##
-## Authorizes SSH root login with the given public key ##
-## --------------------------------------------------- ##
+## ---------------------------------------------- ##
+## Authorizes SSH login with the given public key ##
+## ---------------------------------------------- ##
 
 - name: SSH directory exists
   file:
