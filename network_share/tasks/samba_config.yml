@@ -4,12 +4,12 @@
 ## ----------------------------------- ##
 
 - name: create share with option
-  loop: "{{ samba_share.options }}"
+  loop: "{{ samba_config.options }}"
   loop_control:
-    loop_var: samba_share_option
+    loop_var: samba_config_option
   ini_file:
     path: /etc/samba/smb.conf
-    section: "{{ samba_share.section }}"
-    option: "{{ samba_share_option[0] }}"
-    value: "{{ samba_share_option[1] }}"
+    section: "{{ samba_config.section }}"
+    option: "{{ samba_config_option[0] }}"
+    value: "{{ samba_config_option[1] }}"
     no_extra_spaces: no
