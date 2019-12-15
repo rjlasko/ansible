@@ -23,13 +23,13 @@
     - set_fact:
         private_key: "~/.ssh/id_{{ key_type }}"
 
-    - name: "Create ssh keys for '{{ ansible_user_id }}'"
+    - name: "Create ssh keys for '{{ ansible_facts['user_id'] }}'"
       user:
         name: "{{ whoami_result.stdout }}"
         generate_ssh_key: yes
         ssh_key_file: "{{ private_key }}"
         ssh_key_type: "{{ key_type }}"
-        ssh_key_comment: "{{ ansible_user_id }}@{{ ansible_hostname }}"
+        ssh_key_comment: "{{ ansible_facts['user_id'] }}@{{ ansible_facts['hostname'] }}"
         state: present
         # prevent overwrite of existing keys
         force: false

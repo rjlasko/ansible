@@ -9,7 +9,7 @@
 # https://bbs.archlinux.org/viewtopic.php?id=233727
 # https://www.reddit.com/r/linuxadmin/comments/7tlkve/libvirt_network_configuration_conflicts_with/
 
-- when: ansible_distribution != "Debian"
+- when: ansible_facts['distribution'] != "Debian"
   fail:
     msg: "Only supports Debian!"
 
@@ -32,7 +32,7 @@
 - debug: msg="{{ fingerprint_out.stdout_lines }}"
 
 - apt_repository:
-    repo: "deb [arch=amd64] https://download.docker.com/linux/debian {{ ansible_distribution_release }} stable"
+    repo: "deb [arch=amd64] https://download.docker.com/linux/debian {{ ansible_facts['distribution_release'] }} stable"
     state: present
     update_cache: yes
 
@@ -62,7 +62,7 @@
 - debug: msg="{{ docker_compose_version }}"
 
 - get_url:
-    url: "https://github.com/docker/compose/releases/download/{{ docker_compose_version.stdout }}/docker-compose-{{ ansible_system }}-{{ ansible_architecture }}"
+    url: "https://github.com/docker/compose/releases/download/{{ docker_compose_version.stdout }}/docker-compose-{{ ansible_facts['system'] }}-{{ ansible_facts['architecture'] }}"
     dest: /usr/local/bin/docker-compose
     mode: u=rwx,g=rx
     group: docker

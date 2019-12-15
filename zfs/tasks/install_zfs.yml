@@ -9,11 +9,11 @@
   register: zfs_exists
 
 - when: >
-    ansible_distribution != "Debian" or
-    ansible_distribution_major_version | int < 9 or
-    ansible_distribution_major_version | int > 10
+    ansible_facts['distribution'] != "Debian" or
+    ansible_facts['distribution_version'] is version('9', '<') or
+    ansible_facts['distribution_version'] is version('10', '>')
   fail:
-    msg: "Only supports Debian [9,10]. Found {{ ansible_distribution }} {{ ansible_distribution_version }} ({{ ansible_distribution_release }})"
+    msg: "Only supports Debian [9,10]. Found {{ ansible_facts['lsb']['description'] }}"
 
 # currently using the older version of ZFS.  Upgrade later.
 # TODO: consider using the Debian "backports" version of ZFS for newer features as guided
@@ -21,11 +21,11 @@
   when: zfs_exists.rc != 0
   block:
     - apt_repository:
-        repo: "deb http://ftp.us.debian.org/debian/ {{ ansible_distribution_release }} main contrib non-free"
+        repo: "deb http://ftp.us.debian.org/debian/ {{ ansible_facts['distribution_release'] }} main contrib non-free"
         state: present
         update_cache: yes
     - apt_repository:
-        repo: "deb-src http://ftp.us.debian.org/debian/ {{ ansible_distribution_release }} main contrib non-free"
+        repo: "deb-src http://ftp.us.debian.org/debian/ {{ ansible_facts['distribution_release'] }} main contrib non-free"
         state: present
         update_cache: yes
     - package:
@@ -34,7 +34,7 @@
       vars:
         zfs_deps:
           - dpkg-dev
-          - "linux-headers-{{ ansible_kernel }}"
+          - "linux-headers-{{ ansible_facts['kernel'] }}"
           - linux-image-amd64
     - name: install ZFS via Dynamic Kernal Module Support
       # it is likely that this will fail when ZFS disks, new to this system, are

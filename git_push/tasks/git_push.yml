@@ -43,7 +43,7 @@
     gitpush_host: "{{ ansible_host }}"
 
 - name: Push that repo!
-  local_action: "command git --git-dir={{ git_push.src | mandatory }}/.git push {{ ansible_user_id }}@{{ gitpush_host }}:{{ git_push.dest }}/.git --mirror --prune"
+  local_action: "command git --git-dir={{ git_push.src | mandatory }}/.git push {{ ansible_facts['user_id'] }}@{{ gitpush_host }}:{{ git_push.dest }}/.git --mirror --prune"
   changed_when: push_response.stderr != "Everything up-to-date"
   register: push_response
   # We never use "become" on this local action because we're on the control machine and become_user
