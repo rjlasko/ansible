@@ -8,21 +8,15 @@
 - name: create environment configuration
   become: true
   block:
-    - name: remove any pre-existing file
-      file:
-        state: absent
-        path: "/etc/environment.d/{{ environment_d.level | mandatory }}-{{ environment_d.name | mandatory }}.conf"
-
-    - debug: msg={{environment_d}}
-
     - name: create file with environment variable defined
-      loop: "{{ environment_d.key_value | mandatory }}"
+      loop: "{{ global_env_vars | mandatory }}"
       loop_control:
-        loop_var: envd_key_val
+        loop_var: global_env_var
       lineinfile:
         create: true
-        path: "/etc/environment.d/{{ environment_d.level }}-{{ environment_d.name }}.conf"
-        line: "{{ envd_key_val.0 }}={{ envd_key_val.1 }}"
+        path: "/etc/environment"
+        regexp: "^#?{{ global_env_var.0 }}" 
+        line: "{{ global_env_var.0 }}={{ global_env_var.1 }}"
         owner: root
         group: root
         mode: a=r
