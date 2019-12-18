@@ -37,6 +37,18 @@
         state: restarted
         enabled: true
 
+    - name: define LIBVIRT_DEFAULT_URI in all environments
+      when: libvirt.default_uri is defined
+      include_role:
+        name: environment_d
+      vars:
+        environment_d:
+            name: libvirt
+            level: 99
+            key_value:
+              # https://libvirt.org/uri.html#URI_default
+              - [ 'LIBVIRT_DEFAULT_URI', "{{ libvirt.default_uri }}" ]
+
     - name: create bridge network config
       when: libvirt.bridge is defined
       lineinfile:

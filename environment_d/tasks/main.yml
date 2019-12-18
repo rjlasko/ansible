@@ -1,0 +1,28 @@
+---
+## ------------------------------------------------------------------ ##
+## Creates an environment configuration file under /etc/environment.d ##
+## ------------------------------------------------------------------ ##
+
+# https://www.freedesktop.org/software/systemd/man/environment.d.html
+
+- name: create environment configuration
+  become: true
+  block:
+    - name: remove any pre-existing file
+      file:
+        state: absent
+        path: "/etc/environment.d/{{ environment_d.level | mandatory }}-{{ environment_d.name | mandatory }}.conf"
+
+    - debug: msg={{environment_d}}
+
+    - name: create file with environment variable defined
+      loop: "{{ environment_d.key_value | mandatory }}"
+      loop_control:
+        loop_var: envd_key_val
+      lineinfile:
+        create: true
+        path: "/etc/environment.d/{{ environment_d.level }}-{{ environment_d.name }}.conf"
+        line: "{{ envd_key_val.0 }}={{ envd_key_val.1 }}"
+        owner: root
+        group: root
+        mode: a=r
