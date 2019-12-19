@@ -1,0 +1,32 @@
+---
+## ---------------------------- ##
+## Installs Vagrant for libvirt ##
+## ---------------------------- ##
+
+# https://wiki.debian.org/Vagrant
+
+- name: install vagrant for libvirt
+  become: true
+  block:
+    - name: install packages
+      package:
+        name: vagrant-libvirt
+        state: present
+
+    - name: define VAGRANT_HOME in all environments
+      when: vagrant.home is defined
+      include_role:
+        name: global_environment
+      vars:
+        global_env_vars:
+          # https://www.vagrantup.com/docs/other/environmental-variables.html#vagrant_home
+          - [ 'VAGRANT_HOME', "{{ vagrant.home }}" ]
+
+    - name: define VAGRANT_DEFAULT_PROVIDER in all environments
+      when: vagrant.provider is defined
+      include_role:
+        name: global_environment
+      vars:
+        global_env_vars:
+          # https://github.com/vagrant-libvirt/vagrant-libvirt/blob/master/README.md#start-vm
+          - [ 'VAGRANT_DEFAULT_PROVIDER', "{{ vagrant.provider }}" ]
