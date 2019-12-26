@@ -8,7 +8,7 @@
 - name: install vagrant for libvirt
   become: true
   block:
-    - name: install packages
+    - name: install vagrant
       package:
         name: vagrant-libvirt
         state: present
