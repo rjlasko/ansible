@@ -3,6 +3,11 @@
 ## Mounts the specified filesystems to the given mount point ##
 ## --------------------------------------------------------- ##
 
+- name: install nfs tools
+  package:
+    name: nfs-common
+    state: present
+
 - name: drop old NFS mounts
   block:
     - name: find pre-existing NFS mounts
