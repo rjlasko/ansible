@@ -7,6 +7,12 @@
   when: ssh.create_key | default(false)
   include: create_key.yml
 
+- name: purge known_hosts
+  when: ssh.purge_known_hosts | default(false)
+  file:
+    path: ~/.ssh/known_hosts
+    state: absent
+
 - name: authorized SSH login for given public keys
   loop: "{{ ssh.authorized_keys | default([]) }}"
   loop_control:
