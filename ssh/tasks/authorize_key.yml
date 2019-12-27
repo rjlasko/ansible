@@ -3,9 +3,9 @@
 ## Authorizes SSH login with the given public key ##
 ## ---------------------------------------------- ##
 
-- name: extract SSH key id
+- name: extract SSH key comment and use as key ID
   shell: "echo {{ authorized_key | mandatory }} | awk '{print $3}'"
-  register: key_id
+  register: key_comment
 
 - name: write authorized public key
   lineinfile:
@@ -13,5 +13,5 @@
     create: true
     mode: u=rw
     state: present
-    regexp: "{{ key_id.stdout }}"
+    regexp: ".*{{ key_comment.stdout }}"
     line: "{{ authorized_key }}"
