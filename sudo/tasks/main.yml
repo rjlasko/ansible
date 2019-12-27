@@ -13,6 +13,10 @@
     name: sudo
     state: present
 
+- file:
+    dest: /etc/sudoers
+    mode: u+w
+
 - lineinfile:
     dest: /etc/sudoers
     state: present
