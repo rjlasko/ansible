@@ -1,0 +1,32 @@
+---
+## ---------------------------------- ##
+## Sets up SSH access for active user ##
+## ---------------------------------- ##
+
+- name: create SSH keys
+  when: ssh.create_key | default(false)
+  include: create_key.yml
+
+- name: authorized SSH login for given public keys
+  loop: "{{ ssh.authorized_keys | default([]) }}"
+  loop_control:
+    loop_var: authorized_key
+  include: authorize_key.yml
+
+- name: authorize SSH self-login
+  when: ssh.authorize_self | default(false)
+  block:
+    - name: find user's SSH public key
+      find:
+        patterns: "*.pub"
+        paths: ~/.ssh
+      register: find_pubkey_result
+      failed_when: find_pubkey_result.matched != 1
+
+    - command: "cat {{ find_pubkey_result.files[0].path }}"
+      register: user_pubkey
+
+    - name: set user's SSH key as authorized
+      include: authorize_key.yml
+      vars:
+        authorized_key: "{{ user_pubkey.stdout }}"

@@ -3,17 +3,15 @@
 ## Authorizes SSH login with the given public key ##
 ## ---------------------------------------------- ##
 
-- name: SSH directory exists
-  file:
-    path: "~/.ssh"
-    state: directory
-
-- name: SSH authorized_keys file exists
-  file:
-    path: "~/.ssh/authorized_keys"
-    state: touch
+- name: extract SSH key id
+  shell: "echo {{ authorized_key | mandatory }} | awk '{print $3}'"
+  register: key_id
 
 - name: write authorized public key
   lineinfile:
     path: "~/.ssh/authorized_keys"
-    line: "{{ pubkey | mandatory }}"
+    create: true
+    mode: u=rw
+    state: present
+    regexp: "{{ key_id.stdout }}"
+    line: "{{ authorized_key }}"
