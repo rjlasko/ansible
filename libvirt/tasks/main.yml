@@ -11,6 +11,11 @@
 # https://www.reddit.com/r/linuxadmin/comments/7tlkve/libvirt_network_configuration_conflicts_with/
 
 
+# TODO
+# https://docs.ansible.com/ansible/latest/modules/virt_pool_module.html
+# https://docs.ansible.com/ansible/latest/modules/virt_module.html
+# https://lxml.de/installation.html
+
 - name: install libvirt & KVM
   become: true
   block:
