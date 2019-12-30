@@ -62,7 +62,7 @@
         group: libvirt
         mode: u=rw,g=r,o-rwx
 
-# FIXME: seems to miss adding the group to 'libvirt_qemu'
+    # FIXME: seems to miss adding the group to 'libvirt_qemu'
     - name: grant user permissions to run Virtual Machine Manager
       loop: "{{ libvirt.users | default([]) }}"
       loop_control:
@@ -87,3 +87,11 @@
         groups: libvirt
         append: true
         create_home: false
+
+    - name: install all given VMs
+      loop: "{{ libvirt.virt_install_vms | default([]) }}"
+      loop_control:
+        loop_var: virt_install_vm
+      include: virt_install.yml
+      vars:
+        libvirt_vm: "{{ virt_install_vm }}"

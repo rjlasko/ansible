@@ -1,0 +1,48 @@
+---
+## ------------------------------------- ##
+## Create & install base virtual machine ##
+## ------------------------------------- ##
+
+- name: Create VM with guaranteed cleanup
+  block:
+    - name: create temporary staging directory
+      tempfile:
+        state: directory
+      register: vm_staging_dir
+
+    - name: build virt-install arguments
+      set_fact:
+        virt_install_cmd: virt-install
+        virt_install_given_args: "{{ libvirt_vm.virt_install_args | mandatory }}"
+        virt_install_location: "--location={{ libvirt_vm.location | mandatory}}"
+        virt_install_initrd_inject: ''
+
+    - name: handle preseed
+      when: libvirt_vm.preseed is defined
+      block:
+        - name: populate preseed template
+          include_role:
+            name: envsubst
+          vars:
+            envsubst:
+              src: "{{ libvirt_vm.preseed.src | mandatory }}"
+              dest: "{{ vm_staging_dir.path }}/preseed.cfg"
+              env_vars: "{{ libvirt_vm.preseed.env_vars | default(omit) }}"
+              group: "{{ libvirt_vm.preseed.group | default(omit) }}"
+              mode: "{{ libvirt_vm.preseed.mode | default(omit) }}"
+              owner: "{{ libvirt_vm.preseed.owner | default(omit) }}"
+
+        - name: build virt-install arguments - initrd-inject
+          set_fact:
+            virt_install_initrd_inject: "--initrd-inject={{ vm_staging_dir.path }}/preseed.cfg"
+
+    - name: create new VM
+      become: true
+      command:
+        argv: "{{ [virt_install_cmd] + virt_install_given_args + [virt_install_location] + [virt_install_initrd_inject] }}"
+
+  always:
+    - name: remove staging directory
+      file:
+        path: "{{ vm_staging_dir.path }}"
+        state: absent
