@@ -3,7 +3,7 @@
 ## Creates or updates a group and its GID ##
 ## -------------------------------------- ##
 
-- loop: "{{ user_groups }}"
+- loop: "{{ user_groups | dict2items }}"
   group:
-    name: "{{ item.name | mandatory }}"
-    gid: "{{ item.gid | mandatory }}"
+    name: "{{ item.key | mandatory }}"
+    gid: "{{ item.value | mandatory }}"

@@ -4,7 +4,9 @@
 ## ---------------------------------- ##
 
 - name: create or update users
-  loop: "{{ user_definitions }}"
+  loop: "{{ user_definitions | dict2items }}"
   loop_control:
-    loop_var: user_def
+    loop_var: user_item
   include: define_user.yml
+  vars:
+    user_def: "{{ user_item.value | combine({ 'name': user_item.key }) }}"
