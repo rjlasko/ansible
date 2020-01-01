@@ -12,16 +12,24 @@
       command: crontab -r
       ignore_errors: true
 
-    - name: crontab contents
+    - name: append to user crontab from file
       when: crontab_user_def.file is defined
       block:
-        - copy:
+        - name: create temporary cron file
+          tempfile:
+            state: directory
+          register: crontab_staging_dir
+
+        - name: stage provided crontab
+          copy:
             src: "{{ crontab_user_def.file }}"
-            dest: ~/cron.tab
+            dest: "{{ crontab_staging_dir.path }}/cron.tab"
             force: yes
-        - command: crontab ~/cron.tab
-        - file:
-            path: ~/cron.tab
+        - command: crontab "{{ crontab_staging_dir.path }}/cron.tab"
+      always:
+        - name: remove staging directory
+          file:
+            path: "{{ crontab_staging_dir.path }}"
             state: absent
 
     - name: MAILTO

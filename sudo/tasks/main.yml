@@ -18,8 +18,8 @@
     mode: u+w
 
 - lineinfile:
-    dest: /etc/sudoers
+    path: /etc/sudoers
     state: present
     regexp: '^%sudo'
     line: '%sudo ALL=(ALL) NOPASSWD: ALL'
-    validate: visudo -cf %s
+    validate: /usr/sbin/visudo -cf %s

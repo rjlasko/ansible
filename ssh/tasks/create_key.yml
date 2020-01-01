@@ -10,7 +10,10 @@
   register: file_glob_results
 
 - name: create SSH key, if doesn't already exist
-  when: file_glob_results.matched < 1
+  when: >
+    file_glob_results.matched < 1
+    or
+    ssh.replace_key | default(false)
   block:
     - name: get username (in case of using 'su')
       command: whoami
@@ -29,4 +32,4 @@
         ssh_key_comment: "{{ whoami_result.stdout }}@{{ ansible_facts['hostname'] }}"
         state: present
         # prevent overwrite of existing keys
-        force: false
+        force: "{{ ssh.replace_key | default(false) }}"

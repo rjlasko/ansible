@@ -13,6 +13,12 @@
     path: ~/.ssh/known_hosts
     state: absent
 
+- name: purge authorized_keys
+  when: ssh.purge_authorized_keys | default(false)
+  file:
+    path: ~/.ssh/authorized_keys
+    state: absent
+
 - name: authorized SSH login for given public keys
   loop: "{{ ssh.authorized_keys | default([]) }}"
   loop_control:
