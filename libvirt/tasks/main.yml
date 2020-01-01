@@ -87,11 +87,3 @@
         groups: libvirt
         append: true
         create_home: false
-
-    - name: install all given VMs
-      loop: "{{ libvirt.virt_install_vms | default([]) }}"
-      loop_control:
-        loop_var: virt_install_vm
-      include: virt_install.yml
-      vars:
-        libvirt_vm: "{{ virt_install_vm }}"

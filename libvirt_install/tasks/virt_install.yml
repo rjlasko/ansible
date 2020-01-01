@@ -12,16 +12,16 @@
 - name: List active VMs
   virt:
     command: list_vms
-  register: libvirt_active_vms
+  register: libvirt_existing_vms
 
-- name: Handle active VM
-  when: libvirt_vm.name | mandatory in libvirt_active_vms.list_vms
+- name: Handle pre-existing VM
+  when: >
+    libvirt_existing_vms.list_vms | length > 0
+    and
+    libvirt_vm.name in libvirt_existing_vms.list_vms
+    and
+    libvirt_vm.replace | default(false) == true
   block:
-    - name: fail unless force
-      when: libvirt_vm.force | default(false) == false
-      fail:
-        msg: "{{ libvirt_vm.name }} already exists. Override with 'force'"
-
     - name: "shutdown VM: {{ libvirt_vm.name }}"
       virt:
         command: shutdown
@@ -33,8 +33,9 @@
         command: status
       register: libvirt_vm_status
       until: libvirt_vm_status.status == 'shutdown'
-      retries: 1500
-      delay: 5
+      # check for desired status for 5 minutes
+      delay: 3
+      retries: 100
 
     - name: "erase VM: {{ libvirt_vm.name }}"
       virt:
@@ -46,6 +47,10 @@
 
 
 - name: Create VM with cleanup
+  when: >
+    libvirt_vm.name not in libvirt_existing_vms.list_vms
+    or
+    libvirt_vm.replace | default(false) == true
   block:
     - name: create temporary staging directory
       tempfile:
@@ -71,18 +76,27 @@
               src: "{{ libvirt_vm.preseed.src | mandatory }}"
               dest: "{{ vm_staging_dir.path }}/preseed.cfg"
               env_vars: "{{ libvirt_vm.preseed.env_vars | default(omit) }}"
-              group: "{{ libvirt_vm.preseed.group | default(omit) }}"
-              mode: "{{ libvirt_vm.preseed.mode | default(omit) }}"
-              owner: "{{ libvirt_vm.preseed.owner | default(omit) }}"
+              mode: u=rw,g-rwx,o-rwx
 
         - name: build virt-install arguments - initrd-inject
           set_fact:
             virt_install_initrd_inject: "--initrd-inject={{ vm_staging_dir.path }}/preseed.cfg"
 
     - name: create new VM
+      # run as root to be able to load ISO's via --location
       become: true
       command:
         argv: "{{ [virt_install_cmd] + [virt_install_name] + virt_install_given_args + [virt_install_location] + [virt_install_initrd_inject] }}"
+
+    - name: "waiting until restarted: {{ libvirt_vm.name }}"
+      virt:
+        name: "{{ libvirt_vm.name }}"
+        command: status
+      register: libvirt_vm_status
+      until: libvirt_vm_status.status == 'running'
+      # check for desired status for 5 minutes
+      delay: 3
+      retries: 100
 
   always:
     - name: remove staging directory
