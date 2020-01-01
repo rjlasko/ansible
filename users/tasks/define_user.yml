@@ -3,6 +3,12 @@
 ## Creates or updates a user and its associated IDs ##
 ## ------------------------------------------------ ##
 
+- name: define user group if given
+  when: user_def.group is defined
+  group:
+    name: "{{ user_def.group.name | mandatory }}"
+    gid: "{{ user_def.group.id | default(omit) }}"
+
 - name: create or update user
   when: >
     user_def.uid is defined or
@@ -12,8 +18,8 @@
   user:
     name: "{{ user_def.name | mandatory }}"
     uid: "{{ user_def.uid | default(omit) }}"
-    group: "{{ user_def.group | default(omit) }}"
-    groups: "{{ user_def.groups | default([]) }}"
+    group: "{{ user_def.group.name | default(omit) }}"
+    groups: "{{ user_def.groups | default(omit) }}"
     append: true
     create_home: "{{ user_def.create_home | default(false) }}"
 

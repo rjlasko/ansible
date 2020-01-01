@@ -3,12 +3,8 @@
 ## Creates or updates the given users ##
 ## ---------------------------------- ##
 
-- name: ensure no targeted users are logged on
-  reboot:
-    reboot_timeout: 600
-
 - name: create or update users
-  loop: "{{ user_defs }}"
+  loop: "{{ user_definitions }}"
   loop_control:
     loop_var: user_def
   include: define_user.yml

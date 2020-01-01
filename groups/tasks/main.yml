@@ -3,11 +3,7 @@
 ## Creates or updates a group and its GID ##
 ## -------------------------------------- ##
 
-- name: ensure no users of group are logged on
-  reboot:
-    reboot_timeout: 600
-
-- loop: "{{ define_groups }}"
+- loop: "{{ user_groups }}"
   group:
     name: "{{ item.name | mandatory }}"
     gid: "{{ item.gid | mandatory }}"

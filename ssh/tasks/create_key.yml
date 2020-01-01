@@ -16,7 +16,8 @@
       command: whoami
       register: whoami_result
 
-    - set_fact:
+    - name: set default SSH key type
+      set_fact:
         key_type: "{{ ssh.key_type | default('ed25519') }}"
 
     - name: "Create ssh keys for '{{ whoami_result.stdout }}'"

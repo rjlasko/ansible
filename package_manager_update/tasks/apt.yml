@@ -1,5 +1,6 @@
 ---
 - name: update APT package info
+  become: true
   apt:
     autoclean: true
     autoremove: true

@@ -29,7 +29,8 @@
       register: find_pubkey_result
       failed_when: find_pubkey_result.matched != 1
 
-    - command: "cat {{ find_pubkey_result.files[0].path }}"
+    - name: get the user's public key
+      command: "cat {{ find_pubkey_result.files[0].path }}"
       register: user_pubkey
 
     - name: set user's SSH key as authorized
