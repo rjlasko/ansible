@@ -42,9 +42,18 @@
         name: "{{ libvirt_vm.name }}"
         command: undefine
 
-    - name: "delete VM volume: {{ libvirt_vm.name }}"
-      shell: virsh vol-delete --pool default "$(virsh vol-list --pool default | grep {{ libvirt_vm.name }} | awk '{print $1}')"
+- name: List VM volumes
+  shell: virsh vol-list --pool default | tail -n+3 | grep {{ libvirt_vm.name }} | awk '{print $1}'
+  register: libvirt_existing_vols
 
+- name: Handle pre-existing VM volume
+  when: >
+    libvirt_existing_vols.stdout | length > 0
+    and
+    libvirt_vm.replace | default(false) == true
+  block:
+    - name: "delete VM volume: {{ libvirt_vm.name }}"
+      shell: "virsh vol-delete --pool default {{ libvirt_existing_vols.stdout }}"
 
 - name: Create VM with cleanup
   when: >

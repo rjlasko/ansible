@@ -8,7 +8,8 @@
     name: bridge-utils
     state: present
 
-- shell: brctl show
+- name: find all existing bridges
+  shell: brctl show
   register: bridge_found_result
 
 - name: Configure network bridge from best device
