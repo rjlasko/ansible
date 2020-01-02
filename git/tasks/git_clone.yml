@@ -14,3 +14,12 @@
     dest: "{{ git_clone.dest | mandatory }}"
     accept_hostkey: true
     update: false
+
+- name: apply local configurations
+  when: git_clone.config is defined
+  loop: "{{ git_clone.config | default({}) | dict2items }}"
+  loop_control:
+    loop_var: git_local_config_item
+  include: git_config.yml
+  vars:
+    git_config: "{{ git_local_config_item | combine({'scope': 'local', 'repo': git_clone.dest}) }}"

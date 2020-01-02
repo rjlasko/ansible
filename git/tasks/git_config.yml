@@ -1,0 +1,11 @@
+---
+## -------------------------- ##
+## Apply Git configurations ##
+## -------------------------- ##
+
+- name: apply global configurations
+  git_config:
+    name: "{{ git_config.key }}"
+    value: "{{ git_config.value }}"
+    scope: "{{ git_config.scope }}"
+    repo: "{{ git_config.repo | default(omit) }}"

@@ -1,0 +1,36 @@
+---
+## ----------------------- ##
+## Clones Git repositories ##
+## ----------------------- ##
+
+- name: check if git is accessible via path
+  shell: 'type git'
+  ignore_errors: true
+  register: git_exists
+
+- name: system install git
+  when: git_exists.rc != 0
+  become: true
+  package:
+    name: git
+    state: present
+
+- name: git global config
+  loop: "{{ git.global | default({}) | dict2items }}"
+  loop_control:
+    loop_var: git_global_config_item
+  include: git_config.yml
+  vars:
+    git_config: "{{ git_global_config_item | combine({'scope': 'global'}) }}"
+
+- name: push repositories
+  loop: "{{ git.pushes | default([]) }}"
+  loop_control:
+    loop_var: git_push
+  include: git_push.yml
+
+- name: clone repositories
+  loop: "{{ git.clones | default([]) }}"
+  loop_control:
+    loop_var: git_clone
+  include: git_clone.yml
