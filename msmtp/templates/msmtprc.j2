@@ -1,0 +1,25 @@
+# MSMTP configuration file
+# see: https://marlam.de/msmtp/msmtp.html#Configuration-files
+
+account default
+
+syslog		{{ msmtp.syslog | default('on') }}
+
+from		{{ msmtp.from | mandatory }}
+host		{{ msmtp.hostname | mandatory }}
+port		{{ msmtp.port | mandatory }}
+
+{% if msmtp.auth is defined %}
+auth		on
+user		{{ msmtp.user | default(omit) }}
+password	{{ msmtp.pass | default(omit) }}
+{% else %}
+auth	off
+{% endif %}
+
+
+{% if msmtp.auth is defined and msmtp.auth == 'tls' %}
+tls 			on
+tls_starttls 	{{ msmtp.tls_starttls | default(omit) }}
+tls_trust_file	{{ msmtp.tls_trustfile | default(omit) }}
+{% endif %}

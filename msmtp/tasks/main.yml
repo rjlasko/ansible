@@ -15,13 +15,13 @@
       - msmtp-mta
       - ca-certificates
 
-- name: copy msmtp config file
-  copy:
-    src: "{{ msmtprc_path | mandatory }}"
+- name: create system msmtp config file
+  template:
+    src: msmtprc.j2
     dest: /etc/msmtprc
-    mode: u=r,g=r,o-rwx
     owner: root
     group: mail
+    mode: u=r,g=r,o-rwx
     force: yes
 
 - name: detect if /etc/aliases exists

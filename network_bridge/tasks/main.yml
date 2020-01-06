@@ -39,7 +39,7 @@
         dest: "/etc/network/interfaces.d/{{ bridge_name | mandatory }}"
         owner: root
         group: root
-        mode: 0644
+        mode: u=r,g=r,o=r
 
     - reboot:
         reboot_timeout: 600
