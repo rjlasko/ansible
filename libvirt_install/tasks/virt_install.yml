@@ -77,15 +77,13 @@
     - name: handle preseed
       when: libvirt_vm.preseed is defined
       block:
-        - name: populate preseed template
-          include_role:
-            name: envsubst
+        - name: generate preseed file from template
+          template:
+            src: "{{ libvirt_vm.preseed.template | mandatory }}"
+            dest: "{{ vm_staging_dir.path }}/preseed.cfg"
+            force: yes
           vars:
-            envsubst:
-              src: "{{ libvirt_vm.preseed.src | mandatory }}"
-              dest: "{{ vm_staging_dir.path }}/preseed.cfg"
-              env_vars: "{{ libvirt_vm.preseed.env_vars | default(omit) }}"
-              mode: u=rw,g-rwx,o-rwx
+            preseed: "{{ libvirt_vm.preseed }}"
 
         - name: build virt-install arguments - initrd-inject
           set_fact:
