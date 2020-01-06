@@ -27,7 +27,8 @@
     dest: /etc/smartd.conf
     state: present
     regexp: '^DEVICESCAN'
-    line: "DEVICESCAN -a -S on -o off -R 190 -R 194 -R 231 -W 4,35,40 -m {{ smartmontools_email | mandatory }} -M test -s (S/../(02|10|18|26)/./03|L/../28/./03)"
+    line: "DEVICESCAN -a -S on -o off -R 190 -R 194 -R 231 -W 4,35,40 -m {{ smartmontools_email | mandatory }} -s (S/../(02|10|18|26)/./03|L/../28/./03)"
+    # line: "DEVICESCAN -a -S on -o off -R 190 -R 194 -R 231 -W 4,35,40 -m {{ smartmontools_email | mandatory }} -M test -s (S/../(02|10|18|26)/./03|L/../28/./03)"
 
 # smartd monitoring will poll the devices every 30 mins, by default
 # otherwise uncomment & change the smartd_opts="--interval=1800"

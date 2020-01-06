@@ -1,0 +1,20 @@
+---
+## ---------------------------------------------------------- ##
+## Installs rasdaemon to monitor for machine check exceptions ##
+## ---------------------------------------------------------- ##
+
+# Machine Check Exceptions are hardware failure events and can be logged to
+# journalctl by rasdaemon. Inspect these after after the system has crashed or
+# been used for a period of time, using the following commands:
+#     `journalctl -f -u rasdaemon`
+#     `ras-mc-ctl --errors`
+
+- package:
+    name: rasdaemon
+    state: present
+
+- name: Restart and enable the rasdaemon service
+  service:
+    name: rasdaemon
+    state: restarted
+    enabled: true

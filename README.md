@@ -7,7 +7,12 @@ Ansible roles used to setup a Debian based Network Attached Storage server.
 
 ### Storage
 - ZFS on Linux
+
+### System monitoring
+- Network UPS Tools
 - SMART Monitoring
+- RASdaemon
+- crontab w/ cronic
 
 ### Containerization & Virtualization
 - Docker
@@ -23,6 +28,7 @@ Ansible roles used to setup a Debian based Network Attached Storage server.
 ### Git
 - clone
 - push
+- config
 
 ### SSH
 - create key
@@ -37,10 +43,12 @@ Ansible roles used to setup a Debian based Network Attached Storage server.
 ### Other
 - XRDP
 - MSMTP Mail Transfer Agent
-- Network UPS Tools
 - Unison
 - Neofetch
 - Package Manager Update
+- Vagrant
 
 ### Custom
 - (file) Backup & Restore (from-backup)
+- Global Environment Variable
+- envsubst

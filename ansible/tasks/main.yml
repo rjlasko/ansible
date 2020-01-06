@@ -1,9 +1,0 @@
----
-## ---------------- ##
-## Installs Ansible ##
-## ---------------- ##
-
-- name: install nfs tools
-  package:
-    name: nfs-common
-    state: present
