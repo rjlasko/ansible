@@ -5,8 +5,6 @@
 
 # https://github.com/zfsonlinux/zfs/wiki/Debian
 
-# FIXME: https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=867034
-
 # Debian
 # https://github.com/AlbanAndrieu/ansible-zfs/blob/master/tasks/zfs.yml
 # CentOS
@@ -22,20 +20,32 @@
   become: true
   import_tasks: install_zfs.yml
 
-- name: configure ZED
-  when: zfs is defined and zfs.email is defined
-  become: true
-  import_tasks: config_zed.yml
-
-- name: import ZFS pools
-  when: zfs is defined and zfs.pools is defined
+- name: run configured zfs tasks
+  when: zfs is defined
   become: true
   block:
-    - name: import ZFS pool
-      loop: "{{ zfs.pools }}"
-      loop_control:
-        loop_var: zfs_pool
-      include: import_zpool.yml
+    - name: configure ZED
+      when: zfs.email is defined
+      import_tasks: config_zed.yml
+
+    - name: import ZFS pools
+      when: zfs.pools is defined
+      block:
+        - name: import ZFS pool
+          loop: "{{ zfs.pools }}"
+          loop_control:
+            loop_var: zfs_pool
+          include: import_zpool.yml
+
+    - name: configure zfs_auto_snapshot
+      when: >
+        not (
+          zfs.snapshot is defined
+          and
+          zfs.snapshot.disable is defined
+          and
+          zfs.snapshot.disable == 'true')
+      import_tasks: auto_snapshot.yml
 
 - command: zfs list
   become: true

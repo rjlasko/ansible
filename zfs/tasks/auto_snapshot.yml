@@ -1,0 +1,59 @@
+---
+## ------------------------------------------ ##
+## Installs and configures ZFS Auto Snapshots ##
+## ------------------------------------------ ##
+
+- name: install zfs-auto-snapshot package
+  package:
+    name: zfs-auto-snapshot
+    state: present
+
+- name: configure "frequent" snapshots
+  when: zfs.snapshot.frequent is defined
+  block:
+    - name: set frequent label
+      when: zfs.snapshot.frequent.label is defined
+      replace:
+        path: /etc/cron.d/zfs-auto-snapshot
+        regexp: '--label=[^ ]*'
+        replace: "--label={{ zfs.snapshot.frequent.label }}"
+
+- name: configure "hourly" snapshots
+  when: zfs.snapshot.hourly is defined
+  block:
+    - name: set hourly label
+      when: zfs.snapshot.hourly.label is defined
+      replace:
+        path: /etc/cron.hourly/zfs-auto-snapshot
+        regexp: '--label=[^ ]*'
+        replace: "--label={{ zfs.snapshot.hourly.label }}"
+
+- name: configure "daily" snapshots
+  when: zfs.snapshot.daily is defined
+  block:
+    - name: set daily label
+      when: zfs.snapshot.daily.label is defined
+      replace:
+        path: /etc/cron.daily/zfs-auto-snapshot
+        regexp: '--label=[^ ]*'
+        replace: "--label={{ zfs.snapshot.daily.label }}"
+
+- name: configure "weekly" snapshots
+  when: zfs.snapshot.weekly is defined
+  block:
+    - name: set weekly label
+      when: zfs.snapshot.weekly.label is defined
+      replace:
+        path: /etc/cron.weekly/zfs-auto-snapshot
+        regexp: '--label=[^ ]*'
+        replace: "--label={{ zfs.snapshot.weekly.label }}"
+
+- name: configure "monthly" snapshots
+  when: zfs.snapshot.monthly is defined
+  block:
+    - name: set monthly label
+      when: zfs.snapshot.monthly.label is defined
+      replace:
+        path: /etc/cron.monthly/zfs-auto-snapshot
+        regexp: '--label=[^ ]*'
+        replace: "--label={{ zfs.snapshot.monthly.label }}"

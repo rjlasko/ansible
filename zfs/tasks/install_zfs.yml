@@ -47,13 +47,10 @@
     - modprobe:
         name: zfs
         state: present
-    - package:
-        name: "{{ zfs_packages }}"
+    - name: setup automatic zpool scrubbing
+      package:
+        name: zfsutils-linux
         state: present
-      vars:
-        zfs_packages:
-          - zfsutils-linux # auto scrubbing
-          - zfs-auto-snapshot # auto snapshot
     - shell: modinfo zfs | grep -v parm
       register: zfs_module_info
     - name: module info
