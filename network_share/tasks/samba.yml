@@ -25,11 +25,14 @@
       shell: smbd -b | grep CONFIGFILE | cut -d ":" -f 2 | xargs
       register: config_file
 
-    - name: backup & restore "{{ config_file }}"
+    - set_fact:
+        samba_config_file: "{{ config_file.stdout }}"
+
+    - name: backup & restore "{{ samba_config_file }}"
       include_role:
         name: backup_restore
       vars:
-        br_target: "{{ config_file }}"
+        br_target: "{{ samba_config_file }}"
 
     - name: SAMBA shares
       loop: "{{ net_share.samba.config | default([]) }}"

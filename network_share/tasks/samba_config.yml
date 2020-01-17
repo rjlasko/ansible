@@ -8,7 +8,7 @@
   loop_control:
     loop_var: samba_config_option
   ini_file:
-    path: /etc/samba/smb.conf
+    path: "{{ samba_config_file }}"
     section: "{{ samba_config.section }}"
     option: "{{ samba_config_option[0] }}"
     value: "{{ samba_config_option[1] }}"
