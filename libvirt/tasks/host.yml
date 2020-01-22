@@ -19,7 +19,8 @@
 - name: install libvirt & KVM
   become: true
   block:
-    - package:
+    - name: install KVM packages
+      package:
         name: "{{ kvm_packages }}"
         state: present
       vars:

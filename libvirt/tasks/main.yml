@@ -7,7 +7,7 @@
   when: libvirt.host is defined
   import_tasks: host.yml
   vars:
-    libvirt_host: libvirt.host
+    libvirt_host: "{{ libvirt.host }}"
 
 - name: setup targets as libvirt guests
   when: libvirt.guests is defined
