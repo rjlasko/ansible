@@ -37,16 +37,6 @@
             loop_var: zfs_pool
           include: import_zpool.yml
 
-    - name: configure zfs_auto_snapshot
-      when: >
-        not (
-          zfs.snapshot is defined
-          and
-          zfs.snapshot.disable is defined
-          and
-          zfs.snapshot.disable == 'true')
-      import_tasks: auto_snapshot.yml
-
 - command: zfs list
   become: true
   register: zfs_dataset_listing
