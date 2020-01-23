@@ -1,0 +1,19 @@
+---
+## -------------------------------------- ##
+## Purges all SSH private and public keys ##
+## -------------------------------------- ##
+
+- name: find existing keys
+  find:
+    paths: ~/.ssh
+    patterns: 'id_*'
+  register: file_glob_results
+
+- name: remove keys
+  when: file_glob_results.matched > 0
+  loop: "{{ file_glob_results.files | default([]) }}"
+  loop_control:
+    loop_var: key_file
+  file:
+    path: "{{ key_file.path }}"
+    state: absent
