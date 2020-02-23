@@ -71,7 +71,7 @@
         virt_install_cmd: virt-install
         virt_install_name: "--name={{ libvirt_vm.name | mandatory }}"
         virt_install_given_args: "{{ libvirt_vm.virt_install_args | mandatory }}"
-        virt_install_location: "--location={{ libvirt_vm.location | mandatory}}"
+        virt_install_iso_location: "--location={{ libvirt_vm.iso | mandatory}}"
         virt_install_initrd_inject: ''
 
     - name: handle preseed
@@ -93,7 +93,7 @@
       # run as root to be able to load ISO's via --location
       become: true
       command:
-        argv: "{{ [virt_install_cmd] + [virt_install_name] + virt_install_given_args + [virt_install_location] + [virt_install_initrd_inject] }}"
+        argv: "{{ [virt_install_cmd] + [virt_install_name] + virt_install_given_args + [virt_install_iso_location] + [virt_install_initrd_inject] }}"
 
     - name: "waiting until restarted: {{ libvirt_vm.name }}"
       virt:
