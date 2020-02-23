@@ -33,15 +33,15 @@
             state: absent
 
     - name: MAILTO
+      when: crontab_user_def.mailto is defined
       cron:
         env: true
         name: MAILTO
-        job: "{{ crontab_user_def.mailto | mandatory }}"
+        job: "{{ crontab_user_def.mailto }}"
 
     - name: PATH
       when: crontab_user_def.path is defined
       cron:
         env: true
-        insertafter: MAILTO
         name: PATH
         job: "{{ crontab_user_def.path }}"
