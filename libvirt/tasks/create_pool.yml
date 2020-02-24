@@ -7,21 +7,14 @@
   shell: virsh pool-list --all | awk '{print $1}' | tail -n+3
   register: initial_libvirt_pool_listing
 
-- name: create pool directory navigable by user 'libvirt-qemu'
+- name: create and/or set permissions pool directory read-write by libvirt users
   when: initial_libvirt_pool_listing.stdout is not search(libvirt_pool.name)
   file:
     path: "{{ libvirt_pool.path | mandatory }}"
     state: directory
-    mode: o=rx
-    recurse: true
-
-- name: set pool directory read-write by libvirt users 
-  when: initial_libvirt_pool_listing.stdout is not search(libvirt_pool.name)
-  file:
-    path: "{{ libvirt_pool.path }}"
-    state: directory
-    mode: g=rwx,o-rwx
+    mode: u=rwx,g=rwx,o-rwx
     recurse: false
+    owner: root
     group: libvirt-qemu
 
 - name: define pool
