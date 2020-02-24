@@ -1,112 +1,84 @@
 ---
-## ------------------------------------- ##
-## Create & install base virtual machine ##
-## ------------------------------------- ##
+## ------------------- ##
+## Build or Restore VM ##
+## ------------------- ##
 
-- name: install packages for Ansible libvirt support
-  become: true
-  package:
-    name: python-libvirt
-    state: present
+# XXX: intuitive behavior follows precedence, unless declared:
+# 1. (skip) use existing VM unaltered
+# 2. (fast) restore from backup
+# 3. (slow) build from ISO, if given
 
-- name: List active VMs
-  virt:
-    command: list_vms
-  register: libvirt_existing_vms
+- name: check invalid create mode
+  when: libvirt_vm.create_mode | mandatory not in ['skip', 'restore', 'build']
+  fail:
+    msg: "invalid libvirt_vm.create_mode: {{ libvirt_vm.create_mode }}"
 
-- name: Handle pre-existing VM
-  when: >
-    libvirt_existing_vms.list_vms | length > 0
-    and
-    libvirt_vm.name in libvirt_existing_vms.list_vms
-    and
-    libvirt_vm.replace | default(false) == true
+- name: handle create VM
+  when: libvirt_vm.create_mode != 'skip'
   block:
-    - name: "shutdown VM: {{ libvirt_vm.name }}"
-      virt:
-        command: shutdown
-        name: "{{ libvirt_vm.name }}"
-
-    - name: "waiting for shutdown: {{ libvirt_vm.name }}"
-      virt:
-        name: "{{ libvirt_vm.name }}"
-        command: status
-      register: libvirt_vm_status
-      until: libvirt_vm_status.status == 'shutdown'
-      # check for desired status for 5 minutes
-      delay: 3
-      retries: 100
-
-    - name: "erase VM: {{ libvirt_vm.name }}"
-      virt:
-        name: "{{ libvirt_vm.name }}"
-        command: undefine
-
-- name: List VM volumes
-  shell: virsh vol-list --pool default | tail -n+3 | grep {{ libvirt_vm.name }} | awk '{print $1}'
-  register: libvirt_existing_vols
-
-- name: Handle pre-existing VM volume
-  when: >
-    libvirt_existing_vols.stdout | length > 0
-    and
-    libvirt_vm.replace | default(false) == true
-  block:
-    - name: "delete VM volume: {{ libvirt_vm.name }}"
-      shell: "virsh vol-delete --pool default {{ libvirt_existing_vols.stdout }}"
-
-- name: Create VM with cleanup
-  when: >
-    libvirt_vm.name not in libvirt_existing_vms.list_vms
-    or
-    libvirt_vm.replace | default(false) == true
-  block:
-    - name: create temporary staging directory
-      tempfile:
-        state: directory
-      register: vm_staging_dir
-
-    - name: build virt-install arguments
-      set_fact:
-        virt_install_cmd: virt-install
-        virt_install_name: "--name={{ libvirt_vm.name | mandatory }}"
-        virt_install_given_args: "{{ libvirt_vm.virt_install_args | mandatory }}"
-        virt_install_iso_location: "--location={{ libvirt_vm.iso | mandatory}}"
-        virt_install_initrd_inject: ''
-
-    - name: handle preseed
-      when: libvirt_vm.preseed is defined
-      block:
-        - name: generate preseed file from template
-          template:
-            src: "{{ libvirt_vm.preseed.template | mandatory }}"
-            dest: "{{ vm_staging_dir.path }}/preseed.cfg"
-            force: yes
-          vars:
-            preseed: "{{ libvirt_vm.preseed }}"
-
-        - name: build virt-install arguments - initrd-inject
-          set_fact:
-            virt_install_initrd_inject: "--initrd-inject={{ vm_staging_dir.path }}/preseed.cfg"
-
-    - name: create new VM
-      # run as root to be able to load ISO's via --location
+    - name: install packages for Ansible libvirt support
       become: true
-      command:
-        argv: "{{ [virt_install_cmd] + [virt_install_name] + virt_install_given_args + [virt_install_iso_location] + [virt_install_initrd_inject] }}"
+      package:
+        name: python-libvirt
+        state: present
 
-    - name: "waiting until restarted: {{ libvirt_vm.name }}"
-      virt:
-        name: "{{ libvirt_vm.name }}"
-        command: status
-      register: libvirt_vm_status
-      until: libvirt_vm_status.status == 'running'
-      # check for desired status for 5 minutes
-      delay: 3
-      retries: 100
+    - name: Handle active like-named VMs
+      block:
+      - name: list VMs
+        virt:
+          command: list_vms
+        register: libvirt_existing_vms
+      - name: shutdown & undefine pre-existing VM
+        when: >
+          libvirt_existing_vms.list_vms | length > 0
+          and
+          libvirt_vm.name in libvirt_existing_vms.list_vms
+        block:
+          - name: "shutdown VM: {{ libvirt_vm.name }}"
+            virt:
+              command: shutdown
+              name: "{{ libvirt_vm.name }}"
+          - name: "waiting for shutdown: {{ libvirt_vm.name }}"
+            virt:
+              command: status
+              name: "{{ libvirt_vm.name }}"
+            register: libvirt_vm_status
+            until: libvirt_vm_status.status == 'shutdown'
+            # check for desired status for 5 minutes
+            delay: 3
+            retries: 100
+          - name: "undefine VM: {{ libvirt_vm.name }}"
+            virt:
+              command: undefine
+              name: "{{ libvirt_vm.name }}"
 
-  always:
-    - name: remove staging directory
-      file:
-        path: "{{ vm_staging_dir.path }}"
-        state: absent
+    - name: Handle like-named VM volume
+      block:
+        - name: list volumes
+          shell: virsh vol-list --pool default | tail -n+3 | grep {{ libvirt_vm.name }} | awk '{print $1}'
+          register: libvirt_existing_vols
+        - name: Handle pre-existing VM volume
+          when: >
+            libvirt_existing_vols.stdout | length > 0
+          block:
+            - name: "delete VM volume: {{ libvirt_vm.name }}"
+              shell: "virsh vol-delete --pool default {{ libvirt_existing_vols.stdout }}"
+
+    - name: handle VM 'build' (slow)
+      when: >
+        libvirt_vm.create_mode == 'build'
+        and
+        libvirt_vm.iso | mandatory is defined
+      include: build_guest.yml
+
+    - name: handle VM 'restore' (fast)
+      when: >
+        libvirt_vm.create_mode == 'restore'
+        and
+        libvirt_vm.backup_dir | mandatory is defined
+      include: restore_guest.yml
+
+    - name: "wait for {{ libvirt_vm.name }} to come back up before proceeding"
+      wait_for:
+        host: "{{ libvirt_vm.dns_address | mandatory }}"
+        port: 22

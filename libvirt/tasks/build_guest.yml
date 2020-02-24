@@ -1,0 +1,105 @@
+---
+## --------------------- ##
+## Build VM from scratch ##
+## --------------------- ##
+
+- name: Create VM with cleanup
+  block:
+    - name: create temporary staging directory
+      tempfile:
+        state: directory
+      register: vm_staging_dir
+
+    - name: build virt-install arguments
+      set_fact:
+        virt_install_cmd: virt-install
+        virt_install_name: "--name={{ libvirt_vm.name | mandatory }}"
+        virt_install_given_args: "{{ libvirt_vm.virt_install_args | mandatory }}"
+        virt_install_iso_location: "--location={{ libvirt_vm.iso | mandatory}}"
+        virt_install_initrd_inject: ''
+
+    - name: handle preseed
+      when: libvirt_vm.preseed is defined
+      block:
+        - name: generate preseed file from template
+          template:
+            src: "{{ libvirt_vm.preseed.template | mandatory }}"
+            dest: "{{ vm_staging_dir.path }}/preseed.cfg"
+            force: yes
+          vars:
+            preseed: "{{ libvirt_vm.preseed }}"
+        - name: build virt-install arguments - initrd-inject
+          set_fact:
+            virt_install_initrd_inject: "--initrd-inject={{ vm_staging_dir.path }}/preseed.cfg"
+
+    - name: create new VM
+      # run as root to be able to load ISO's via --location
+      become: true
+      command:
+        argv: "{{ [virt_install_cmd] + [virt_install_name] + virt_install_given_args + [virt_install_iso_location] + [virt_install_initrd_inject] }}"
+
+    - name: "waiting until restarted: {{ libvirt_vm.name }}"
+      virt:
+        command: status
+        name: "{{ libvirt_vm.name }}"
+      register: libvirt_vm_status
+      until: libvirt_vm_status.status == 'running'
+      # check for desired status for 5 minutes
+      delay: 3
+      retries: 100
+
+  always:
+    - name: remove staging directory
+      file:
+        path: "{{ vm_staging_dir.path }}"
+        state: absent
+
+- name: "wait for {{ libvirt_vm.name }} to come back up before proceeding"
+  wait_for:
+    host: "{{ libvirt_vm.dns_address | mandatory }}"
+    port: 22
+
+- name: backup VM
+  when: libvirt_vm.backup_dir is defined
+  block:
+    - name: clear existing backup directory
+      file:
+        path: "{{ libvirt_vm.backup_dir }}"
+        state: absent
+    - name: remake backup directory
+      file:
+        path: "{{ libvirt_vm.backup_dir }}"
+        state: directory
+        mode: u=rwx,g=rx,o-rwx
+    - name: backup XML
+      shell: virsh dumpxml {{ libvirt_vm.name }} > {{ libvirt_vm.backup_dir }}/{{ libvirt_vm.name }}.xml
+    - name: shutdown VM
+      virt:
+        command: shutdown
+        name: "{{ libvirt_vm.name }}"
+    - name: "waiting for shutdown: {{ libvirt_vm.name }}"
+      virt:
+        command: status
+        name: "{{ libvirt_vm.name }}"
+      register: libvirt_vm_status
+      until: libvirt_vm_status.status == 'shutdown'
+      # check for desired status for 5 minutes
+      delay: 3
+      retries: 100
+    - name: list VM block devices
+      shell: virsh domblklist {{ libvirt_vm.name }} | tail -n+3 | awk '{print $2}'
+      register: libvirt_vm_domblklist_vols
+    - name: list volumes
+      shell: virsh vol-list --pool default | tail -n+3 | sed '/^[[:space:]]*$/d' | xargs | awk '{print $2}'
+      register: libvirt_existing_vols
+    - name: backup VM associated volumes
+      loop: "{{ libvirt_vm_domblklist_vols.stdout_lines }}"
+      loop_control:
+        loop_var: libvirt_vm_vol
+      when: libvirt_vm_vol in libvirt_existing_vols.stdout_lines
+      become: true
+      command: qemu-img convert -O qcow2 {{ libvirt_vm_vol }} {{ libvirt_vm.backup_dir }}/{{ libvirt_vm_vol.split("/")[-1] }}
+    - name: restart VM
+      virt:
+        command: start
+        name: "{{ libvirt_vm.name }}"

@@ -1,0 +1,29 @@
+---
+## ---------------------- ##
+## Restore VM from backup ##
+## ---------------------- ##
+
+- name: restore VM from XML
+  command: virsh define --file {{ libvirt_vm.backup_dir }}/{{ libvirt_vm.name }}.xml
+
+- name: list expected VM block devices
+  shell: virsh domblklist {{ libvirt_vm.name }} | tail -n+3 | awk '{print $2}'
+  register: libvirt_vm_domblklist_vols
+
+- name: list files in backup directory
+  find:
+    paths: "{{ libvirt_vm.backup_dir }}"
+    file_type: file
+  register: libvirt_vm_backup_files
+
+- name: restore VM disk images defined in XML, if available
+  loop: "{{ libvirt_vm_domblklist_vols.stdout_lines }}"
+  loop_control:
+    loop_var: libvirt_vm_vol
+  when: libvirt_vm_vol | basename in libvirt_vm_backup_files.files | map(attribute='path') | map('basename') | list
+  command: qemu-img convert -O qcow2 {{ libvirt_vm.backup_dir }}/{{ libvirt_vm_vol | basename }} {{ libvirt_vm_vol }}
+
+- name: restart VM
+  virt:
+    command: start
+    name: "{{ libvirt_vm.name }}"
