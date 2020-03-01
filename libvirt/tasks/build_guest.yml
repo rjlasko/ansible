@@ -15,10 +15,8 @@
         virt_install_cmd: virt-install
         virt_install_name: "--name={{ libvirt_vm.name | mandatory }}"
         virt_install_given_args: "{{ libvirt_vm.virt_install_args | mandatory }}"
-        virt_install_iso_location: "--location={{ libvirt_vm.iso | mandatory}}"
-        virt_install_initrd_inject: ''
 
-    - name: handle preseed
+    - name: create VM using preseed injection
       when: libvirt_vm.preseed is defined
       block:
         - name: generate preseed file from template
@@ -28,15 +26,25 @@
             force: yes
           vars:
             preseed: "{{ libvirt_vm.preseed }}"
-        - name: build virt-install arguments - initrd-inject
+        - name: build preseed-drive command arguments
           set_fact:
+            virt_install_iso_location: "--location={{ libvirt_vm.iso | mandatory}}"
             virt_install_initrd_inject: "--initrd-inject={{ vm_staging_dir.path }}/preseed.cfg"
+        - name: create VM
+          # run as root to be able to load ISO's via --location
+          become: true
+          command:
+            argv: "{{ [virt_install_cmd] + [virt_install_name] + virt_install_given_args + [virt_install_iso_location] + [virt_install_initrd_inject] }}"
 
-    - name: create new VM
-      # run as root to be able to load ISO's via --location
-      become: true
-      command:
-        argv: "{{ [virt_install_cmd] + [virt_install_name] + virt_install_given_args + [virt_install_iso_location] + [virt_install_initrd_inject] }}"
+    - name: create VM without preseed injection
+      when: libvirt_vm.preseed is not defined
+      block:
+        - name: build preseed-drive command arguments
+          set_fact:
+            virt_install_iso_cdrom: "--cdrom={{ libvirt_vm.iso | mandatory}}"
+        - name: create VM
+          command:
+            argv: "{{ [virt_install_cmd] + [virt_install_name] + virt_install_given_args + [virt_install_iso_cdrom] }}"
 
     - name: "waiting until restarted: {{ libvirt_vm.name }}"
       virt:
