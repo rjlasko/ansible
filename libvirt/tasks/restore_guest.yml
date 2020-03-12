@@ -21,6 +21,7 @@
   loop_control:
     loop_var: libvirt_vm_vol
   when: libvirt_vm_vol | basename in libvirt_vm_backup_files.files | map(attribute='path') | map('basename') | list
+  become: true
   command: qemu-img convert -O qcow2 {{ libvirt_vm.backup_dir }}/{{ libvirt_vm_vol | basename }} {{ libvirt_vm_vol }}
 
 - name: restart VM
