@@ -51,6 +51,7 @@
         path: "{{ bind_mount_point }}"
         state: absent
 
+    # XXX: note that we just unmounted everything here defined in /etc/fstab
     - name: clear out all mount points
       command: find /srv/nfs -mindepth 1 -type d -empty -delete
 

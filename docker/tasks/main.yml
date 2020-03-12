@@ -29,7 +29,7 @@
 - command: apt-key fingerprint 0EBFCD88
   register: fingerprint_out
 
-- debug: msg="{{ fingerprint_out.stdout_lines }}"
+# - debug: msg="{{ fingerprint_out.stdout_lines }}"
 
 - apt_repository:
     repo: "deb [arch=amd64] https://download.docker.com/linux/debian {{ ansible_facts['distribution_release'] }} stable"
@@ -47,7 +47,7 @@
 - command: docker run hello-world
   register: dkr_out
 
-- debug: msg="{{ dkr_out.stdout_lines }}"
+# - debug: msg="{{ dkr_out.stdout_lines }}"
 
 - systemd:
     name: docker
@@ -59,7 +59,7 @@
   shell: git ls-remote --tags https://github.com/docker/compose.git | cut -f 2 | sort -t '/' -k 3 --version-sort | grep -v "rc" | grep -v "docs" | tail -n1 | sed 's:.*/::'
   register: docker_compose_version
 
-- debug: msg="{{ docker_compose_version }}"
+# - debug: msg="{{ docker_compose_version }}"
 
 - get_url:
     url: "https://github.com/docker/compose/releases/download/{{ docker_compose_version.stdout }}/docker-compose-{{ ansible_facts['system'] }}-{{ ansible_facts['architecture'] }}"

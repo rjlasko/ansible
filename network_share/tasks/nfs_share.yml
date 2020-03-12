@@ -9,7 +9,6 @@
     path: "/srv/nfs/{{ nfs_share.name }}"
     fstype: none
     opts: "bind{% if nfs_share.bind_opts is defined %},{{nfs_share.bind_opts}}{%endif%}"
-    
     state: mounted
 
 - name: create share with options
