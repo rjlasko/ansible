@@ -3,40 +3,42 @@
 ## Backup and reset a given file ##
 ## ----------------------------- ##
 
-- name: "stat file: {{ br_target }}"
+- name: declare filepath of target's backup
+  set_fact:
+    br_backup: "{{ br_target | mandatory }}.BAK"
+
+- name: "stat target: {{ br_target }}"
   stat:
-    path: "{{ br_target | mandatory }}"
-  register: target_check
+    path: "{{ br_target }}"
+  register: stat_target
   failed_when: >
-    target_check.stat.exists and
-    (
-      target_check.stat.isdir or
-      target_check.stat.islnk or
-      target_check.stat.issock or
-      target_check.stat.isfifo
+    stat_target.stat.exists and
+    not (
+      stat_target.stat.isreg or
+      stat_target.stat.islnk
     )
 
-- name: backup if exists
-  when: target_check.stat.exists
-  block:
-    - set_fact:
-        br_backup: "{{ br_target }}.BAK"
+- name: "stat backup: {{ br_backup }}"
+  stat:
+    path: "{{ br_backup }}"
+  register: stat_backup
+  failed_when: >
+    stat_backup.stat.exists and
+    not (
+      stat_backup.stat.isreg or
+      stat_backup.stat.islnk
+    )
 
-    - name: check for {{ br_backup }}
-      stat:
-        path: "{{ br_backup }}"
-      register: bak_exists
+- name: "restore backup: {{ br_backup }}"
+  when: stat_backup.stat.exists
+  copy:
+    src: "{{ br_backup }}"
+    dest: "{{ br_target }}"
+    remote_src: yes
 
-    - name: backup {{ br_target }}
-      when: bak_exists.stat.exists == False
-      copy:
-        src: "{{ br_target }}"
-        dest: "{{ br_backup }}"
-        remote_src: yes
-
-    - name: restore {{ br_target }}
-      when: bak_exists.stat.exists == True
-      copy:
-        src: "{{ br_backup }}"
-        dest: "{{ br_target }}"
-        remote_src: yes
+- name: "backup target: {{ br_target }}"
+  when: stat_target.stat.exists and not stat_backup.stat.exists
+  copy:
+    src: "{{ br_target }}"
+    dest: "{{ br_backup }}"
+    remote_src: yes
