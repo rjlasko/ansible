@@ -1,0 +1,43 @@
+---
+## ------------------------------------------- ##
+## Partition (single) a disk, format and mount ##
+## ------------------------------------------- ##
+
+- package:
+    name: parted
+
+- name: "Read information from device: {{ simple_disk.dev | mandatory }}"
+  parted:
+    device: "{{ simple_disk.dev }}"
+    unit: MiB
+  register: sdb_info
+
+- name: "Remove all partitions from device: {{ simple_disk.dev }}"
+  loop: "{{ sdb_info.partitions }}"
+  parted:
+    device: "{{ simple_disk.dev }}"
+    number: "{{ item.num }}"
+    state: absent
+
+- name: "Partition device: {{ simple_disk.dev }}"
+  parted:
+    device: "{{ simple_disk.dev }}"
+    number: 1
+    state: present
+
+- name: get device path of the new partition
+  set_fact:
+    simple_partition_dev: "{{ simple_disk.dev }}1"
+
+- name: "Format {{ simple_disk.dev }}1 as {{ simple_disk.fstype | mandatory }}"
+  filesystem:
+    dev: "{{ simple_partition_dev }}"
+    fstype: "{{ simple_disk.fstype }}"
+    force: true
+
+- name: "Mount {{ simple_partition_dev }} to {{ simple_disk.mount | mandatory }}"
+  mount:
+    src: "{{ simple_partition_dev }}"
+    path: "{{ simple_disk.mount | mandatory }}"
+    fstype: "{{ simple_disk.fstype }}"
+    state: present
