@@ -101,7 +101,7 @@
       shell: virsh domblklist {{ libvirt_vm.name }} | tail -n+3 | awk '{print $2}'
       register: libvirt_vm_domblklist_vols
     - name: list volumes
-      shell: virsh vol-list --pool default | tail -n+3 | sed '/^[[:space:]]*$/d' | xargs | awk '{print $2}'
+      shell: virsh vol-list --pool default | tail -n+3 | sed '/^[[:space:]]*$/d' | awk '{print $2}'
       register: libvirt_existing_vols
     - name: backup VM associated volumes
       loop: "{{ libvirt_vm_domblklist_vols.stdout_lines }}"

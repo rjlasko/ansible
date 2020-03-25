@@ -57,12 +57,12 @@
         - name: list volumes
           shell: virsh vol-list --pool default | tail -n+3 | grep {{ libvirt_vm.name }} | awk '{print $1}'
           register: libvirt_existing_vols
-        - name: Handle pre-existing VM volume
-          when: >
-            libvirt_existing_vols.stdout | length > 0
-          block:
-            - name: "delete VM volume: {{ libvirt_vm.name }}"
-              shell: "virsh vol-delete --pool default {{ libvirt_existing_vols.stdout }}"
+        - name: Delete old VM volumes
+          when: libvirt_existing_vols.stdout | length > 0
+          loop: "{{ libvirt_existing_vols.stdout_lines }}"
+          loop_control:
+            loop_var: libvirt_del_vol
+          shell: "virsh vol-delete --pool default {{ libvirt_del_vol }}"
 
     - name: handle VM 'build' (slow)
       when: >
