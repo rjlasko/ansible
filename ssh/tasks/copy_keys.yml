@@ -9,33 +9,35 @@
     state: directory
     mode: u=rwx,go-rwx
 
+- name: detect prexisting pubkey
+  stat:
+    path: "~/.ssh/{{ ssh_key_name | mandatory }}.pub"
+  register: original_pubkey
+
 - name: copy public key
   copy:
-    src: "{{ ssh.copy_keys.pub_key_file | mandatory }}"
-    dest: "~/.ssh/id_{{ ssh.key_type | mandatory }}.pub"
+    src: "{{ ssh_key_def.source.public | mandatory }}"
+    dest: "~/.ssh/{{ ssh_key_name }}.pub"
     mode: u=rw,g=r,o=r
-    decrypt: "{{ ssh.copy_keys.decrypt | default(omit) }}"
-    force: "{{ ssh.copy_keys.force | default(true) }}"
-
-- name: get username (in case of using 'su')
-  command: whoami
-  register: whoami_result
+    decrypt: "{{ ssh_key_def.decrypt | default(omit) }}"
+    force: "{{ ssh_key_def.replace | default(false) }}"
 
 - name: get pubkey sans the comment
-  shell: cat ~/.ssh/id_{{ ssh.key_type }}.pub | cut -d' ' -f1,2
+  shell: cat ~/.ssh/{{ ssh_key_name }}.pub | cut -d' ' -f1,2
   register: pub_key_no_comment
 
 - name: update pubkey comment
+  when: original_pubkey.stat.exists and ssh_key_def.replace | default(false)
   lineinfile:
-    path: "~/.ssh/id_{{ ssh.key_type }}.pub"
+    path: "~/.ssh/{{ ssh_key_name }}.pub"
     regexp: ".*"
-    line: "{{ pub_key_no_comment.stdout }} {{ whoami_result.stdout }}@{{ ansible_facts['hostname'] }}"
+    line: "{{ pub_key_no_comment.stdout }} {{ ssh_key_comment | mandatory }}"
     state: present
 
 - name: copy private key
   copy:
-    src: "{{ ssh.copy_keys.pri_key_file | mandatory }}"
-    dest: "~/.ssh/id_{{ ssh.key_type | mandatory }}"
+    src: "{{ ssh_key_def.source.private | mandatory }}"
+    dest: "~/.ssh/{{ ssh_key_name }}"
     mode: u=rw,go-rwx
-    decrypt: "{{ ssh.copy_keys.decrypt | default(omit) }}"
-    force: "{{ ssh.copy_keys.force | default(true) }}"
+    decrypt: "{{ ssh_key_def.decrypt | default(omit) }}"
+    force: "{{ ssh_key_def.replace | default(false) }}"

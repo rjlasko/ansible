@@ -1,0 +1,44 @@
+---
+## ---------------------------------- ##
+## Generates or copies key definition ##
+## ---------------------------------- ##
+
+- name: validate key definition is primary XOR named
+  when: >
+    ssh_key_def.primary | default(false) == ssh_key_def.name is defined
+  fail:
+    msg: "SSH key definition must be primary or named"
+
+- name: validate key definition when provided keys
+  when: >
+    ssh_key_def.source is defined
+    and
+    ssh_key_def.primary | default(false)
+    and
+    ssh_key_def.type is not defined
+  fail:
+    msg: "Primary keys with provided source files must declare a type, even if bogus!"
+
+- name: get username (in case of using 'su')
+  command: whoami
+  register: whoami_result
+
+- name: set default SSH key type
+  set_fact:
+    ssh_key_user: "{{ whoami_result.stdout }}"
+    ssh_key_type: "{{ ssh_key_def.type | default('ed25519') }}"
+    ssh_key_default_name: "id_{{ ssh_key_def.type | default('ed25519') }}"
+    ssh_key_default_comment: "{{ whoami_result.stdout }}@{{ ansible_facts['hostname'] }}"
+
+- name: set SSH key name
+  set_fact:
+    ssh_key_name: "{{ ssh_key_def.name | default(ssh_key_default_name) }}"
+    ssh_key_comment: "{{ ssh_key_def.comment | default(ssh_key_default_comment) }}"
+
+- name: "handle novel key generation for '{{ ssh_key_user }}'"
+  when: ssh_key_def.source is not defined
+  include: create_key.yml
+
+- name: "handle provided key insertion for '{{ ssh_key_user }}'"
+  when: ssh_key_def.source is defined
+  include: copy_keys.yml

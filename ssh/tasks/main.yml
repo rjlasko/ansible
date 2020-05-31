@@ -7,13 +7,11 @@
   when: ssh.purge_keys | default(false)
   include: purge_keys.yml
 
-- name: create SSH keys
-  when: ssh.create_key | default(false)
-  include: create_key.yml
-
-- name: copy SSH keys
-  when: ssh.copy_keys is defined
-  include: copy_keys.yml
+- name: loop over given key definitions
+  loop: "{{ ssh.key_definitions | default([]) }}"
+  loop_control:
+    loop_var: ssh_key_def
+  include: define_key.yml
 
 - name: purge known_hosts
   when: ssh.purge_known_hosts | default(false)

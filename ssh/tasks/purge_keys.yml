@@ -6,7 +6,9 @@
 - name: find existing keys
   find:
     paths: ~/.ssh
-    patterns: 'id_*'
+    # more effective to avoid known files that are not keys, than to target keys
+    excludes: 'known_hosts*,authorized_keys*,*.properties,config,credentials'
+    # patterns: 'id_*'
   register: file_glob_results
 
 - name: remove keys

@@ -4,14 +4,14 @@
 ## ---------------------------------------------- ##
 
 - name: extract SSH key comment and use as key ID
-  shell: "echo {{ authorized_key | mandatory }} | awk '{print $3}'"
+  shell: "echo {{ authorized_key | mandatory }} | awk '{print $NF}'"
   register: key_comment
 
 - name: write authorized public key
   lineinfile:
     path: "~/.ssh/authorized_keys"
     create: true
-    mode: u=rw
+    mode: u=rw,go-rwx
     state: present
     regexp: ".*{{ key_comment.stdout }}"
     line: "{{ authorized_key }}"

@@ -1,35 +1,15 @@
 ---
-## ---------------- ##
-## Creates SSH keys ##
-## ---------------- ##
+## -------------------------------------------- ##
+## Creates the default (id) SSH keys for a user ##
+## -------------------------------------------- ##
 
-- name: glob for public keys
-  find:
-    paths: ~/.ssh
-    patterns: '*.pub'
-  register: file_glob_results
-
-- name: create SSH key, if doesn't already exist
-  when: >
-    file_glob_results.matched < 1
-    or
-    ssh.replace_key | default(false)
-  block:
-    - name: get username (in case of using 'su')
-      command: whoami
-      register: whoami_result
-
-    - name: set default SSH key type
-      set_fact:
-        key_type: "{{ ssh.key_type | default('ed25519') }}"
-
-    - name: "Create ssh keys for '{{ whoami_result.stdout }}'"
-      user:
-        name: "{{ whoami_result.stdout }}"
-        generate_ssh_key: yes
-        ssh_key_file: "~/.ssh/id_{{ key_type }}"
-        ssh_key_type: "{{ key_type }}"
-        ssh_key_comment: "{{ whoami_result.stdout }}@{{ ansible_facts['hostname'] }}"
-        state: present
-        # prevent overwrite of existing keys
-        force: "{{ ssh.replace_key | default(false) }}"
+- name: "Create ssh keys"
+  user:
+    name: "{{ ssh_key_user | mandatory }}"
+    generate_ssh_key: yes
+    ssh_key_file: "~/.ssh/{{ ssh_key_name | mandatory }}"
+    ssh_key_type: "{{ ssh_key_type | mandatory }}"
+    ssh_key_comment: "{{ ssh_key_comment | mandatory }}"
+    state: present
+    # prevent overwrite of existing keys
+    force: "{{ ssh_key_def.replace | default(false) }}"
