@@ -17,7 +17,7 @@
 # "-S on" - enable attribute auto-save
 # "-o off" - disable SMART Automatic Offline Testing (in favor of daily short tests)
 # "-R 190 -R 194 -R 231" - use raw values (celsius) for Airflow Temp and Temperature for monitoring
-# "-W 4,35,40" - track temperature changes (log 4deg changes, log hit 35deg, log & email warning @ 40deg)
+# "-W 4,40,45" - track temperature changes (log 4deg changes, log hit 40deg, log & email warning @ 45deg)
 # "-m ${ALERT_EMAIL}" - email alerts to that account
 # "-M test" - send test email for each device on SMART daemon restart
 # "-s (S/../(02|10|18|26)/./03|L/../28/./03)" - short @ 3am (2nd,10th,18th,26th of the month), long @ 3am (28th of the month)
@@ -27,8 +27,8 @@
     dest: /etc/smartd.conf
     state: present
     regexp: '^DEVICESCAN'
-    line: "DEVICESCAN -a -S on -o off -R 190 -R 194 -R 231 -W 4,35,40 -m {{ smartmontools_email | mandatory }} -s (S/../(02|10|18|26)/./03|L/../28/./03)"
-    # line: "DEVICESCAN -a -S on -o off -R 190 -R 194 -R 231 -W 4,35,40 -m {{ smartmontools_email | mandatory }} -M test -s (S/../(02|10|18|26)/./03|L/../28/./03)"
+    line: "DEVICESCAN -a -S on -o off -R 190 -R 194 -R 231 -W 4,40,45 -m {{ smartmontools_email | mandatory }} -s (S/../(02|10|18|26)/./03|L/../28/./03)"
+    # line: "DEVICESCAN -a -S on -o off -R 190 -R 194 -R 231 -W 4,40,45 -m {{ smartmontools_email | mandatory }} -M test -s (S/../(02|10|18|26)/./03|L/../28/./03)"
 
 # smartd monitoring will poll the devices every 30 mins, by default
 # otherwise uncomment & change the smartd_opts="--interval=1800"
@@ -45,6 +45,9 @@
     state: restarted
     enabled: true
 
+# FIXME: better way than 'pause' to wait for smartmontools daemon to come back up
+# XXX: we do this because we think that we've had problems with certain tasks
+# immediately following the restart of this daemon, probably after install
 - name: wait for smartmontools to restart
   pause:
     seconds: 10
