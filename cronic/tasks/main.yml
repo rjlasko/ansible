@@ -1,0 +1,13 @@
+---
+## ------------------------------------------------------------------- ##
+## This script installs cronic, a useful error reporting tool for cron ##
+## ------------------------------------------------------------------- ##
+
+# install cronic to cleanup cron outputs for mailing errors
+# requires 'bash'
+- name: install cronic
+  get_url:
+    url: https://habilis.net/cronic/cronic
+    dest: /usr/bin/cronic
+    mode: a=rx
+    force: yes

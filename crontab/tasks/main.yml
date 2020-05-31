@@ -1,21 +1,43 @@
 ---
-## ------------------------------------------------------------------------------- ##
-## This script installs the preconfigured crontab, and other tools useful for cron ##
-## ------------------------------------------------------------------------------- ##
-# install cronic to cleanup cron outputs for mailing errors
-# requires 'bash'
-- name: install cronic
-  become: true
-  get_url:
-    url: https://habilis.net/cronic/cronic
-    dest: /usr/bin/cronic
-    mode: a=rx
-    force: yes
+## ------------------------------------ ##
+## This script sets up a user's crontab ##
+## ------------------------------------ ##
 
-- name: setup crontab user
-  loop: "{{ crontabs | default([])}}"
-  loop_control:
-    loop_var: crontabs_item
-  include: crontab_user.yml
-  vars:
-    crontab_user_def: "{{ crontabs_item }}"
+- name: clear crontab
+  when: crontab.reset | default(false)
+  command: crontab -r
+  ignore_errors: true
+
+- name: append to user crontab from file
+  when: crontab.file is defined
+  block:
+    - name: create temporary cron file
+      tempfile:
+        state: directory
+      register: crontab_staging_dir
+
+    - name: stage provided crontab
+      copy:
+        src: "{{ crontab.file }}"
+        dest: "{{ crontab_staging_dir.path }}/cron.tab"
+        force: yes
+    - command: crontab "{{ crontab_staging_dir.path }}/cron.tab"
+  always:
+    - name: remove staging directory
+      file:
+        path: "{{ crontab_staging_dir.path }}"
+        state: absent
+
+- name: MAILTO
+  when: crontab.mailto is defined
+  cron:
+    env: true
+    name: MAILTO
+    job: "{{ crontab.mailto }}"
+
+- name: PATH
+  when: crontab.path is defined
+  cron:
+    env: true
+    name: PATH
+    job: "{{ crontab.path }}"
