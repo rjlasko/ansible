@@ -4,11 +4,9 @@
 ## --------------------- ##
 
 - name: check archive override directory
-  become: true
-  become_user: "{{ unison_user_def.user | mandatory}}"
-  when: unison_user_def.archive is defined
+  when: unison.user_def.archive is defined
   stat:
-    path: "{{ unison_user_def.archive }}"
+    path: "{{ unison.user_def.archive }}"
   register: archive_override
   failed_when: >
     not archive_override.stat.exists
@@ -18,8 +16,6 @@
     not archive_override.stat.isdir
 
 - name: resolve archive directory
-  become: true
-  become_user: "{{ unison_user_def.user | mandatory}}"
   block:
     - name: check default archive directory
       stat:
@@ -34,36 +30,34 @@
           (
             not archive_default.stat.islnk
             and
-            unison_user_def.archive is defined
+            unison.user_def.archive is defined
           )
           or
           (
             archive_default.stat.islnk
             and
-            archive_default.stat.lnk_target != unison_user_def.archive
+            archive_default.stat.lnk_target != unison.user_def.archive
             and
-            archive_default.stat.lnk_source != unison_user_def.archive
+            archive_default.stat.lnk_source != unison.user_def.archive
           )
         )
 
     - name: create archive default directory
-      when: not archive_default.stat.exists and unison_user_def.archive is not defined
+      when: not archive_default.stat.exists and unison.user_def.archive is not defined
       file:
         path: "~/.unison"
         state: directory
         mode: u=rwx,g-rwx,o-rwx
 
     - name: link to archive override directory
-      when: not archive_default.stat.exists and unison_user_def.archive is defined
+      when: not archive_default.stat.exists and unison.user_def.archive is defined
       file:
         path: "~/.unison"
         state: link
-        src: "{{ unison_user_def.archive }}"
+        src: "{{ unison.user_def.archive }}"
 
 - name: resolve default profile
-  when: unison_user_def.profile is defined
-  become: true
-  become_user: "{{ unison_user_def.user }}"
+  when: unison.user_def.profile is defined
   block:
     - name: discover prexisting profiles
       find:
@@ -81,7 +75,7 @@
 
     - name: install default profile
       copy:
-        src: "{{ unison_user_def.profile }}"
+        src: "{{ unison.user_def.profile }}"
         dest: "~/.unison/default.prf"
         owner: root
         mode: u=rw,g-rwx,o-rwx

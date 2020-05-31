@@ -3,11 +3,17 @@
 ## Build + install Unison, then setup users ##
 ## ---------------------------------------- ##
 
-- become: true
+- when: >
+    unison.versions is not defined
+    and
+    unison.user_def is not defined
+  fail:
+    msg: "Required variables are undefined!"
+
+- name: install unison
+  when: unison.versions is defined
   include: install_unison.yml
 
 - name: setup unison user
-  loop: "{{ unison.user_defs | default([])}}"
+  when: unison.user_def is defined
   include: unison_user.yml
-  vars:
-    unison_user_def: "{{ item }}"
