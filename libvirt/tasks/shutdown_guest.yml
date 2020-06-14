@@ -1,0 +1,42 @@
+---
+## ----------------- ##
+## Shutdown Guest VM ##
+## ----------------- ##
+
+- name: "detect VM state before attempt restart: {{ libvirt_vm.name }}"
+  virt:
+    command: status
+    name: "{{ libvirt_vm.name }}"
+  register: libvirt_vm_status
+
+- name: error out if VM is in unacceptable state
+  when: >
+    libvirt_vm_status.status != 'running'
+    and
+    libvirt_vm_status.status != 'shutdown'
+  fail:
+    msg: "Cannot shutdown {{ libvirt_vm.name }} from state: {{ libvirt_vm_status.status }}"
+
+- name: shutdown from running state
+  when: libvirt_vm_status.status == 'running'
+  block:
+    - name: Pause for manual indication if specified
+      when: libvirt_vm.check_manual | default(false)
+      pause:
+        prompt: "Continue when ready for shutdown"
+
+    - name: shutdown VM
+      virt:
+        # FIXME: consider using ACPI to shutdown the guest cleanly
+        command: shutdown
+        name: "{{ libvirt_vm.name }}"
+
+    - name: "waiting for shutdown: {{ libvirt_vm.name }}"
+      virt:
+        command: status
+        name: "{{ libvirt_vm.name }}"
+      register: libvirt_vm_status
+      until: libvirt_vm_status.status == 'shutdown'
+      # check for desired status for 5 minutes
+      delay: 3
+      retries: 100

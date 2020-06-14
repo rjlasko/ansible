@@ -3,6 +3,9 @@
 ## Backup Guest VM ##
 ## --------------- ##
 
+- name: shutdown VM
+  include: shutdown_guest.yml
+
 - name: clear existing backup directory
   file:
     path: "{{ libvirt_vm.backup_dir }}"
@@ -16,21 +19,6 @@
 
 - name: backup XML
   shell: virsh dumpxml {{ libvirt_vm.name }} > {{ libvirt_vm.backup_dir }}/{{ libvirt_vm.name }}.xml
-
-- name: shutdown VM
-  virt:
-    command: shutdown
-    name: "{{ libvirt_vm.name }}"
-
-- name: "waiting for shutdown: {{ libvirt_vm.name }}"
-  virt:
-    command: status
-    name: "{{ libvirt_vm.name }}"
-  register: libvirt_vm_status
-  until: libvirt_vm_status.status == 'shutdown'
-  # check for desired status for 5 minutes
-  delay: 3
-  retries: 100
 
 - name: list VM block devices
   shell: virsh domblklist {{ libvirt_vm.name }} | tail -n+3 | awk '{print $2}'
@@ -47,8 +35,3 @@
   when: libvirt_vm_vol in libvirt_existing_vols.stdout_lines
   become: true
   command: qemu-img convert -O qcow2 {{ libvirt_vm_vol }} {{ libvirt_vm.backup_dir }}/{{ libvirt_vm_vol.split("/")[-1] }}
-
-- name: restart VM
-  virt:
-    command: start
-    name: "{{ libvirt_vm.name }}"

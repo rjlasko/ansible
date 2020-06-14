@@ -46,9 +46,5 @@
         libvirt_vm.backup_dir | mandatory is defined
       include: restore_guest.yml
 
-    - name: "wait for {{ libvirt_vm.name }} to come back up before proceeding"
-      # XXX: this is because windows hosts are a little bit of a pain to work with
-      when: libvirt_vm.manual_install | default(false) == false
-      wait_for:
-        host: "{{ libvirt_vm.dns_address | mandatory }}"
-        port: 22
+    - name: "complete with {{ libvirt_vm.name }} in running state"
+      include: start_guest.yml

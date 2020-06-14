@@ -15,21 +15,8 @@
     and
     libvirt_vm.name in libvirt_existing_vms.list_vms
   block:
-    - name: "shutdown VM: {{ libvirt_vm.name }}"
-      virt:
-        command: shutdown
-        name: "{{ libvirt_vm.name }}"
-
-    - name: "waiting for shutdown: {{ libvirt_vm.name }}"
-      virt:
-        command: status
-        name: "{{ libvirt_vm.name }}"
-      register: libvirt_vm_status
-      until: libvirt_vm_status.status == 'shutdown'
-      # check for desired status for 5 minutes
-      delay: 3
-      retries: 100
-
+    - name: shutdown VM
+      include: shutdown_guest.yml
     - name: "undefine VM: {{ libvirt_vm.name }}"
       virt:
         command: undefine

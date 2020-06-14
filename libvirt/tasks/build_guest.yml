@@ -23,7 +23,7 @@
         force: yes
       vars:
         preseed: "{{ libvirt_vm.preseed }}"
-    - name: build preseed-drive command arguments
+    - name: build preseeded install command arguments
       set_fact:
         virt_install_iso_location: "--location={{ libvirt_vm.iso | mandatory}}"
         virt_install_initrd_inject: "--initrd-inject={{ vm_staging_dir.path }}/preseed.cfg"
@@ -33,7 +33,7 @@
       command:
         argv: "{{ [virt_install_cmd] + [virt_install_name] + virt_install_given_args + [virt_install_iso_location] + [virt_install_initrd_inject] }}"
   always:
-    - name: remove staging directory
+    - name: remove preseed staging directory
       file:
         path: "{{ vm_staging_dir.path }}"
         state: absent
@@ -41,31 +41,12 @@
 - name: create VM without preseed injection
   when: libvirt_vm.preseed is not defined
   block:
-    - name: build preseed-drive command arguments
+    - name: build non-preseed install command arguments
       set_fact:
         virt_install_iso_cdrom: "--cdrom={{ libvirt_vm.iso | mandatory}}"
     - name: create VM
       command:
         argv: "{{ [virt_install_cmd] + [virt_install_name] + virt_install_given_args + [virt_install_iso_cdrom] }}"
 
-- name: "waiting until restarted: {{ libvirt_vm.name }}"
-  virt:
-    command: status
-    name: "{{ libvirt_vm.name }}"
-  register: libvirt_vm_status
-  until: libvirt_vm_status.status == 'running'
-  # check for desired status for 5 minutes
-  delay: 3
-  retries: 100
-
-- name: waiting for user-driven manual install to complete
-  when: libvirt_vm.manual_install | default(false)
-  pause:
-    prompt: "Continue when manual installation has completed..."
-
-- name: "wait for {{ libvirt_vm.name }} SSH to come back up before proceeding"
-  # XXX: this is because windows hosts are a little bit of a pain to work with
-  when: libvirt_vm.manual_install | default(false) == false
-  wait_for:
-    host: "{{ libvirt_vm.dns_address | mandatory }}"
-    port: 22
+- name: "conclude build with {{ libvirt_vm.name }} in running state"
+  include: start_guest.yml
