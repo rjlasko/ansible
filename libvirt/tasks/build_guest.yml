@@ -63,54 +63,9 @@
   pause:
     prompt: "Continue when manual installation has completed..."
 
-- name: "wait for {{ libvirt_vm.name }} to come back up before proceeding"
+- name: "wait for {{ libvirt_vm.name }} SSH to come back up before proceeding"
   # XXX: this is because windows hosts are a little bit of a pain to work with
   when: libvirt_vm.manual_install | default(false) == false
   wait_for:
     host: "{{ libvirt_vm.dns_address | mandatory }}"
     port: 22
-
-- name: backup VM
-  when: libvirt_vm.backup_dir is defined
-  block:
-    - name: clear existing backup directory
-      file:
-        path: "{{ libvirt_vm.backup_dir }}"
-        state: absent
-    - name: remake backup directory
-      file:
-        path: "{{ libvirt_vm.backup_dir }}"
-        state: directory
-        mode: u=rwx,g=rx,o-rwx
-    - name: backup XML
-      shell: virsh dumpxml {{ libvirt_vm.name }} > {{ libvirt_vm.backup_dir }}/{{ libvirt_vm.name }}.xml
-    - name: shutdown VM
-      virt:
-        command: shutdown
-        name: "{{ libvirt_vm.name }}"
-    - name: "waiting for shutdown: {{ libvirt_vm.name }}"
-      virt:
-        command: status
-        name: "{{ libvirt_vm.name }}"
-      register: libvirt_vm_status
-      until: libvirt_vm_status.status == 'shutdown'
-      # check for desired status for 5 minutes
-      delay: 3
-      retries: 100
-    - name: list VM block devices
-      shell: virsh domblklist {{ libvirt_vm.name }} | tail -n+3 | awk '{print $2}'
-      register: libvirt_vm_domblklist_vols
-    - name: list volumes
-      shell: virsh vol-list --pool default | tail -n+3 | sed '/^[[:space:]]*$/d' | awk '{print $2}'
-      register: libvirt_existing_vols
-    - name: backup VM associated volumes
-      loop: "{{ libvirt_vm_domblklist_vols.stdout_lines }}"
-      loop_control:
-        loop_var: libvirt_vm_vol
-      when: libvirt_vm_vol in libvirt_existing_vols.stdout_lines
-      become: true
-      command: qemu-img convert -O qcow2 {{ libvirt_vm_vol }} {{ libvirt_vm.backup_dir }}/{{ libvirt_vm_vol.split("/")[-1] }}
-    - name: restart VM
-      virt:
-        command: start
-        name: "{{ libvirt_vm.name }}"

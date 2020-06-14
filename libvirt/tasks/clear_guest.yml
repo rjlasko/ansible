@@ -1,0 +1,48 @@
+---
+## ----------------------------------- ##
+## Shuts down and removes the guest VM ##
+## ----------------------------------- ##
+
+# Handle active like-named VMs
+- name: list VMs
+  virt:
+    command: list_vms
+  register: libvirt_existing_vms
+
+- name: shutdown & undefine pre-existing VM
+  when: >
+    libvirt_existing_vms.list_vms | length > 0
+    and
+    libvirt_vm.name in libvirt_existing_vms.list_vms
+  block:
+    - name: "shutdown VM: {{ libvirt_vm.name }}"
+      virt:
+        command: shutdown
+        name: "{{ libvirt_vm.name }}"
+
+    - name: "waiting for shutdown: {{ libvirt_vm.name }}"
+      virt:
+        command: status
+        name: "{{ libvirt_vm.name }}"
+      register: libvirt_vm_status
+      until: libvirt_vm_status.status == 'shutdown'
+      # check for desired status for 5 minutes
+      delay: 3
+      retries: 100
+
+    - name: "undefine VM: {{ libvirt_vm.name }}"
+      virt:
+        command: undefine
+        name: "{{ libvirt_vm.name }}"
+
+# Handle like-named VM volume
+- name: list volumes
+  shell: virsh vol-list --pool default | tail -n+3 | grep {{ libvirt_vm.name }} | awk '{print $1}'
+  register: libvirt_existing_vols
+
+- name: Delete old VM volumes
+  when: libvirt_existing_vols.stdout | length > 0
+  loop: "{{ libvirt_existing_vols.stdout_lines }}"
+  loop_control:
+    loop_var: libvirt_del_vol
+  shell: "virsh vol-delete --pool default {{ libvirt_del_vol }}"
