@@ -1,0 +1,132 @@
+---
+## ------------------------------------- ##
+## Alter a VM via its XML representation ##
+## XXX: This approach will define and finalize the XML prior to OS installation ##
+## ------------------------------------- ##
+
+- name: shutdown VM
+  include: shutdown_guest.yml
+
+- name: obtain guest domain XML
+  virt:
+    command: get_xml
+    name: "{{ libvirt_vm.name }}"
+  register: domain_xml
+
+
+- name: install packages for Ansible XML support
+  become: true
+  package:
+    name: "{{ user_packages }}"
+    state: present
+  vars:
+    user_packages:
+      # only needed if we are using XSL transformations
+      # - xsltproc
+      # only needed if we are using the XML module
+      - python-lxml
+
+
+- name: edit machine/domain definition
+  block:
+    - name: create temporary domain staging directory
+      tempfile:
+        state: directory
+      register: domain_staging_dir
+
+    - name: write machine initial config to temporary file
+      copy:
+        dest: "{{ domain_staging_dir.path }}/domain.xml"
+        content: "{{ domain_xml.get_xml }}"
+        force: true
+
+    - name: copy CPU profiler to target
+      copy:
+        src: "{{ role_path }}/files/profile_cpu.py"
+        dest: "{{ domain_staging_dir.path }}/profile_cpu.py"
+        mode: a=rx
+
+    - name: profile host cpuset
+      command: "{{ domain_staging_dir.path }}/profile_cpu.py"
+      register: cpu_profiler_out
+
+    - name: configure vcpu pinning
+      when: libvirt_vm.alter_domain.vcpupin is defined
+      block:
+        - debug:
+            msg: "{{ cpu_profile | cpuset_select(physical_core_pool, logical_set_size, count) }}"
+          vars:
+            cpu_profile: "{{ cpu_profiler_out.stdout }}"
+            count: "{{ libvirt_vm.alter_domain.vcpupin.count | mandatory }}"
+            physical_core_pool: "{{ libvirt_vm.alter_domain.vcpupin.physical_core_pool | mandatory }}"
+            logical_set_size: "{{ libvirt_vm.alter_domain.vcpupin.logical_set_size | mandatory }}"
+
+
+    # - name: cputune
+    #   when: libvirt_vm.alter_domain.cputune is defined
+    #   block:
+
+    # - name: generate domain transform from template
+    #   template:
+    #     src: "{{ role_path }}/templates/domain.xsl.j2"
+    #     dest: "{{ domain_staging_dir.path }}/domain.xsl"
+    #     force: yes
+    #   vars:
+    #     libvirt_xml: "{{ libvirt_vm.alter_domain }}"
+
+
+        # - name: vcpupin
+        #   xml:
+        #     # path: "{{ vm_domain_xml.path }}"
+        #     xpath: /domain/vcpu/cputune/vcpupin
+        #     xmlstring: "{{ domain_xml.get_xml }}"
+        #     # pretty_print: true
+        #     state: absent
+        #   register: vm_domain_xml_2
+        #
+        # - debug:
+        #     var: vm_domain_xml_2.xmlstring
+
+
+        # - name: iothreads
+        # - name: emulatorpin
+  always:
+    - name: remove staging directory
+      file:
+        path: "{{ domain_staging_dir.path }}"
+        state: absent
+# we need to have an item that holds the evolving state of our machine definition
+
+
+
+
+
+
+
+
+
+
+
+- fail:
+    msg: boo
+
+#
+# 1. this will occur after the backup process within the build phase
+#     - backup is not guaranteed to be run, so we must get XML from virsh directly
+#     - backup does not get altered VM definition
+# 2. this will happen before the restore phase
+# 3. if altering the VM is indicated, we will need to produce a new XML that replaces
+#    the XML being restarted (after build+backup) or restored from.
+#
+# If the VM if not already shutdown
+# - "alter" should shutdown prior to XML alter
+# - "backup" should shutdown prior to XML + volume backup
+#
+# Should the changes be applied via XSL, instead of with an Ansible module?
+# - testable outside of ansible build
+# - xmllint likely already installed, via libxml
+#
+# ???? #1 below will probably change
+# 1. use `virt-install --print-xml` to build initial XML
+# 2. make changes to XML w/ Ansible XML module
+# 3. start with Ansible 'virt' module

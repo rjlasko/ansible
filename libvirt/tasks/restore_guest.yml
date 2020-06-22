@@ -4,6 +4,7 @@
 ## ---------------------- ##
 
 - name: restore VM from XML
+  # TODO: look into using "virt" module to do this
   command: virsh define --file {{ libvirt_vm.backup_dir }}/{{ libvirt_vm.name }}.xml
 
 - name: list expected VM block devices
