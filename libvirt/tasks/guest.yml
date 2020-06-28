@@ -46,5 +46,9 @@
         libvirt_vm.backup_dir | mandatory is defined
       include: restore_guest.yml
 
-    - name: "complete with {{ libvirt_vm.name }} in running state"
-      include: start_guest.yml
+    - name: alter VM machine definition
+      when: libvirt_vm.alter_domain is defined
+      include: alter_guest.yml
+
+- name: "complete with {{ libvirt_vm.name }} in running state"
+  include: start_guest.yml
