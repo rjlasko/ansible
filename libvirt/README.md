@@ -32,7 +32,6 @@ This Ansible role can be used to:
 - `preseed` - parameters to be passed into preseed template
     - `template` - path to the preseed (Jinja2 formatted) template to pass to `virt-install`
 
-
 ### Example properties for linux guest
 ```
 libvirt_vm:
