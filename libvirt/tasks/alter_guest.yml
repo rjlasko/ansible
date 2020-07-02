@@ -75,7 +75,7 @@
         cpu_profile: "{{ cpu_profiler_out.stdout }}"
         count: "{{ libvirt_vm.alter_domain.vcpupin.count | mandatory }}"
         physical_core_pool: "{{ libvirt_vm.alter_domain.vcpupin.physical_core_pool | mandatory }}"
-        logical_set_size: "{{ libvirt_vm.alter_domain.vcpupin.logical_set_size | mandatory }}"
+        logical_set_size: "{{ libvirt_vm.alter_domain.vcpupin.logical_set_size | default(1) }}"
 
     - name: pin vcpu
       loop: "{{ vcpupins | default([]) }}"
@@ -93,7 +93,7 @@
         cpu_profile: "{{ cpu_profiler_out.stdout }}"
         count: 1
         physical_core_pool: "{{ libvirt_vm.alter_domain.emulator.physical_core_pool | mandatory }}"
-        logical_set_size: "{{ libvirt_vm.alter_domain.emulator.logical_set_size | mandatory }}"
+        logical_set_size: "{{ libvirt_vm.alter_domain.emulator.logical_set_size | default(1) }}"
 
     - name: pin emulator
       command: "virsh emulatorpin {{ libvirt_vm.name }} {{ ','.join(emulatorpins[0] | map('string') | list) }} --config"

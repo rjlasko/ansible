@@ -21,10 +21,10 @@ This Ansible role can be used to:
     - `vcpupin`
         - `count` - number of vcpus to pin
         - `physical_core_pool` - list of which host cpu cores to pin vcpus to
-        - `logical_set_size` - how many logical cores per vcpu
+        - `logical_set_size` - default(1) - how many logical cores per vcpu
     - `emulator`
         - `physical_core_pool` - list of which host cpu cores to pin emulator process to
-        - `logical_set_size` - how many logical cores used by emulator process
+        - `logical_set_size` - default(1) - how many logical cores used by emulator process
 
 ##### Parameters specific to `create_mode` = `build`
 - `iso` - location of the OS installation ISO file
