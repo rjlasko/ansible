@@ -1,0 +1,31 @@
+---
+## ---------------------------------------- ##
+## Alter the XPath defined properties of VM ##
+## ---------------------------------------- ##
+
+
+- name: get domain XML
+  virt:
+    command: get_xml
+    name: "{{ libvirt_vm.name }}"
+  register: domain_xml
+
+- name: alter XML by XPath
+  xml:
+    xmlstring: "{{ domain_xml.get_xml }}"
+    xpath: "{{ libvirt_xpath.xpath }}"
+    attribute: "{{ libvirt_xpath.attribute | default(omit) }}"
+    value: "{{ libvirt_xpath.value | default(omit) }}"
+    state: "{{ libvirt_xpath.state | default(omit) }}"
+    pretty_print: true
+  register: altered_domain_xml
+
+- debug:
+    var: altered_domain_xml.xmlstring
+
+
+
+- name: define domain XML
+  virt:
+    command: define
+    xml: "{{ altered_domain_xml.xmlstring }}"

@@ -1,103 +1,25 @@
 ---
 ## ------------------------------------- ##
 ## Alter a VM via its XML representation ##
-## XXX: This approach will define and finalize the XML prior to OS installation ##
 ## ------------------------------------- ##
 
 - name: shutdown VM
   include: shutdown_guest.yml
 
-- name: edit machine/domain definition
-  block:
-    - name: create temporary domain staging directory
-      tempfile:
-        state: directory
-      register: domain_staging_dir
+- name: alter cpu topology and affinity
+  when: libvirt_vm.alter_domain.cpuset is defined
+  include: alter_cpus.yml
+  vars:
+    libvirt_cpu: "{{ libvirt_vm.alter_domain.cpuset }}"
 
-    - name: cputune options
-      when: >
-        libvirt_vm.alter_domain.iothreads is defined
-        or libvirt_vm.alter_domain.vcpupin is defined
-        or libvirt_vm.alter_domain.emulatorpin is defined
-      block:
-        - name: copy CPU profiler to target
-          copy:
-            src: "{{ role_path }}/files/profile_cpu.py"
-            dest: "{{ domain_staging_dir.path }}/profile_cpu.py"
-            mode: a=rx
+- name: alter VM by XPath
+  when: libvirt_vm.alter_domain.xpaths is defined
+  loop: "{{ libvirt_vm.alter_domain.xpaths | default([]) }}"
+  loop_control:
+    loop_var: alter_domain_xpath
+  include: alter_xpath.yml
+  vars:
+    libvirt_xpath: "{{ alter_domain_xpath }}"
 
-        - name: profile host cpuset
-          command: "{{ domain_staging_dir.path }}/profile_cpu.py"
-          register: cpu_profiler_out
-
-  always:
-    - name: remove staging directory
-      file:
-        path: "{{ domain_staging_dir.path }}"
-        state: absent
-
-
-- name: configure iothread pinning
-  when: libvirt_vm.alter_domain.iothread is defined
-  block:
-    - set_fact:
-        iothreads: "{{ cpu_profile | cpuset_select(physical_core_pool, logical_set_size, count) }}"
-      vars:
-        cpu_profile: "{{ cpu_profiler_out.stdout }}"
-        count: "{{ libvirt_vm.alter_domain.iothread.count | mandatory }}"
-        physical_core_pool: "{{ libvirt_vm.alter_domain.iothread.physical_core_pool | mandatory }}"
-        logical_set_size: "{{ libvirt_vm.alter_domain.iothread.logical_set_size | mandatory }}"
-
-    - name: remove iothread assignments
-      shell: virsh iothreadinfo {{ libvirt_vm.name }} | tail -n+3 | awk '{print $1}' | xargs -n1 virsh iothreaddel boundary
-      ignore_errors: true
-
-    - name: add iothread id
-      loop: "{{ iothreads | default([]) }}"
-      loop_control:
-        loop_var: iothread_cpuset
-        index_var: iothread_idx
-      command: "virsh iothreadadd {{ libvirt_vm.name }} {{ iothread_idx + 1 }} --config"
-
-    - name: pin iothread
-      loop: "{{ iothreads | default([]) }}"
-      loop_control:
-        loop_var: iothread_cpuset
-        index_var: iothread_idx
-      command: "virsh iothreadpin {{ libvirt_vm.name }} {{ iothread_idx + 1 }} {{ ','.join(iothread_cpuset | map('string') | list) }} --config"
-
-- name: configure vcpu pinning
-  when: libvirt_vm.alter_domain.vcpupin is defined
-  block:
-    - set_fact:
-        vcpupins: "{{ cpu_profile | cpuset_select(physical_core_pool, logical_set_size, count) }}"
-      vars:
-        cpu_profile: "{{ cpu_profiler_out.stdout }}"
-        count: "{{ libvirt_vm.alter_domain.vcpupin.count | mandatory }}"
-        physical_core_pool: "{{ libvirt_vm.alter_domain.vcpupin.physical_core_pool | mandatory }}"
-        logical_set_size: "{{ libvirt_vm.alter_domain.vcpupin.logical_set_size | default(1) }}"
-
-    - name: pin vcpu
-      loop: "{{ vcpupins | default([]) }}"
-      loop_control:
-        loop_var: vcpupin_cpuset
-        index_var: vcpupin_idx
-      command: "virsh vcpupin {{ libvirt_vm.name }} {{ vcpupin_idx }} {{ ','.join(vcpupin_cpuset | map('string') | list) }} --config"
-
-- name: configure emulator emulator
-  when: libvirt_vm.alter_domain.emulator is defined
-  block:
-    - set_fact:
-        emulatorpins: "{{ cpu_profile | cpuset_select(physical_core_pool, logical_set_size, count) }}"
-      vars:
-        cpu_profile: "{{ cpu_profiler_out.stdout }}"
-        count: 1
-        physical_core_pool: "{{ libvirt_vm.alter_domain.emulator.physical_core_pool | mandatory }}"
-        logical_set_size: "{{ libvirt_vm.alter_domain.emulator.logical_set_size | default(1) }}"
-
-    - name: pin emulator
-      command: "virsh emulatorpin {{ libvirt_vm.name }} {{ ','.join(emulatorpins[0] | map('string') | list) }} --config"
-
-
-# - fail:
-#     msg: boo
+- fail:
+    msg: boom
