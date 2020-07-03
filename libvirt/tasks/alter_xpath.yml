@@ -3,7 +3,6 @@
 ## Alter the XPath defined properties of VM ##
 ## ---------------------------------------- ##
 
-
 - name: get domain XML
   virt:
     command: get_xml
@@ -20,10 +19,8 @@
     pretty_print: true
   register: altered_domain_xml
 
-- debug:
-    var: altered_domain_xml.xmlstring
-
-
+# - debug:
+#     var: altered_domain_xml.xmlstring
 
 - name: define domain XML
   virt:

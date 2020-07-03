@@ -21,5 +21,5 @@
   vars:
     libvirt_xpath: "{{ alter_domain_xpath }}"
 
-- fail:
-    msg: boom
+# - fail:
+#     msg: boom

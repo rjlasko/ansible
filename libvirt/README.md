@@ -14,17 +14,25 @@ This Ansible role can be used to:
 - `check_ssh` - default(true) - VM start waits for SSH response to continue, requires `dns_address`
 - `dns_address` - network resolvable address used to verify restart
 - `alter_domain` - alters machine's XML definition
-    - `iothread`
-        - `count` - number of iothreads to pin
-        - `physical_core_pool` - list of which host cpu cores to pin iothreads to
-        - `logical_set_size` - how many logical cores per iothread
-    - `vcpupin`
-        - `count` - number of vcpus to pin
-        - `physical_core_pool` - list of which host cpu cores to pin vcpus to
-        - `logical_set_size` - default(1) - how many logical cores per vcpu
-    - `emulator`
-        - `physical_core_pool` - list of which host cpu cores to pin emulator process to
-        - `logical_set_size` - default(1) - how many logical cores used by emulator process
+    - `cpuset` - define CPU topology and affinity
+        - `iothread`
+            - `count` - number of iothreads to pin
+            - `physical_core_pool` - list of which host cpu cores to pin iothreads to
+            - `logical_set_size` - how many logical cores per iothread
+        - `vcpupin`
+            - `count` - number of vcpus to pin
+            - `physical_core_pool` - list of which host cpu cores to pin vcpus to
+            - `logical_set_size` - default(1) - how many logical cores per vcpu
+        - `emulator`
+            - `physical_core_pool` - list of which host cpu cores to pin emulator process to
+            - `logical_set_size` - default(1) - how many logical cores used by emulator process
+    - `xpaths` - list of XPath modifications to domain XML
+        - (list of definitions)
+            - `xpath` - XPath to target XML element(s)
+            - `attribute` - attribute name to set
+            - `value` - value of attribute or element to set
+            - `state` - default(present) add or remove XPath target. Values: `present`, `absent`
+
 
 ##### Parameters specific to `create_mode` = `build`
 - `iso` - location of the OS installation ISO file
@@ -84,17 +92,24 @@ libvirt_vm:
           min: 16384
           max: -1
   alter_domain:
-    iothread:
-      count: 2
-      physical_core_pool: [1]
-      logical_set_size: 2
-    vcpupin:
-      count: 4
-      physical_core_pool: [2,3]
-      logical_set_size: 1
-    emulator:
-      physical_core_pool: [1]
-      logical_set_size: 2
+    cpuset:
+      iothread:
+        count: 2
+        physical_core_pool: [1]
+        logical_set_size: 2
+      vcpupin:
+        count: 4
+        physical_core_pool: [2,3]
+        logical_set_size: 1
+      emulator:
+        physical_core_pool: [1]
+        logical_set_size: 2
+    xpaths:
+      - xpath: /domain/devices/disk[@device='cdrom']
+        state: absent
+      - xpath: /domain/features/kvm/hidden
+        attribute: state
+        value: 'on'
 ```
 
 ### Example properties for windows guest
@@ -119,18 +134,22 @@ libvirt_vm:
     - "--disk=/iso/os/windows/virtio-win-0.1.171.iso,device=cdrom,bus=sata"
     - "--disk=size=128,format=qcow2,io=threads,bus=virtio,serial=winbox-disk0"
   alter_domain:
-    vcpupin:
-      count: 6
-      cpu_affinity:
-        physical_pool: [1,2,3]
-        logical_size: 1
-    iothreads:
-      count: 2
-      cpu_affinity:
-        physical_pool: [0]
-        logical_size: 2
-    emulatorpin:
-      cpu_affinity:
-        physical_pool: [0]
-        logical_size: 2
+    cpuset:
+      iothread:
+        count: 2
+        physical_core_pool: [1]
+        logical_set_size: 2
+      vcpupin:
+        count: 4
+        physical_core_pool: [2,3]
+        logical_set_size: 1
+      emulator:
+        physical_core_pool: [1]
+        logical_set_size: 2
+    xpaths:
+      - xpath: /domain/devices/disk[@device='cdrom']
+        state: absent
+      - xpath: /domain/features/kvm/hidden
+        attribute: state
+        value: 'on'
 ```
