@@ -24,7 +24,7 @@
   register: xorgxrdp_version_detection
 
 # unless forced, stop here if it appears that everything has been installed
-- name: 
+- name:
   when: not (xrdp_force_install is defined or
         xrdp_stat_result.stat.exists == true and
         xrdp_version_detection is defined and
@@ -65,15 +65,15 @@
           - nasm
           - libpixman-1-dev
           - xserver-xorg-dev
-    
+
     - name: mktemp dir
       tempfile:
         state: directory
-        suffix: build
+        suffix: xrdp
       register: tmp_dir
-    
+
     ### Xrdp ###
-    
+
     # download & extract sources from the release page
     # Or clone xrdp and xorgxrdp repository from GitHub (if you need the devel branch)
     - name: unarchive xrdp
@@ -81,81 +81,87 @@
         src: "https://github.com/neutrinolabs/xrdp/releases/download/v{{ xrdp_version | mandatory }}/xrdp-{{ xrdp_version | mandatory }}.tar.gz"
         dest: "{{ tmp_dir.path }}"
         remote_src: yes
-    
+
     - command: echo "{{ tmp_dir.path }}/xrdp-{{ xrdp_version | mandatory }}/"
       register: xrdp_src
-    
+
     - name: bootstrap xrdp
       command: ./bootstrap
       args:
         chdir: "{{ xrdp_src.stdout }}"
-    
+
     - name: configure xrdp
       command: ./configure --enable-fuse --enable-mp3lame --enable-pixman
       args:
         chdir: "{{ xrdp_src.stdout }}"
-    
+
     - name: make xrdp
       command: make
       args:
         chdir: "{{ xrdp_src.stdout }}"
-    
+
     - name: install xrdp
       command: make install
       args:
         chdir: "{{ xrdp_src.stdout }}"
-    
+
     - name: remove old xrdp
       file:
         path: /usr/sbin/xrdp
         state: absent
-    
+
     - name: hardlink xrdp
       file:
         src: /usr/local/sbin/xrdp
         path: /usr/sbin/xrdp
         state: hard
         mode: ugo=rx
-    
+
     - name: remove old xrdp-sesman
       file:
         path: /usr/sbin/xrdp-sesman
         state: absent
-    
+
     - name: hardlink xrdp-sesman
       file:
         src: /usr/local/sbin/xrdp-sesman
         path: /usr/sbin/xrdp-sesman
         state: hard
         mode: ugo=rx
-    
+
     ### Xorg-Xrdp ###
-    
+
     - name: unarchive xorgxrdp
       unarchive:
         src: "https://github.com/neutrinolabs/xorgxrdp/releases/download/v{{ xorg_xrdp_version | mandatory }}/xorgxrdp-{{ xorg_xrdp_version | mandatory }}.tar.gz"
         dest: "{{ tmp_dir.path }}"
         remote_src: yes
-    
+
     - command: echo "{{ tmp_dir.path }}/xorgxrdp-{{ xorg_xrdp_version | mandatory }}/"
       register: xorgrdp_src
-    
+
     - name: bootstrap xorgxrdp
       command: ./bootstrap
       args:
         chdir: "{{ xorgrdp_src.stdout }}"
-    
+
     - name: configure xorgxrdp
       command: ./configure --enable-fuse --enable-mp3lame --enable-pixman
       args:
         chdir: "{{ xorgrdp_src.stdout }}"
-    
+
     - name: make xorgxrdp
       command: make
       args:
         chdir: "{{ xorgrdp_src.stdout }}"
-    
+
     - name: install xorgxrdp
       command: make install
       args:
         chdir: "{{ xorgrdp_src.stdout }}"
+
+  always:
+    - name: remove temp directory
+      file:
+        path: "{{ tmp_dir.path }}"
+        state: absent

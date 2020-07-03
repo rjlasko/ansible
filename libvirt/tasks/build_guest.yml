@@ -15,7 +15,9 @@
     - name: create temporary staging directory
       tempfile:
         state: directory
+        suffix: preseed
       register: vm_staging_dir
+
     - name: generate preseed file from template
       template:
         src: "{{ libvirt_vm.preseed.template | mandatory }}"
@@ -23,15 +25,18 @@
         force: yes
       vars:
         preseed: "{{ libvirt_vm.preseed }}"
+
     - name: build preseeded install command arguments
       set_fact:
         virt_install_iso_location: "--location={{ libvirt_vm.iso | mandatory}}"
         virt_install_initrd_inject: "--initrd-inject={{ vm_staging_dir.path }}/preseed.cfg"
+
     - name: create VM
       # run as root to be able to load ISO's via --location
       become: true
       command:
         argv: "{{ [virt_install_cmd] + [virt_install_name] + virt_install_given_args + [virt_install_iso_location] + [virt_install_initrd_inject] }}"
+
   always:
     - name: remove preseed staging directory
       file:

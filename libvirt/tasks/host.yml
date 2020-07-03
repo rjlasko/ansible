@@ -1,7 +1,7 @@
 ---
-## ---------------------------------------------- ##
-## Installs KVM and related libraries & utilities ##
-## ---------------------------------------------- ##
+## ----------------------------------------------- ##
+## Installs libvirt software, resources, and users ##
+## ----------------------------------------------- ##
 # TODO: figure out how to auto-shutdown KVM instances when UPS goes down
 
 # XXX: is not compatible with Docker in the default configuration:
@@ -10,38 +10,16 @@
 # https://bbs.archlinux.org/viewtopic.php?id=233727
 # https://www.reddit.com/r/linuxadmin/comments/7tlkve/libvirt_network_configuration_conflicts_with/
 
-
 # TODO
 # https://docs.ansible.com/ansible/latest/modules/virt_pool_module.html
 # https://docs.ansible.com/ansible/latest/modules/virt_module.html
 # https://lxml.de/installation.html
 
-- name: install libvirt & KVM
+- name: install software, network, storage pools, permissions
   become: true
   block:
-    - name: install KVM packages
-      package:
-        name: "{{ kvm_packages }}"
-        state: present
-      vars:
-        kvm_packages:
-          - qemu-kvm
-          - libvirt-clients
-          - qemu-utils
-          - libvirt-daemon-system
-          - virtinst
-# TODO: checkout "ovirt" instead of "virt-manager"
-          - virt-manager
-# XXX: enables UEFI support for VMs
-          # - ovmf
-# XXX: evaluate purpose
-          # - libguestfs-tools
-          # - genisoimage
-    - name: restart libvirtd
-      service:
-        name: libvirtd
-        state: restarted
-        enabled: true
+    - name: install software
+      include: host_install_software.yml
 
     - name: define LIBVIRT_DEFAULT_URI in all environments
       when: libvirt_host.default_uri is defined

@@ -1,7 +1,7 @@
 ---
-## -------------------------------------------------------- ##
-## This script seeks to automate the installation of a XRDP ##
-## -------------------------------------------------------- ##
+## ---------------------------------------------- ##
+## This script automates the installation of XRDP ##
+## ---------------------------------------------- ##
 # https://wiki.archlinux.org/index.php/xrdp
 
 - when: >

@@ -1,7 +1,7 @@
 ---
-## ------------------------------------------------------------ ##
-## Automates the installation and setup of KVM hosts and guests ##
-## ------------------------------------------------------------ ##
+## ---------------------------------------------------------------- ##
+## Automates the installation and setup of libvirt hosts and guests ##
+## ---------------------------------------------------------------- ##
 
 - name: setup target as libvirt host
   when: libvirt.host is defined
