@@ -2,16 +2,26 @@
 ## ---------------------------------- ##
 ## Adds a user to the list of sudoers ##
 ## ---------------------------------- ##
-# TODO: add to "wheel" or "admin" groups when needed on OSx/BSD
+# TODO: add to "admin" groups when needed on OSx/BSD
 # https://stackoverflow.com/questions/33359404/ansible-best-practice-for-maintaining-list-of-sudoers
 
 - package:
     name: sudo
     state: present
 
-- group:
-    name: sudo
-    state: present
+# determine default group with sudo privileges
+- name: get all groups
+  shell: getent group | awk -F":" '{print $1}'
+  register: getent_groups
+
+- name: find default sudoers group
+  when: item in getent_groups.stdout_lines
+  # XXX: in ascending order of precedence
+  with_items:
+    - sudo
+    - wheel
+  set_fact:
+    default_sudoers_group: "{{ item }}"
 
 - file:
     dest: /etc/sudoers
@@ -20,6 +30,6 @@
 - lineinfile:
     path: /etc/sudoers
     state: present
-    regexp: '^%sudo'
-    line: '%sudo ALL=(ALL) NOPASSWD: ALL'
+    regexp: "^%{{ default_sudoers_group | mandatory }}"
+    line: "%{{ default_sudoers_group }} ALL=(ALL) NOPASSWD: ALL"
     validate: visudo -cf %s

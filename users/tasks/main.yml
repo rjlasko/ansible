@@ -3,6 +3,20 @@
 ## Creates or updates the given users ##
 ## ---------------------------------- ##
 
+# determine default group with sudo privileges
+- name: get all groups
+  shell: getent group | awk -F":" '{print $1}'
+  register: getent_groups
+
+- name: find default sudoers group
+  when: item in getent_groups.stdout_lines
+  # XXX: in ascending order of precedence
+  with_items:
+    - sudo
+    - wheel
+  set_fact:
+    default_sudoers_group: "{{ item }}"
+
 - name: create or update users
   loop: "{{ user_definitions | dict2items }}"
   loop_control:

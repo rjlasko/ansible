@@ -23,6 +23,13 @@
     append: true
     create_home: "{{ user_def.create_home | default(false) }}"
 
+- name: add as sudoer
+  when: user_def.sudoer | default(false)
+  user:
+    name: "{{ user_def.name | mandatory }}"
+    groups: "{{ default_sudoers_group }}"
+    append: true
+
 - name: update email
   when: user_def.email is defined
   lineinfile:
