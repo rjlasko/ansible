@@ -1,0 +1,20 @@
+---
+## ------------------------------------------------------------------- ##
+## Handles general update of all packages installed by package manager ##
+## ------------------------------------------------------------------- ##
+
+- name: update 'apt' packages
+  when: ansible_facts['pkg_mgr'] == 'apt'
+  become: true
+  apt:
+    autoclean: true
+    autoremove: true
+    update_cache: true
+    upgrade: safe
+
+- name: update 'pacman' packages
+  when: ansible_facts['pkg_mgr'] == 'pacman'
+  become: true
+  pacman:
+    update_cache: true
+    upgrade: true

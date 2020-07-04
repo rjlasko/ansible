@@ -1,7 +1,0 @@
----
-## -------------------------------------------------- ##
-## Handles the update of the system's package manager ##
-## -------------------------------------------------- ##
-
-- when: ansible_facts['distribution'] == "Debian"
-  import_tasks: apt.yml
