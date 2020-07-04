@@ -4,6 +4,19 @@ This Ansible role can be used to:
 1. install libvirt on a host, and
 2. it can be used to install guest VMs
 
+## General properties
+- `libvirt` - the prefix property that host and guest VM properties should be declared under
+    - `host` - properties for the host
+    - `guests` - a list of guests to install
+
+### Host installation properties
+- `default_uri` - the default URI to access guests under
+- `bridge` - the name of a network bridge available to be used
+- `users` - a list usernames to add as VM admins
+- `pools` - a list of file system locations that libvirt can use to store VMs and access ISOs
+    - `name` - the name of the pool - `default` is the first location that libvirt looks at
+    - `path` - the location of the pool
+
 ### Guest installation properties
 
 ##### General
