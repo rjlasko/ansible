@@ -5,12 +5,24 @@
 # TODO: https://unix.stackexchange.com/questions/26666/can-i-change-roots-email-address-or-forward-it-to-an-external-address
 # does this conflict with the msmtprc configuration?
 
+#
+- name: check if 'mailx' is accessible via path
+  shell: 'type mailx'
+  ignore_errors: true
+  register: mailx_exists
+
+# ensure that mailx is installed, as cron will need it
+- name: system install 'mailx'
+  when: mailx_exists.rc != 0
+  package:
+    name: mailutils
+    state: present
+
 - package:
     name: "{{ msmtp_packages }}"
     state: present
   vars:
     msmtp_packages:
-      - mailutils
       - msmtp
       - msmtp-mta
       - ca-certificates
