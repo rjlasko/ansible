@@ -8,54 +8,26 @@
   ignore_errors: true
   register: zfs_exists
 
-- when: >
-    ansible_facts['distribution'] != "Debian" or
-    ansible_facts['distribution_version'] is version('9', '<') or
-    ansible_facts['distribution_version'] is version('10', '>')
-  fail:
-    msg: "Only supports Debian [9,10]. Found {{ ansible_facts['lsb']['description'] }}"
-
-# currently using the older version of ZFS.  Upgrade later.
-# TODO: consider using the Debian "backports" version of ZFS for newer features as guided
-- name: install ZFS
+- name: install zfs
   when: zfs_exists.rc != 0
   block:
-    - apt_repository:
-        repo: "deb http://ftp.us.debian.org/debian/ {{ ansible_facts['distribution_release'] }} main contrib non-free"
-        state: present
-        update_cache: yes
-    - apt_repository:
-        repo: "deb-src http://ftp.us.debian.org/debian/ {{ ansible_facts['distribution_release'] }} main contrib non-free"
-        state: present
-        update_cache: yes
-    - package:
-        name: "{{ zfs_deps }}"
-        state: present
-      vars:
-        zfs_deps:
-          - dpkg-dev
-          - "linux-headers-{{ ansible_facts['kernel'] }}"
-          - linux-image-amd64
-    - name: install ZFS via Dynamic Kernal Module Support
-      # it is likely that this will fail when ZFS disks, new to this system, are
-      # detected upon installation. Continue despite this, knowing latter tasks
-      # will fail if there is an issue.
-      ignore_errors: true
-      package:
-        name: zfs-dkms
-        state: present
-    - modprobe:
-        name: zfs
-        state: present
-    - name: setup automatic zpool scrubbing
-      package:
-        name: "{{ zfs_packages }}"
-        state: present
-      vars:
-        zfs_packages:
-          - zfsutils-linux # auto scrubbing
-          - zfs-auto-snapshot # auto snapshot
-    - shell: modinfo zfs | grep -v parm
-      register: zfs_module_info
-    - name: module info
-      debug: msg="{{ zfs_module_info.stdout_lines }}"
+    - name: detect Debian ZFS install
+      when: ansible_facts['distribution'] == "Debian"
+      import_tasks: install_zfs_debian.yml
+
+    - name: detect Arch Linux ZFS install
+      when: ansible_facts['distribution'] == "Archlinux"
+      import_tasks: install_zfs_arch.yml
+
+    - name: fail on unsupported distributions
+      when: >
+        ansible_facts['distribution'] != "Debian" and
+        ansible_facts['distribution'] != "Archlinux"
+      fail:
+        msg: "Only supports Debian and Arch Linux"
+
+- shell: modinfo zfs | grep -v parm
+  register: zfs_module_info
+
+- name: module info
+  debug: msg="{{ zfs_module_info.stdout_lines }}"

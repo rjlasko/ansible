@@ -1,0 +1,38 @@
+---
+## ------------------------------------- ##
+## Installs ZFS on Linux, for Arch Linux ##
+## ------------------------------------- ##
+
+# pacman -S zfs-dkms
+# dkms install zfs/0.8.4
+# systemctl enable dkms.service
+#
+# kernelVersion = pacman -Qe | grep linux | grep {{ ansible_facts['kernel'] }} | awk '{print $1}'
+# pacman -S ${kernelVersion}-headers
+#
+# modprobe zfs
+
+- name: figure out kernel headers package prefix
+  shell: pacman -Qe | grep linux | grep {{ ansible_facts['kernel'] }} | awk '{print $1}'
+  register: kernel_module_info
+
+- name: install kernel headers
+  package:
+    name: "{{ kernel_module_info.stdout }}-headers"
+    state: present
+
+- name: install ZFS via Dynamic Kernal Module Support
+  package:
+    name: zfs-dkms
+    state: present
+
+- name: load ZFS module into the kernel
+  modprobe:
+    name: zfs
+    state: present
+
+# FIXME: this needs to be installed from AUR... so special stuff needs to happen
+- name: install ZFS automatic snapshots
+  package:
+    name: zfs-auto-snapshot
+    state: present
