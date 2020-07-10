@@ -61,14 +61,14 @@
       lineinfile:
         dest: /etc/security/limits.conf
         state: present
-        regexp:
+        regexp: # FIXME
         line: "@{{ hugepages.group }} soft memlock {{ (total_hugepages_kb + lock_limit_buffer_kb) }}"
 
     - name: set hard limit
       lineinfile:
         dest: /etc/security/limits.conf
         state: present
-        regexp:
+        regexp: # FIXME
         line: "@{{ hugepages.group }} hard memlock {{ (total_hugepages_kb + lock_limit_buffer_kb) }}"
 
 # It is required that the total hugepage size to reserve is specified
