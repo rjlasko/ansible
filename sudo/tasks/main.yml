@@ -17,19 +17,21 @@
 - name: find default sudoers group
   when: item in getent_groups.stdout_lines
   # XXX: in ascending order of precedence
+  # see: https://wiki.archlinux.org/index.php/Sudo#Example_entries
   with_items:
     - sudo
     - wheel
   set_fact:
     default_sudoers_group: "{{ item }}"
 
-- file:
-    dest: /etc/sudoers
-    mode: u+w
-
-- lineinfile:
-    path: /etc/sudoers
+- name: add custom sudoer file
+  lineinfile:
+    path: /etc/sudoers.d/wheel-sudoer
     state: present
-    regexp: "^%{{ default_sudoers_group | mandatory }}"
-    line: "%{{ default_sudoers_group }} ALL=(ALL) NOPASSWD: ALL"
+    create: true
+    mode: u=r,g=r,o-rwx
+    owner: root
+    group: root
+    regexp: '^.*%{{ default_sudoers_group | mandatory }}'
+    line: '%{{ default_sudoers_group }} ALL=(ALL) NOPASSWD: ALL'
     validate: visudo -cf %s
