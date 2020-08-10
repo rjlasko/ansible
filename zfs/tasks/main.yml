@@ -17,9 +17,19 @@
 # https://docs.ansible.com/ansible/latest/modules/zfs_module.html
 
 - name: install zfs
-  become: true
   import_tasks: install_zfs.yml
 
+- name: get zfs kernel module info
+  shell: modinfo zfs | grep -v parm
+  register: zfs_module_info
+
+- name: module info
+  debug: msg="{{ zfs_module_info.stdout_lines }}"
+
+- name: setup ZFS snapshots
+  import_tasks: setup_snapshot.yml
+
+# FIXME: We know that there is something wrong with ZED config in Arch
 - name: run configured zfs tasks
   when: zfs is defined
   become: true

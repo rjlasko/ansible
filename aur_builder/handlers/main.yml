@@ -1,9 +1,0 @@
----
-## -------------------------------------------------------------- ##
-## Provides a handler to remove the sudoer file upon notification ##
-## -------------------------------------------------------------- ##
-
-- name: cleanup aur_builder
-  file:
-    path: /etc/sudoers.d/aur_builder-pacman-sudoer
-    state: absent

@@ -1,0 +1,12 @@
+---
+## ----------------------------- ##
+## Setup ZFS automatic snapshots ##
+## ----------------------------- ##
+
+
+# XXX: this installs a cron script and maybe more
+- name: install ZFS automatic snapshots [Debian]
+  when: ansible_facts['distribution'] == 'Debian'
+  package:
+    name: zfs-auto-snapshot
+    state: present
