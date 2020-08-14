@@ -51,7 +51,7 @@
         state: present
 
 # XXX: Debian: cron.d zpool scrubbing and snapshots
-# XXX: Ubuntu & variants: this is the installation for ZFS
+# XXX: Ubuntu & variants: this also enables ZFS
 - name: install zfsutils-linux
   package:
     name: zfsutils-linux
