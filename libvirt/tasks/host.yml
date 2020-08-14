@@ -30,16 +30,8 @@
           # https://libvirt.org/uri.html#URI_default
           - [ 'LIBVIRT_DEFAULT_URI', "{{ libvirt_host.default_uri }}" ]
 
-    - name: create bridge network config
-      when: libvirt_host.bridge is defined
-      lineinfile:
-        line: "allow {{ libvirt_host.bridge }}"
-        path: /etc/qemu/bridge.conf
-        create: true
-        state: present
-        owner: root
-        group: libvirt
-        mode: u=rw,g=r,o-rwx
+    - name: install software
+      include: network_bridge.yml
 
     # FIXME: seems to miss adding the group to 'libvirt_qemu'
     - name: grant user permissions to run Virtual Machine Manager

@@ -3,17 +3,12 @@
 ## Creates a bridge interface ##
 ## -------------------------- ##
 
-- name: install bridge-utils
-  package:
-    name: bridge-utils
-    state: present
-
 - name: find all existing bridges
   shell: brctl show
   register: bridge_found_result
 
 - name: Configure network bridge from best device
-  when: bridge_found_result.stdout is not search(bridge_name)
+  when: bridge_found_result.stdout is not search(libvirt_host.bridge)
   block:
     - name: mktemp dir
       tempfile:
@@ -27,19 +22,30 @@
         owner: root
         mode: u=rx
 
-    - command: "{{ tmp_dir.path }}/best_interface.sh {{ bridge_name | mandatory }}"
+    - command: "{{ tmp_dir.path }}/best_interface.sh {{ libvirt_host.bridge }}"
       register: best_interface_result
 
     - set_fact:
         source_interface: "{{ best_interface_result.stdout }}"
 
-    - name: "/etc/network/interfaces.d/{{ bridge_name | mandatory }}"
+    - name: "/etc/network/interfaces.d/{{ libvirt_host.bridge | mandatory }}"
       template:
         src: bridge.j2
-        dest: "/etc/network/interfaces.d/{{ bridge_name | mandatory }}"
+        dest: "/etc/network/interfaces.d/{{ libvirt_host.bridge | mandatory }}"
         owner: root
         group: root
         mode: u=r,g=r,o=r
 
     - reboot:
         reboot_timeout: 600
+
+- name: create bridge network config
+  when: libvirt_host.bridge is defined
+  lineinfile:
+    line: "allow {{ libvirt_host.bridge }}"
+    path: /etc/qemu/bridge.conf
+    create: true
+    state: present
+    owner: root
+    group: libvirt
+    mode: u=rw,g=r,o-rwx
