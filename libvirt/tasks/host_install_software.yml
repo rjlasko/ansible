@@ -3,10 +3,6 @@
 ## Installs libvirt and related libraries & utilities ##
 ## -------------------------------------------------- ##
 
-- name: install software from source
-  when: libvirt_host.source is defined
-  fail:
-    msg: install from source not supported at the moment
 
 - name: install software from package manager
   when: libvirt_host.source is not defined
@@ -19,7 +15,6 @@
       - qemu-utils
       - libvirt-daemon-system
       - libvirt-clients
-      - bridge-utils
       - virtinst
 # TODO: checkout "ovirt" instead of "virt-manager"
       - virt-manager
