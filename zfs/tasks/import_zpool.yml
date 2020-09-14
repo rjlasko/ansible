@@ -16,12 +16,19 @@
   when: initial_zpool_listing.stdout is not search(zfs_pool)
   command: "zpool import -d /dev/disk/by-id -f {{ zfs_pool }}"
 
-# XXX: it may be the case that permanent mounting needs to be triggered
-# - name: trigger zpool import scan & permanent mount
-#   when: >
-#     ansible_facts['distribution'] != 'Ubuntu' and
-#     ansible_facts['distribution'] != 'Pop!_OS'
-#   service:
-#     name: zfs-import-scan
-#     state: restarted
-#     enabled: true
+# XXX: Debian doesn't appear to need this trigger
+- name: trigger zpool import service
+  when: >
+    ansible_facts['distribution'] == 'Ubuntu' or
+    ansible_facts['distribution'] == 'Pop!_OS'
+  block:
+    - name: automatically zpool import using cachefile
+      service:
+        name: zfs-import-cache
+        state: restarted
+        enabled: true
+    # - name: automatically zpool import scan without cachefile
+    #   service:
+    #     name: zfs-import-scan
+    #     state: restarted
+    #     enabled: true
