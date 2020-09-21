@@ -29,7 +29,6 @@
 - name: setup ZFS snapshots
   import_tasks: setup_snapshot.yml
 
-# FIXME: We know that there is something wrong with ZED config in Arch
 - name: run configured zfs tasks
   when: zfs is defined
   become: true

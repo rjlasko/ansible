@@ -1,0 +1,16 @@
+---
+## -------------------------------- ##
+## Installs ZFS on Linux for Ubuntu ##
+## -------------------------------- ##
+
+
+# enable ZFS
+- name: install zfsutils-linux
+  package:
+    name: zfsutils-linux
+    state: present
+
+- name: load ZFS module into the kernel
+  modprobe:
+    name: zfs
+    state: present

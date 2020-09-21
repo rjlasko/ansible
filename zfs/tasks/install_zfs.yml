@@ -4,8 +4,6 @@
 ## --------------------- ##
 
 
-
-
 - name: fail on unsupported distributions
   when: >
     ansible_facts['distribution'] != 'Debian' and
@@ -21,43 +19,14 @@
   register: zfs_exists
 
 - name: add ZFS install dependencies [Debian]
-  when: >
-    ansible_facts['distribution'] == 'Debian' and
-    zfs_exists.rc != 0
+  when: zfs_exists.rc != 0
   block:
-    - name: add repos
-      loop:
-        - "deb http://ftp.us.debian.org/debian/ {{ ansible_facts['distribution_release'] }} main contrib non-free"
-        - "deb-src http://ftp.us.debian.org/debian/ {{ ansible_facts['distribution_release'] }} main contrib non-free"
-      apt_repository:
-        repo: "{{ item }}"
-        state: present
-        update_cache: yes
-    - name: add build dependencies
-      package:
-        name:
-          - dpkg-dev
-          - "linux-headers-{{ ansible_facts['kernel'] }}"
-          - linux-image-amd64
-        state: present
-    - name: install ZFS via Dynamic Kernal Module Support
-      # it is likely that this will fail when ZFS disks, new to this system, are
-      # detected upon installation. Continue despite this, knowing latter tasks
-      # will fail if there is an issue.
-      # We have observed this behavior in Debian, and accept it
-      ignore_errors: "{{ ansible_facts['distribution'] == 'Debian' }}"
-      package:
-        name: zfs-dkms
-        state: present
+    - name: Install ZFS on Debian
+      when: ansible_facts['distribution'] == 'Debian'
+      import_tasks: install_zfs_debian.yml
 
-# XXX: Debian: cron.d zpool scrubbing and snapshots
-# XXX: Ubuntu & variants: this also enables ZFS
-- name: install zfsutils-linux
-  package:
-    name: zfsutils-linux
-    state: present
-
-- name: load ZFS module into the kernel
-  modprobe:
-    name: zfs
-    state: present
+    - name: Install ZFS on Ubuntu variants
+      when: >
+        ansible_facts['distribution'] == 'Ubuntu' or
+        ansible_facts['distribution'] == 'Pop!_OS'
+      import_tasks: install_zfs_ubuntu.yml
