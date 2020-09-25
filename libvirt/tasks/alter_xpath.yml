@@ -9,7 +9,7 @@
     name: "{{ libvirt_vm.name }}"
   register: domain_xml
 
-- name: alter XML by XPath
+- name: alter XML by XPath "{{ libvirt_xpath.xpath }}"
   xml:
     xmlstring: "{{ domain_xml.get_xml }}"
     xpath: "{{ libvirt_xpath.xpath }}"
