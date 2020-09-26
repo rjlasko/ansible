@@ -43,10 +43,10 @@
       set_fact:
         selected_wol_device: "{{ wol_device | default(default_device.stdout | mandatory) }}"
 
-    - name: "/etc/network/interfaces.d/{{ libvirt_host.bridge | mandatory }}"
+    - name: "/etc/network/interfaces.d/{{ libvirt_host.bridge }}"
       template:
         src: bridge.j2
-        dest: "/etc/network/interfaces.d/{{ libvirt_host.bridge | mandatory }}"
+        dest: "/etc/network/interfaces.d/{{ libvirt_host.bridge }}"
         owner: root
         group: root
         mode: u=r,g=r,o=r
@@ -58,7 +58,6 @@
         reboot_timeout: 600
 
 - name: create bridge network config
-  when: libvirt_host.bridge is defined
   lineinfile:
     line: "allow {{ libvirt_host.bridge }}"
     path: /etc/qemu/bridge.conf

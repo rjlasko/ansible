@@ -15,9 +15,13 @@
 # https://docs.ansible.com/ansible/latest/modules/virt_module.html
 # https://lxml.de/installation.html
 
-- name: install software, network, storage pools, permissions
+- name: install software, configure virtualized resources, permissions
   become: true
   block:
+    - name: enable IOMMU support
+      when: libvirt_host.iommu is defined
+      include: iommu.yml
+
     - name: install software
       include: host_install_software.yml
 
@@ -30,7 +34,8 @@
           # https://libvirt.org/uri.html#URI_default
           - [ 'LIBVIRT_DEFAULT_URI', "{{ libvirt_host.default_uri }}" ]
 
-    - name: install software
+    - name: install network bridge
+      when: libvirt_host.bridge is defined
       include: network_bridge.yml
 
     # FIXME: seems to miss adding the group to 'libvirt_qemu'
