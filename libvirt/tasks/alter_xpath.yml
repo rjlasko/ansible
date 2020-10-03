@@ -3,16 +3,44 @@
 ## Alter the XPath defined properties of VM ##
 ## ---------------------------------------- ##
 
-- name: get domain XML
-  virt:
-    command: get_xml
-    name: "{{ libvirt_vm.name }}"
-  register: domain_xml
+# XXX: editing the VM configuration XML sometimes requires multiple changes to
+# be staged before applying the new definition.  Because of this, this process
+# allows for the deferred accrual of changes via the `defer` property. The
+# specification OF this property must follow the following order:
+#   [intial, carry, ...., carry, apply]
+
+
+- name: use current VM definition
+  when: >
+    libvirt_xpath.defer is not defined or
+    libvirt_xpath.defer == 'initial'
+  block:
+    - name: get XML of current VM definition
+      virt:
+        command: get_xml
+        name: "{{ libvirt_vm.name }}"
+      register: current_domain_xml
+
+    - set_fact:
+        selected_domain_xml: "{{ current_domain_xml.get_xml }}"
+
+- name: use deferred domain XML
+  when: >
+    libvirt_xpath.defer is defined and
+    libvirt_xpath.defer != 'initial'
+  block:
+    - name: get contents of deferred XML
+      command: cat {{ libvirt_defered_xml }}
+      register: deferred_domain_xml
+
+    - set_fact:
+        selected_domain_xml: "{{ deferred_domain_xml.stdout }}"
 
 - name: alter XML by XPath "{{ libvirt_xpath.xpath }}"
   xml:
-    xmlstring: "{{ domain_xml.get_xml }}"
+    xmlstring: "{{ selected_domain_xml }}"
     xpath: "{{ libvirt_xpath.xpath }}"
+    add_children: "{{ libvirt_xpath.add_children | default(omit) }}"
     attribute: "{{ libvirt_xpath.attribute | default(omit) }}"
     value: "{{ libvirt_xpath.value | default(omit) }}"
     state: "{{ libvirt_xpath.state | default(omit) }}"
@@ -22,7 +50,26 @@
 # - debug:
 #     var: altered_domain_xml.xmlstring
 
-- name: define domain XML
-  virt:
-    command: define
-    xml: "{{ altered_domain_xml.xmlstring }}"
+- name: capture deferred domain XML alteration
+  when: >
+    libvirt_xpath.defer is defined and
+    libvirt_xpath.defer != 'apply'
+  copy:
+    content: "{{ altered_domain_xml.xmlstring }}"
+    dest: "{{ libvirt_defered_xml }}"
+    force: true
+
+- name: apply domain configuration
+  when: >
+    libvirt_xpath.defer is not defined or
+    libvirt_xpath.defer == 'apply'
+  block:
+    - name: define domain XML
+      virt:
+        command: define
+        xml: "{{ altered_domain_xml.xmlstring }}"
+
+    - name: remove deferral XML
+      file:
+        path: "{{ libvirt_defered_xml }}"
+        state: absent

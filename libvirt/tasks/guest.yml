@@ -25,25 +25,18 @@
     - name: clear pre-existing VM
       include: clear_guest.yml
 
-    - name: handle VM 'build' (slow)
-      when: >
-        libvirt_vm.create_mode == 'build'
-        and
-        libvirt_vm.iso | mandatory is defined
-      include: build_guest.yml
+    - name: vm creation
+      when: libvirt_vm.create_mode == 'build'
+      block:
+        - name: handle VM 'build' (slow)
+          include: build_guest.yml
 
-    - name: backup newly built guest VM
-      when: >
-        libvirt_vm.create_mode == 'build'
-        and
-        libvirt_vm.backup_dir is defined
-      include: backup_guest.yml
+        - name: backup newly built guest VM
+          when: libvirt_vm.backup_dir is defined
+          include: backup_guest.yml
 
     - name: handle VM 'restore' (fast)
-      when: >
-        libvirt_vm.create_mode == 'restore'
-        and
-        libvirt_vm.backup_dir | mandatory is defined
+      when: libvirt_vm.create_mode == 'restore'
       include: restore_guest.yml
 
     - name: alter VM machine definition
