@@ -1,0 +1,36 @@
+---
+## --------------------------------- ##
+## Attach disk to a VM configuration ##
+## --------------------------------- ##
+
+- name: build attach-disk base command
+  set_fact:
+    virt_attach: "virsh attach-disk {{ libvirt_vm.name | mandatory }} {{ libvirt_disk.source | mandatory }} {{ libvirt_disk.target | mandatory }}"
+
+- name: add target_bus to base command
+  when: libvirt_disk.target_bus is defined
+  set_fact:
+    virt_attach: "{{ virt_attach }} --targetbus {{ libvirt_disk.target_bus }}"
+
+- name: add iothread to base command
+  when: libvirt_disk.iothread is defined
+  set_fact:
+    virt_attach: "{{ virt_attach }} --iothread {{ libvirt_disk.iothread }}"
+
+- name: add cache to base comand
+  when: libvirt_disk.cache is defined
+  set_fact:
+    virt_attach: "{{ virt_attach }} --cache {{ libvirt_disk.cache }}"
+
+- name: add io to base command
+  when: libvirt_disk.io is defined
+  set_fact:
+    virt_attach: "{{ virt_attach }} --io {{ libvirt_disk.io }}"
+
+- name: add serial to base command
+  when: libvirt_disk.serial is defined
+  set_fact:
+    virt_attach: "{{ virt_attach }} --serial {{ libvirt_disk.serial }}"
+
+- name: "attach disk to {{ libvirt_vm.name }}"
+  command: "{{ virt_attach }} --config"

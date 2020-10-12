@@ -12,6 +12,15 @@
   vars:
     libvirt_cpu: "{{ libvirt_vm.alter_domain.cpuset }}"
 
+- name: attach disks
+  when: libvirt_vm.alter_domain.disks is defined
+  loop: "{{ libvirt_vm.alter_domain.disks }}"
+  loop_control:
+    loop_var: alter_domain_disk
+  include: attach_disk.yml
+  vars:
+    libvirt_disk: "{{ alter_domain_disk }}"
+
 - name: alter VM by XPath
   when: libvirt_vm.alter_domain.xpaths is defined
   block:
@@ -38,7 +47,7 @@
           register: temp_xml
 
         - name: alter xpaths
-          loop: "{{ libvirt_vm.alter_domain.xpaths | default([]) }}"
+          loop: "{{ libvirt_vm.alter_domain.xpaths }}"
           loop_control:
             loop_var: alter_domain_xpath
           include: alter_xpath.yml

@@ -22,13 +22,16 @@
         command: undefine
         name: "{{ libvirt_vm.name }}"
 
+# FIXME: for some reason, sometimes this doesn't find everything
+# XXX: maybe it never does.  Does the QEMU URI have something to do with it? Is that properly set for this call?
 # Handle like-named VM volume
 - name: list volumes
   shell: virsh vol-list --pool default | tail -n+3 | grep {{ libvirt_vm.name }} | awk '{print $1}'
   register: libvirt_existing_vols
 
+# FIXME: for some reason, sometimes this doesn't delete everything
 - name: Delete old VM volumes
-  when: libvirt_existing_vols.stdout | length > 0
+  when: libvirt_existing_vols.stdout_lines | length > 0
   loop: "{{ libvirt_existing_vols.stdout_lines }}"
   loop_control:
     loop_var: libvirt_del_vol
