@@ -5,7 +5,7 @@ allowing the specification of UID, email, and if they are expected to be a sudoe
 
 ### General properties
 - `user_definitions` - an object with child objects for each user (not a list)
-	- each child object is the name of the user
+	- each child object name is the name of the user it defines
 		- `uid` - the integer value for this user's preferred UID
 		- `group` - the user's primary group
 			- `name` - primary group name
