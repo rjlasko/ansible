@@ -1,72 +1,92 @@
 ---
-## -------------------------------------------------------- ##
-## This script seeks to automate the installation of Docker ##
-## -------------------------------------------------------- ##
-
-# XXX: is not compatible with libvirt bridge networking in the default configuration:
-# https://serverfault.com/questions/963759/docker-breaks-libvirt-bridge-network
-# https://serverfault.com/questions/948339/networking-between-kvm-vm-and-docker-container-on-same-host
-# https://bbs.archlinux.org/viewtopic.php?id=233727
-# https://www.reddit.com/r/linuxadmin/comments/7tlkve/libvirt_network_configuration_conflicts_with/
-
-- when: ansible_facts['distribution'] != "Debian"
-  fail:
-    msg: "Only supports Debian!"
+## --------------- ##
+## Installs Docker ##
+## --------------- ##
 
 - package:
-    name: "{{ docker_dependencies }}"
-  vars:
-    docker_dependencies:
-      - apt-transport-https
-      - ca-certificates
-      - gnupg2
-      - software-properties-common
+    name: curl
 
-- apt_key:
-    url: https://download.docker.com/linux/debian/gpg
-    state: present
+- name: Install Docker
+  block:
+    - name: get Docker installation script
+      get_url:
+        url: https://get.docker.com
+        dest: /tmp/install_docker.sh
+        mode: u=rwx,g=rx
+        force: yes
 
-- command: apt-key fingerprint 0EBFCD88
-  register: fingerprint_out
+    - name: Run Docker installation
+      command: /tmp/install_docker.sh
+  always:
+    - name: remove Docker installation script
+      file:
+        path: /tmp/install_docker.sh
+        state: absent
 
-# - debug: msg="{{ fingerprint_out.stdout_lines }}"
+- name: define supported architecture - to image repository prefix  dictionary
+  set_fact:
+    docker_arch_dict:
+      armv7l: "arm32v7/"
+      x86_64: ""
 
-- apt_repository:
-    repo: "deb [arch=amd64] https://download.docker.com/linux/debian {{ ansible_facts['distribution_release'] }} stable"
-    state: present
-    update_cache: yes
+# - name: find other architectures
+#   when: ansible_facts['architecture'] != 'x86_64'
+#   fail:
+#     msg: "unsupported architecture {{ ansible_facts['architecture'] }}"
 
-- package:
-    name: "{{ docker_packages }}"
-  vars:
-    docker_packages:
-      - docker-ce
-      - docker-ce-cli
-      - containerd.io
-
-- command: docker run hello-world
+- name: Verify Docker installation works
+  # when: ansible_facts['architecture'] == 'x86_64'
+  command: "docker run {{ docker_arch_dict[ansible_facts['architecture']] }}hello-world"
   register: dkr_out
 
 # - debug: msg="{{ dkr_out.stdout_lines }}"
 
-- systemd:
+- name: Restart and enable Docker daemon via systemd
+  systemd:
     name: docker
     state: restarted
     enabled: yes
 
-# install the latest officially released version of docker-compose
-- name: query docker-compose version
-  shell: git ls-remote --tags https://github.com/docker/compose.git | cut -f 2 | sort -t '/' -k 3 --version-sort | grep -v "rc" | grep -v "docs" | tail -n1 | sed 's:.*/::'
-  register: docker_compose_version
+# - name: find other architectures for docker-compose
+#   when: ansible_facts['architecture'] != 'x86_64'
+#   fail:
+#     msg: "unsupported architecture {{ ansible_facts['architecture'] }}"
 
-# - debug: msg="{{ docker_compose_version }}"
+- name: Install docker-compose for x86_64
+  when: ansible_facts['architecture'] == 'x86_64'
+  block:
+    - name: install Git to install docker-compose
+      package:
+        name: git
 
-- get_url:
-    url: "https://github.com/docker/compose/releases/download/{{ docker_compose_version.stdout }}/docker-compose-{{ ansible_facts['system'] }}-{{ ansible_facts['architecture'] }}"
-    dest: /usr/local/bin/docker-compose
-    mode: u=rwx,g=rx
-    group: docker
-    force: yes
+    # install the latest officially released version of docker-compose
+    - name: query for latest officially released docker-compose version
+      shell: git ls-remote --tags https://github.com/docker/compose.git | cut -f 2 | sed 's#.*/##' | grep -v "rc" | grep -v "docs" | grep -v "test" | awk '{print $1 " " $1}' | sed 's#^[a-z]*##g' | sort --version-sort -k 1 | tail -n1 | awk '{print $2}' | sed 's:.*/::'
+      register: docker_compose_version
+
+    - debug: msg="{{ docker_compose_version }}"
+
+    - name: install docker-compose from GitHub
+      get_url:
+        url: "https://github.com/docker/compose/releases/download/{{ docker_compose_version.stdout }}/docker-compose-{{ ansible_facts['system'] }}-{{ ansible_facts['architecture'] }}"
+        dest: /usr/local/bin/docker-compose
+        mode: u=rwx,g=rx
+        group: docker
+        force: yes
+
+- name: "Install docker-compose for architectures not x86_64"
+  when: ansible_facts['architecture'] != 'x86_64'
+  block:
+    - name: install python3 & dependencies for docker-compose
+      package:
+        name:
+          - libffi-dev
+          - python3-pip
+
+    - name: install docker-compose from pip
+      pip:
+        name: docker-compose
+        executable: pip3
 
 # grant user permissions to run Docker
 - loop: "{{ docker_users | default([]) }}"
