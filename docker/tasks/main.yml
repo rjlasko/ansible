@@ -45,7 +45,7 @@
   systemd:
     name: docker
     state: restarted
-    enabled: yes
+    enabled: true
 
 # - name: find other architectures for docker-compose
 #   when: ansible_facts['architecture'] != 'x86_64'
@@ -85,8 +85,11 @@
 
     - name: install docker-compose from pip
       pip:
-        name: docker-compose
+        name:
+          - docker-compose
         executable: pip3
+      vars:
+        ansible_python_interpreter: /usr/bin/python3
 
 # grant user permissions to run Docker
 - loop: "{{ docker_users | default([]) }}"
