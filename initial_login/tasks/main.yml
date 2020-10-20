@@ -3,12 +3,8 @@
 ## Changes the password of the active user ##
 ## --------------------------------------- ##
 
-- name: first try, because it appears that without the second will cause overall failure, despite ignoring errors
-  command: whoami
-  ignore_errors: true
-
 - name: "change initial password for {{ initial_login.user }}"
-  ignore_errors: true
+  ignore_unreachable: true
   vars:
     ansible_ssh_pass: "{{ initial_login.initial_password }}"
     ansible_become_password: "{{ initial_login.become_password | default(omit) }}"
@@ -16,6 +12,3 @@
     name: "{{ initial_login.user }}"
     password: "{{ initial_login.new_password | password_hash('sha512') }}"
     create_home: false
-
-- name: "verify updated password for {{ initial_login.user }}"
-  command: "whoami"
