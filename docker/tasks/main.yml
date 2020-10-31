@@ -23,20 +23,8 @@
         path: /tmp/install_docker.sh
         state: absent
 
-- name: define supported architecture - to image repository prefix  dictionary
-  set_fact:
-    docker_arch_dict:
-      armv7l: "arm32v7/"
-      x86_64: ""
-
-# - name: find other architectures
-#   when: ansible_facts['architecture'] != 'x86_64'
-#   fail:
-#     msg: "unsupported architecture {{ ansible_facts['architecture'] }}"
-
 - name: Verify Docker installation works
-  # when: ansible_facts['architecture'] == 'x86_64'
-  command: "docker run {{ docker_arch_dict[ansible_facts['architecture']] }}hello-world"
+  command: "docker run hello-world"
   register: dkr_out
 
 # - debug: msg="{{ dkr_out.stdout_lines }}"
@@ -46,11 +34,6 @@
     name: docker
     state: restarted
     enabled: true
-
-# - name: find other architectures for docker-compose
-#   when: ansible_facts['architecture'] != 'x86_64'
-#   fail:
-#     msg: "unsupported architecture {{ ansible_facts['architecture'] }}"
 
 - name: Install docker-compose for x86_64
   when: ansible_facts['architecture'] == 'x86_64'
