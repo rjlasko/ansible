@@ -11,15 +11,19 @@ port		{{ msmtp.port | mandatory }}
 
 {% if msmtp.auth is defined %}
 auth		on
-user		{{ msmtp.user | default(omit) }}
-password	{{ msmtp.pass | default(omit) }}
+user		{{ msmtp.user | mandatory }}
+password	{{ msmtp.pass | mandatory }}
 {% else %}
-auth	off
+auth		off
 {% endif %}
 
 
 {% if msmtp.auth is defined and msmtp.auth == 'tls' %}
-tls 			on
-tls_starttls 	{{ msmtp.tls_starttls | default(omit) }}
-tls_trust_file	{{ msmtp.tls_trustfile | default(omit) }}
+tls			on
+{% if msmtp.tls_starttls is defined %}
+tls_starttls	{{ msmtp.tls_starttls }}
+{% endif %}
+{% if msmtp.tls_trustfile is defined %}
+tls_trust_file	{{ msmtp.tls_trustfile }}
+{% endif %}
 {% endif %}
