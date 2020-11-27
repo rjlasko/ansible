@@ -1,0 +1,25 @@
+---
+## ---------------- ##
+## Set the hostname ##
+## ---------------- ##
+
+- name: get the current hostname
+  command: hostname
+  register: initial_hostname
+
+- name: only try to change the hostname if there is a difference
+  when: new_hostname != initial_hostname.stdout
+  block:
+    - name: change the hostname
+      hostname:
+        name: "{{ new_hostname }}"
+
+    - name: change the hostname in the /etc/hosts
+      replace:
+        path: /etc/hosts
+        regexp: '(?i){{ initial_hostname.stdout }}'
+        replace: "{{ new_hostname }}"
+
+    - name: reboot
+      reboot:
+        reboot_timeout: 600

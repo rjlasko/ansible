@@ -1,0 +1,18 @@
+---
+## -------------------------- ##
+## Copies templates and files ##
+## -------------------------- ##
+
+- name: copy files/templates
+  loop: "{{ file_drop.files }}"
+  loop_control:
+    loop_var: file_drop_item
+    # - src: "{{ rjl_root }}/powdahaus.lan/resource/docker/portainer.yml"
+    #   dest: ~/portainer.yml
+    # - src: "{{ rjl_root }}/powdahaus.lan/yurt/puck/env"
+    #   dest: ~/.env
+  template:
+    src: "{{ file_drop_item.src }}"
+    dest: "{{ file_drop_item.dest }}"
+    mode: "{{ file_drop.mode | default('u=r,g-rwx,o-rwx') }}"
+    force: true
