@@ -47,7 +47,7 @@
       shell: git ls-remote --tags https://github.com/docker/compose.git | cut -f 2 | sed 's#.*/##' | grep -v "rc" | grep -v "docs" | grep -v "test" | awk '{print $1 " " $1}' | sed 's#^[a-z]*##g' | sort --version-sort -k 1 | tail -n1 | awk '{print $2}' | sed 's:.*/::'
       register: docker_compose_version
 
-    - debug: msg="{{ docker_compose_version }}"
+    # - debug: msg="{{ docker_compose_version }}"
 
     - name: install docker-compose from GitHub
       get_url:
