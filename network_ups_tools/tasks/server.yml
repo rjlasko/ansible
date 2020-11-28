@@ -9,7 +9,7 @@
     dest: "{{ nut_config_path }}/ups.conf"
     owner: root
     group: nut
-    mode: 0640
+    mode: u=rw,g=r,o-rwx
 
 # Need to install ups.conf and reboot, before attempting to restart the nut services.
 # Upon reboot, the NUT-installed udev rules will assign correct group ownership to the device
@@ -26,7 +26,7 @@
     dest: "{{ nut_config_path }}/upsd.conf"
     owner: root
     group: nut
-    mode: 0640
+    mode: u=rw,g=r,o-rwx
 
 - name: upsd.users
   template:
@@ -34,7 +34,7 @@
     dest: "{{ nut_config_path }}/upsd.users"
     owner: root
     group: nut
-    mode: 0640
+    mode: u=rw,g=r,o-rwx
 
 - name: restart nut-driver
   service:
@@ -47,4 +47,3 @@
     name: nut-server
     state: restarted
     enabled: yes
-

@@ -14,20 +14,14 @@
     append: true
     create_home: false
 
-- name: copy NOTIFYCMD script
-  copy:
-    src: "{{ role_path }}/files/notify.sh"
+- name: NOTIFYCMD script
+  template:
+    src: notify.sh.j2
     dest: "{{ nut_config_path }}/notify.sh"
     owner: root
     group: nut
+    # XXX: it isn't clear why, but these file permissions seem required
     mode: u=rw,g=rx,o-rwx
-
-- name: update EMAIL address
-  lineinfile:
-    dest: "{{ nut_config_path }}/notify.sh"
-    state: present
-    regexp: '^EMAIL'
-    line: "EMAIL={{ nut.email }}"
 
 - name: upsmon.conf
   template:
@@ -35,7 +29,7 @@
     dest: "{{ nut_config_path }}/upsmon.conf"
     owner: root
     group: nut
-    mode: 0640
+    mode: u=rw,g=r,o-rwx
 
 - name: restart nut-monitor
   service:

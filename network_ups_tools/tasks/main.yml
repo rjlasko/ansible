@@ -21,13 +21,15 @@
 
 - when: nut.mode == "standalone"
   set_fact:
-    monitor_name: "{{ nut.upsname | mandatory }}"
-    monitor_mode: "master"
+    nut_monitor:
+      name: "{{ nut.upsname | mandatory }}"
+      mode: "master"
 
 - when: nut.mode == "netclient"
   set_fact:
-    monitor_name: "{{ nut.upsname | mandatory }}@{{ nut.server | mandatory }}"
-    monitor_mode: "slave"
+    nut_monitor:
+      name: "{{ nut.upsname | mandatory }}@{{ nut.server | mandatory }}"
+      mode: "slave"
 
 - package:
     name: nut
@@ -42,12 +44,12 @@
 
 - when: nut.mode == "standalone"
   import_tasks: server.yml
-  
+
 - when: nut.mode == "netclient" or nut.mode == "standalone"
   import_tasks: monitor.yml
 
 - name: check ups connection
-  command: "upsc {{ monitor_name }}"
+  command: "upsc {{ nut_monitor.name }}"
   register: upsc_out
 
 - name: display ups info

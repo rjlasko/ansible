@@ -7,8 +7,10 @@
 {%- for repeat in nut_upsd_users[user][option] %}
   {{ option }} = {{ repeat }}{{ '\n' }}
 {%- endfor %}
+{%- elif option == 'upsmon' %}
+  upsmon {{ nut_upsd_users[user][option] }}{{ '\n' }}
 {%- else %}
-  {{ option }}{% if not nut_upsd_users[user][option] == '' %} = {{ nut_upsd_users[user][option] }}{% endif %}{{ '\n' }}
+  {{ option }} = {{ nut_upsd_users[user][option] }}{{ '\n' }}
 {%- endif %}
 {% endfor %}
 {% endfor %}
