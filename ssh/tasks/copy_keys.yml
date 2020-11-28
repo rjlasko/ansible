@@ -9,42 +9,19 @@
     state: directory
     mode: u=rwx,go-rwx
 
-- name: handle pubkey
+- name: handle public key
   when: ssh_key_def.source.public is defined
-  block:
-    - set_fact:
-        ssh_pub_key_path: "~/.ssh/{{ ssh_key_name | mandatory }}.pub"
+  template:
+    src: key.pub.j2
+    dest: "~/.ssh/{{ ssh_key_name | mandatory }}.pub"
+    mode: u=rw,g=r,o=r
+    force: true
 
-    - name: detect prexisting pubkey
-      stat:
-        path: "{{ ssh_pub_key_path }}"
-      register: original_pubkey
-
-    - name: copy public key
-      copy:
-        src: "{{ ssh_key_def.source.public }}"
-        dest: "{{ ssh_pub_key_path }}"
-        mode: u=rw,g=r,o=r
-        decrypt: "{{ ssh_key_def.decrypt | default(omit) }}"
-        force: "{{ ssh_key_def.replace | default(false) }}"
-
-    - name: get pubkey sans the comment
-      shell: cat {{ ssh_pub_key_path }} | cut -d' ' -f1,2
-      register: pub_key_no_comment
-
-    - name: update pubkey comment
-      when: original_pubkey.stat.exists and ssh_key_def.replace | default(false)
-      lineinfile:
-        path: "{{ ssh_pub_key_path }}"
-        regexp: ".*"
-        line: "{{ pub_key_no_comment.stdout }} {{ ssh_key_comment | mandatory }}"
-        state: present
-
-- name: copy private key
+- name: handle private key
   when: ssh_key_def.source.private is defined
   copy:
     src: "{{ ssh_key_def.source.private }}"
     dest: "~/.ssh/{{ ssh_key_name }}"
     mode: u=rw,go-rwx
     decrypt: "{{ ssh_key_def.decrypt | default(omit) }}"
-    force: "{{ ssh_key_def.replace | default(false) }}"
+    force: true

@@ -5,9 +5,9 @@
 
 - name: validate key definition is primary XOR named
   when: >
-    ssh_key_def.primary | default(false) == ssh_key_def.name is defined
+    (ssh_key_def.primary | default(false)) == (ssh_key_def.name is defined)
   fail:
-    msg: "SSH key definition must be primary or named"
+    msg: "SSH key definition must be primary XOR named"
 
 - name: validate key definition when provided keys
   when: >
