@@ -1,72 +1,13 @@
 ---
-## ------------------------------------------- ##
-## Partition (single) a disk, format and mount ##
-## ------------------------------------------- ##
+## ------------------------------------------ ##
+## Perform simple disk partition/format/mount ##
+## ------------------------------------------ ##
 
-# XXX: provided are controls to avoid repartitioning and reformatting a disk if
-# it should be presumed to be in the desired state
-
-- set_fact:
-    simple_disk_rebuild: "{{ simple_disk.rebuild | default(false) }}"
-
-- name: rebuild disk with a single partition
-  when: simple_disk_rebuild
-  block:
-    - package:
-      name: parted
-
-    - name: "Read information from device: {{ simple_disk.dev | mandatory }}"
-      parted:
-        device: "{{ simple_disk.dev }}"
-        unit: MiB
-      register: sdb_info
-
-    - name: "Remove all partitions from device: {{ simple_disk.dev }}"
-      loop: "{{ sdb_info.partitions }}"
-      parted:
-        device: "{{ simple_disk.dev }}"
-        number: "{{ item.num }}"
-        state: absent
-
-    - name: "Partition device: {{ simple_disk.dev }}"
-      parted:
-        device: "{{ simple_disk.dev }}"
-        number: 1
-        state: present
-
-    - name: get absolute device path
-      command: "readlink -f {{ simple_disk.dev | mandatory }}"
-      register: simple_disk_abs_path
-
-    - name: set device path of the new partition (we created only 1)
-      set_fact:
-        simple_partition_dev: "{{ simple_disk_abs_path.stdout }}1"
-
-- name: get pre-existing device partition
-  when: not simple_disk_rebuild
-  block:
-    - name: get absolute device partition path
-      command: "readlink -f {{ simple_disk.dev | mandatory }}"
-      register: simple_disk_abs_path
-
-      # XXX: it doesn't make sense, but even if the wrapping block is skipped, the prior
-      # task will still register its output.  That is why this operation is duplicated
-    - name: get device path of the new partition (we assume only 1)
-      set_fact:
-        simple_partition_dev: "{{ simple_disk_abs_path.stdout }}1"
-
-- name: reformat disk partition
-  when: simple_disk_rebuild or simple_disk.format | default(false)
-  block:
-    - name: "Format {{ simple_partition_dev }} as {{ simple_disk.fstype | mandatory }}"
-      filesystem:
-        dev: "{{ simple_partition_dev }}"
-        fstype: "{{ simple_disk.fstype }}"
-        force: true
-
-- name: "Mount {{ simple_partition_dev }} to {{ simple_disk.mount | mandatory }}"
-  mount:
-    src: "{{ simple_partition_dev }}"
-    path: "{{ simple_disk.mount }}"
-    fstype: "{{ simple_disk.fstype }}"
-    state: present
+- name: setup disks
+  when: simple_disks is defined
+  loop: "{{ simple_disks | default([]) }}"
+  loop_control:
+    loop_var: simple_disk_item
+  include: single_disk.yml
+  vars:
+    simple_disk: "{{ simple_disk_item }}"
