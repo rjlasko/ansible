@@ -3,48 +3,106 @@
 ## Builds and installs Unison ##
 ## -------------------------- ##
 
-- command: which unison
-  ignore_errors: true
-  register: detected_filepath
+# XXX: if we were installing to Alpine linux, we would also need the following dependencies:
+# build-time: musl-dev
+# runtime: openssh
+- package:
+    name:
+      - curl
+      - gcc
+      - make
+      - libc6
+    state: present
 
-- command: unison -version
-  ignore_errors: true
-  register: detected_version
+- name: mktemp dir
+  tempfile:
+    state: directory
+    suffix: unison
+  register: work_base_dir
 
-- name: install Unison if missing or wrong version
-  when: >
-    detected_filepath.rc != 0
-    or
-    detected_version.stdout is not search(unison.versions.unison)
-    or
-    detected_version.stdout is not search(unison.versions.ocaml)
-  block:
-    - name: delete prior install
-      when: detected_filepath.rc == 0
-      file:
-        path: detected_filepath.stdout
-        state: absent
+- set_fact:
+    work_src_dir: "{{ work_base_dir.path }}/src"
+    ocaml_minor_version: "{{ unison.versions.ocaml | regex_replace('^([0-9])\\.([0-9]*).*', '\\1.\\2') }}"
+    ocaml_install_dir: "{{ work_base_dir.path }}/ocaml"
+- set_fact:
+    ocaml_extract_dir: "{{ work_src_dir }}/ocaml"
+    ocaml_src_dir: "{{ work_src_dir }}/ocaml/ocaml-{{ unison.versions.ocaml }}"
+    unison_extract_dir: "{{ work_src_dir }}/unison"
+    unison_src_dir: "{{ work_src_dir }}/unison/src"
 
-    - package:
-        name: "{{ unison_packages }}"
-        state: present
-      vars:
-        unison_packages:
-          - curl
-          - gcc
-          - make
-          - libc6
+- name: create output target directories
+  loop:
+    - "{{ ocaml_extract_dir }}"
+    - "{{ unison_extract_dir }}"
+  loop_control:
+    loop_var: make_target_dir
+  file:
+    path: "{{ make_target_dir }}"
+    state: directory
 
-    - name: mktemp dir
-      tempfile:
-        state: directory
-        suffix: build
-      register: tmp_dir
+#########
+# OCaml #
+#########
 
-    - copy:
-        src: "{{ role_path }}/files/build.sh"
-        dest: "{{ tmp_dir.path }}/build_unison.sh"
-        owner: root
-        mode: u=rx
+- name: download OCaml
+  unarchive:
+    remote_src: true
+    src: "http://caml.inria.fr/pub/distrib/ocaml-{{ ocaml_minor_version }}/ocaml-{{ unison.versions.ocaml }}.tar.gz"
+    dest: "{{ ocaml_extract_dir }}"
 
-    - command: "{{ tmp_dir.path }}/build_unison.sh {{ unison.versions.unison }} {{ unison.versions.ocaml }}"
+- name: configure OCaml build
+  command:
+    argv:
+      - ./configure
+      - "-prefix"
+      - "{{ ocaml_install_dir }}"
+      - "-with-pthread"
+      - "-no-graph"
+      - "-no-debugger"
+      - "-no-ocamldoc"
+      # XXX: GCC10 breaks compilation (in Ubuntu 20.10) without this change
+      - "-cc"
+      - "gcc -fcommon"
+  args:
+    chdir: "{{ ocaml_src_dir }}"
+
+- name: make + install OCaml
+  command: make world.opt install
+  args:
+    chdir: "{{ ocaml_src_dir }}"
+
+##########
+# Unison #
+##########
+
+- name: download Unison
+  unarchive:
+    remote_src: true
+    src: "http://www.seas.upenn.edu/~bcpierce/unison/download/releases/unison-{{ unison.versions.unison }}/unison-{{ unison.versions.unison }}.tar.gz"
+    dest: "{{ unison_extract_dir }}"
+
+# XXX: if we were installing to Alpine Linux, we would want to consider the following:
+# Unison's build process was not designed with musl libc in mind. As a result, when it searches
+# for the header files that indicate support for 'inotify', it does not see them where expected.
+# By overwritting the source, we can force it to believe it is supported by musl libc. (it is!)
+#sed -i -e 's/GLIBC_SUPPORT_INOTIFY 0/GLIBC_SUPPORT_INOTIFY 1/' fsmonitor/linux/inotify_stubs.c
+#make UISTYLE=text THREADS=true STATIC=true
+
+- name: make + install Unison
+  command: make UISTYLE=text THREADS=true
+  args:
+    chdir: "{{ unison_src_dir }}"
+  environment:
+    PATH: "{{ ocaml_install_dir }}/bin:{{ ansible_env.PATH }}"
+
+##################
+# Install Unison #
+##################
+
+- copy:
+    remote_src: true
+    src: "{{ unison_src_dir }}/unison"
+    dest: "/usr/local/bin/"
+    owner: root
+    mode: a=rx
+    force: true

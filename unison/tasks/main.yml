@@ -3,16 +3,31 @@
 ## Build + install Unison, then setup users ##
 ## ---------------------------------------- ##
 
-- when: >
-    unison.versions is not defined
-    and
-    unison.user_def is not defined
-  fail:
-    msg: "Required variables are undefined!"
+- command: which unison
+  ignore_errors: true
+  register: detected_filepath
 
-- name: install unison
-  when: unison.versions is defined
-  include: install_unison.yml
+- command: unison -version
+  ignore_errors: true
+  register: detected_version
+
+- name: install Unison if missing or wrong version
+  when: >
+    detected_filepath.rc != 0
+    or
+    detected_version.stdout is not search(unison.versions.unison | mandatory)
+    or
+    detected_version.stdout is not search(unison.versions.ocaml | mandatory)
+  block:
+    - name: delete prior install
+      when: detected_filepath.rc == 0
+      file:
+        path: detected_filepath.stdout
+        state: absent
+
+    - name: install unison
+      when: unison.versions is defined
+      include: install_unison.yml
 
 - name: setup unison user
   when: unison.user_def is defined
