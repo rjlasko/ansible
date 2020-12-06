@@ -39,8 +39,9 @@
     path: "{{ smartd_env_file.stdout }}"
   register: stat_envfile
 
+  # XXX: only bother to change this property if the env file and property exists,
+  # as it is removed in newer versions
 - name: configure startup
-  # XXX: only bother to change this property if the env file and property exists
   when: stat_envfile.stat.exists
   lineinfile:
     dest: "{{ smartd_env_file.stdout }}"
@@ -54,11 +55,29 @@
 # otherwise uncomment & change the smartd_opts="--interval=1800"
 # in "{{ smartd_env_file.stdout }}"
 
-- name: restart
+# XXX: this works for Debian
+- name: restart smartd
   service:
     name: smartd
     state: restarted
     enabled: true
+  register: smartd_service
+  ignore_errors: true
+
+# XXX: this works for Ubuntu 20.10
+- name: restart smartmontools
+  when: not smartd_service.changed
+  service:
+    name: smartmontools
+    state: restarted
+    enabled: true
+  register: smartmontools_service
+  ignore_errors: true
+
+- name: detect failure to restart SMART daemon
+  when: not smartd_service.changed and not smartmontools_service.changed
+  fail:
+    msg: could not restart SMART daemon
 
 # FIXME: better way than 'pause' to wait for smartmontools daemon to come back up
 # XXX: we do this because we think that we've had problems with certain tasks
