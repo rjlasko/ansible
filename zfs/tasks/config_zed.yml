@@ -49,8 +49,24 @@
     path: "{{ zed_rc_path }}"
     mode: u=r
 
-- name: restart ZED
+- name: restart ZED (Debian)
   service:
     name: zed
     state: restarted
     enabled: true
+  register: zed_service
+  ignore_errors: true
+
+- name: restart ZFS-ZED (Ubuntu 20.10)
+  when: not zed_service.changed
+  service:
+    name: zfs-zed
+    state: restarted
+    enabled: true
+  register: zfs_zed_service
+  ignore_errors: true
+
+- name: detect failure to restart ZED daemon
+  when: not zed_service.changed and not zfs_zed_service.changed
+  fail:
+    msg: could not restart ZED daemon
