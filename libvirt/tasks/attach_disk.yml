@@ -16,6 +16,7 @@
   stat:
     path: "{{ libvirt_disk.source }}"
     follow: true
+    get_checksum: false
   register: libvirt_source_stat
 
 - name: if file, handle as per file type
