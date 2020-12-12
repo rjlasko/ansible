@@ -12,9 +12,6 @@
 - name: rebuild disk with a single partition
   when: simple_disk_rebuild
   block:
-    - package:
-      name: parted
-
     - name: "Read information from device: {{ simple_disk.dev | mandatory }}"
       parted:
         device: "{{ simple_disk.dev }}"

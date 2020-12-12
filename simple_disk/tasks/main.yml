@@ -3,6 +3,22 @@
 ## Perform simple disk partition/format/mount ##
 ## ------------------------------------------ ##
 
+- set_fact:
+    simple_disk_fstypes: "{{ simple_disks | map(attribute='fstype') | unique | list }}"
+    simple_disk_rebuild: "{{ simple_disks | map(attribute='rebuild') | unique | list }}"
+    xfs_fstype: xfs
+    rebuild_flag: true
+
+- name: install support for XFS
+  when: xfs_fstype in simple_disk_fstypes
+  package:
+    name: xfsprogs
+
+- name: install support for parted
+  when: rebuild_flag in simple_disk_rebuild
+  package:
+    name: parted
+
 - name: setup disks
   when: simple_disks is defined
   loop: "{{ simple_disks | default([]) }}"
