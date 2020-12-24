@@ -5,25 +5,24 @@
 
 - name: build attach-disk base command
   set_fact:
-    virt_attach: "virsh attach-disk {{ libvirt_vm.name | mandatory }} {{ libvirt_disk.source | mandatory }} {{ libvirt_disk.target_dev | mandatory }}"
+    virt_attach: "virsh attach-disk {{ libvirt_vm.name | mandatory }} {{ libvirt_disk.path | mandatory }} {{ libvirt_disk.target_dev | mandatory }}"
 
 - name: add target_bus to base command
   when: libvirt_disk.target_bus is defined
   set_fact:
     virt_attach: "{{ virt_attach }} --targetbus {{ libvirt_disk.target_bus }}"
 
-- name: stat the source to determine if it is a device or file
+- name: stat the path to determine if it is a device or file
   stat:
-    path: "{{ libvirt_disk.source }}"
+    path: "{{ libvirt_disk.path }}"
     follow: true
     get_checksum: false
-  register: libvirt_source_stat
+  register: libvirt_disk_path_stat
 
 - name: if file, handle as per file type
-  when: libvirt_source_stat.stat.isreg and not libvirt_source_stat.stat.islnk
+  when: libvirt_disk_path_stat.stat.isreg and not libvirt_disk_path_stat.stat.islnk
   set_fact:
-    # virt_attach: "{{ virt_attach }} --subdriver {{ libvirt_disk.source | basename | splitext | last | split('.') | last }}"
-    virt_attach: "{{ virt_attach }} --driver qemu --subdriver {{ libvirt_disk.source.split('.') | last }}"
+    virt_attach: "{{ virt_attach }} --driver qemu --subdriver {{ libvirt_disk.path.split('.') | last }}"
 
 - name: add type to base command
   when: libvirt_disk.iothread is defined
