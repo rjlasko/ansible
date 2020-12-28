@@ -1,0 +1,43 @@
+---
+## ------------------ ##
+## Build a disk image ##
+## ------------------ ##
+
+- name: delete old image
+  when: >
+    libvirt_image_stat.stat.exists
+    and
+    libvirt_image.rebuild | default(false)
+  file:
+    path: "{{ libvirt_image.path }}"
+    state: absent
+  register: libvirt_image_path_delete
+
+- debug:
+    var: libvirt_image_path_delete
+
+- name: create new image
+  when: >
+    not libvirt_image_stat.stat.exists
+    or
+    libvirt_image_path_delete.changed
+  block:
+    - name: build image creation command for suffix-derived format
+      set_fact:
+        qemu_img_cmd: "qemu-img create -f {{ libvirt_image.path.split('.') | last }}"
+
+    - name: add preallocation to command
+      when: libvirt_image.preallocation is defined
+      set_fact:
+        qemu_img_cmd: "{{ qemu_img_cmd }} -o preallocation={{ libvirt_image.preallocation }}"
+
+    - name: "create disk image at path: {{ libvirt_image.path }}"
+      command: "{{ qemu_img_cmd }} {{ libvirt_image.path }} {{ libvirt_image.size | mandatory }}"
+
+    - name: set file permissions for disk image
+      become: true
+      file:
+        path: "{{ libvirt_image.path }}"
+        owner: libvirt-qemu
+        group: libvirt-qemu
+        mode: u=rw,g=r,o-rwx

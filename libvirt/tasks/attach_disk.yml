@@ -1,48 +1,67 @@
 ---
-## --------------------------------- ##
-## Attach disk to a VM configuration ##
-## --------------------------------- ##
+## -------------------------------------------------------- ##
+## Attach a new or pre-existing disk to a VM configuration ##
+## -------------------------------------------------------- ##
 
-- name: build attach-disk base command
-  set_fact:
-    virt_attach: "virsh attach-disk {{ libvirt_vm.name | mandatory }} {{ libvirt_disk.path | mandatory }} {{ libvirt_disk.target_dev | mandatory }}"
-
-- name: add target_bus to base command
-  when: libvirt_disk.target_bus is defined
-  set_fact:
-    virt_attach: "{{ virt_attach }} --targetbus {{ libvirt_disk.target_bus }}"
-
-- name: stat the path to determine if it is a device or file
+- name: stat the path to determine if it is a device or file, or even exists
   stat:
-    path: "{{ libvirt_disk.path }}"
+    path: "{{ libvirt_disk.host.path | mandatory }}"
     follow: true
     get_checksum: false
   register: libvirt_disk_path_stat
 
-- name: if file, handle as per file type
-  when: libvirt_disk_path_stat.stat.isreg and not libvirt_disk_path_stat.stat.islnk
+- name: fail if likely device path and does not exist
+  when: >
+    libvirt_disk.host.path is match("/dev/")
+    and
+    not libvirt_disk_path_stat.stat.exists
+  fail:
+    msg: "device does not exist at host path: {{ libvirt_disk.host.path }}"
+
+- name: build attach-disk base command
   set_fact:
-    virt_attach: "{{ virt_attach }} --driver qemu --subdriver {{ libvirt_disk.path.split('.') | last }}"
+    virt_attach: "virsh attach-disk {{ libvirt_vm.name | mandatory }} {{ libvirt_disk.host.path }} {{ libvirt_disk.guest.dev | mandatory }}"
+
+- name: add target_bus to base command
+  when: libvirt_disk.guest.bus is defined
+  set_fact:
+    virt_attach: "{{ virt_attach }} --targetbus {{ libvirt_disk.guest.bus }}"
+
+- name: handle disk as image file
+  when: >
+    not libvirt_disk_path_stat.stat.exists
+    or
+    (libvirt_disk_path_stat.stat.isreg and not libvirt_disk_path_stat.stat.islnk)
+  block:
+    - name: build disk image
+      include: build_disk_image.yml
+      vars:
+        libvirt_image_stat: "{{ libvirt_disk_path_stat }}"
+        libvirt_image: "{{ libvirt_disk.host }}"
+
+    - name: if file, handle as per file type
+      set_fact:
+        virt_attach: "{{ virt_attach }} --driver qemu --subdriver {{ libvirt_disk.host.path.split('.') | last }}"
 
 - name: add type to base command
-  when: libvirt_disk.iothread is defined
+  when: libvirt_disk.guest.iothread is defined
   set_fact:
-    virt_attach: "{{ virt_attach }} --iothread {{ libvirt_disk.iothread }}"
+    virt_attach: "{{ virt_attach }} --iothread {{ libvirt_disk.guest.iothread }}"
 
 - name: add cache to base comand
-  when: libvirt_disk.cache is defined
+  when: libvirt_disk.guest.cache is defined
   set_fact:
-    virt_attach: "{{ virt_attach }} --cache {{ libvirt_disk.cache }}"
+    virt_attach: "{{ virt_attach }} --cache {{ libvirt_disk.guest.cache }}"
 
 - name: add io to base command
-  when: libvirt_disk.io is defined
+  when: libvirt_disk.guest.io is defined
   set_fact:
-    virt_attach: "{{ virt_attach }} --io {{ libvirt_disk.io }}"
+    virt_attach: "{{ virt_attach }} --io {{ libvirt_disk.guest.io }}"
 
 - name: add serial to base command
-  when: libvirt_disk.serial is defined
+  when: libvirt_disk.guest.serial is defined
   set_fact:
-    virt_attach: "{{ virt_attach }} --serial {{ libvirt_disk.serial }}"
+    virt_attach: "{{ virt_attach }} --serial {{ libvirt_disk.guest.serial }}"
 
 - name: "attach disk to {{ libvirt_vm.name }}"
   command: "{{ virt_attach }} --config"

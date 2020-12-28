@@ -27,3 +27,5 @@
 - name: "restore VM disk image as '{{ libvirt_image_type }}' type"
   become: true
   command: qemu-img convert -O {{ libvirt_image_type }} {{ libvirt_vm.backup_dir }}/{{ libvirt_vm_vol | basename | splitext | first}}.qcow2 {{ libvirt_vm_vol }}
+
+# FIXME? does this file need proper owner/group? libvirt-qemu?
