@@ -4,8 +4,8 @@
 ## ------------------------------------------ ##
 
 - set_fact:
-    simple_disk_fstypes: "{{ simple_disks | map(attribute='fstype') | unique | list }}"
-    simple_disk_rebuild: "{{ simple_disks | map(attribute='rebuild') | unique | list }}"
+    simple_disk_fstypes: "{{ simple_disks | selectattr('fstype', 'defined') | map(attribute='fstype') | unique | list }}"
+    simple_disk_rebuild: "{{ simple_disks | selectattr('rebuild', 'defined') | map(attribute='rebuild') | unique | list }}"
 
 - name: install support for XFS
   when: '"xfs" in simple_disk_fstypes'

@@ -13,9 +13,6 @@
     state: absent
   register: libvirt_image_path_delete
 
-- debug:
-    var: libvirt_image_path_delete
-
 - name: create new image
   when: >
     not libvirt_image_stat.stat.exists
