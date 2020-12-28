@@ -6,21 +6,26 @@
 - set_fact:
     simple_disk_fstypes: "{{ simple_disks | map(attribute='fstype') | unique | list }}"
     simple_disk_rebuild: "{{ simple_disks | map(attribute='rebuild') | unique | list }}"
-    xfs_fstype: xfs
-    rebuild_flag: true
 
 - name: install support for XFS
-  when: xfs_fstype in simple_disk_fstypes
+  when: '"xfs" in simple_disk_fstypes'
   package:
     name: xfsprogs
 
 - name: install support for parted
-  when: rebuild_flag in simple_disk_rebuild
+  when: simple_disk_rebuild is any
   package:
     name: parted
 
+- name: dismount disks being updated or rebuilt
+  loop: "{{ simple_disks | default([]) }}"
+  loop_control:
+    loop_var: simple_disk_item
+  include: smart_dismount.yml
+  vars:
+    simple_disk: "{{ simple_disk_item }}"
+
 - name: setup disks
-  when: simple_disks is defined
   loop: "{{ simple_disks | default([]) }}"
   loop_control:
     loop_var: simple_disk_item
