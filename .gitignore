@@ -3,3 +3,5 @@
 ._.DS_Store
 ._*
 __pycache__
+.project
+.pydevproject
