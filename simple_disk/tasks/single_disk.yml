@@ -3,48 +3,50 @@
 ## Partition (single) a disk, format and mount ##
 ## ------------------------------------------- ##
 
+# XXX: for simplicity, the following operations use the by-id path of the given device
 - set_fact:
-    simple_disk_rebuild: "{{ simple_disk.rebuild | default(false) }}"
-    simple_partition_dev: "{{ simple_disk.dev }}-part1"
+    selected_device_id_path: "/dev/disk/by-id/{{ simple_disk.dev }}"
+- set_fact:
+    selected_partition_path: "{{ selected_device_id_path }}-part1"
 
 - name: rebuild disk with a single partition
-  when: simple_disk_rebuild
+  when: simple_disk.rebuild | default(false)
   block:
-    - name: "Read information from device: {{ simple_disk.dev | mandatory }}"
+    - name: "Read information from device: {{ selected_device_id_path }}"
       parted:
-        device: "{{ simple_disk.dev }}"
+        device: "{{ selected_device_id_path }}"
         unit: MiB
-      register: sdb_info
+      register: selected_device_info
 
-    - name: "Remove all partitions from device: {{ simple_disk.dev }}"
-      loop: "{{ sdb_info.partitions }}"
+    - name: "Remove all partitions from device: {{ selected_device_id_path }}"
+      loop: "{{ selected_device_info.partitions }}"
       parted:
-        device: "{{ simple_disk.dev }}"
+        device: "{{ selected_device_info.disk.dev }}"
         number: "{{ item.num }}"
         state: absent
 
-    - name: "Partition device: {{ simple_disk.dev }}"
+    - name: "Partition device: {{ selected_device_id_path }}"
       parted:
-        device: "{{ simple_disk.dev }}"
+        device: "{{ selected_device_id_path }}"
         number: 1
         state: present
+      register: parted_result
 
-- name: "Format {{ simple_partition_dev }} as {{ simple_disk.fstype | mandatory }}"
-  when: simple_disk_rebuild or simple_disk.format | default(false)
-  filesystem:
-    dev: "{{ simple_partition_dev }}"
-    fstype: "{{ simple_disk.fstype }}"
-    force: true
+    - name: "Format {{ selected_partition_path }} as {{ simple_disk.fstype | mandatory }}"
+      filesystem:
+        dev: "{{ selected_partition_path }}"
+        fstype: "{{ simple_disk.fstype }}"
+        force: true
 
-- name: "verify {{ simple_partition_dev }} has filesystem type: {{ simple_disk.fstype }}"
+- name: "verify {{ selected_partition_path }} has filesystem type: {{ simple_disk.fstype }}"
   become: true
-  command: blkid -o value -s TYPE {{ simple_disk.dev }}-part1
+  command: blkid -o value -s TYPE {{ selected_partition_path }}
   register: blkid_dev_partition
   failed_when: blkid_dev_partition.stdout != simple_disk.fstype
 
-- name: "Mount {{ simple_partition_dev }} to {{ simple_disk.mount | mandatory }}"
+- name: "Mount {{ selected_device_id_path }} to {{ simple_disk.mount | mandatory }}"
   mount:
-    src: "{{ simple_partition_dev }}"
+    src: "{{ selected_partition_path }}"
     path: "{{ simple_disk.mount }}"
     fstype: "{{ simple_disk.fstype }}"
     state: mounted
