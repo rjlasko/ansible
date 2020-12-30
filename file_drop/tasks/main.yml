@@ -3,16 +3,27 @@
 ## Copies templates and files ##
 ## -------------------------- ##
 
-- name: copy files/templates
-  loop: "{{ file_drop.files }}"
+- name: create files/directories/links
+  loop: "{{ file_drop.files | default([]) }}"
   loop_control:
-    loop_var: file_drop_item
-    # - src: "{{ rjl_root }}/powdahaus.lan/resource/docker/portainer.yml"
-    #   dest: ~/portainer.yml
-    # - src: "{{ rjl_root }}/powdahaus.lan/yurt/puck/env"
-    #   dest: ~/.env
+    loop_var: fd_file
+  file:
+    path: "{{ fd_file.path | mandatory }}"
+    state: "{{ fd_file.state | mandatory }}"
+    src: "{{ fd_file.src | default(omit) }}"
+    force: "{{ fd_file.force | default(omit) }}"
+    owner: "{{ fd_file.owner | default(omit) }}"
+    group: "{{ fd_file.group | default(omit) }}"
+    mode: "{{ fd_file.mode | default('u=r,g-rwx,o-rwx') }}"
+
+- name: transfer files/templates
+  loop: "{{ file_drop.transfers | default([]) }}"
+  loop_control:
+    loop_var: fd_transfer
   template:
-    src: "{{ file_drop_item.src }}"
-    dest: "{{ file_drop_item.dest }}"
-    mode: "{{ file_drop.mode | default('u=r,g-rwx,o-rwx') }}"
-    force: true
+    src: "{{ fd_transfer.src }}"
+    dest: "{{ fd_transfer.dest }}"
+    owner: "{{ fd_transfer.owner | default(omit) }}"
+    group: "{{ fd_transfer.group | default(omit) }}"
+    force: "{{ fd_transfer.force | default(omit) }}"
+    mode: "{{ fd_transfer.mode | default('u=r,g-rwx,o-rwx') }}"
