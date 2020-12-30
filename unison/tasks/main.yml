@@ -28,7 +28,3 @@
     - name: install unison
       when: unison.versions is defined
       include: install_unison.yml
-
-- name: setup unison user
-  when: unison.user_def is defined
-  include: unison_user.yml
