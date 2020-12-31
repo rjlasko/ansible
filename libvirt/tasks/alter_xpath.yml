@@ -6,9 +6,8 @@
 # XXX: editing the VM configuration XML sometimes requires multiple changes to
 # be staged before applying the new definition.  Because of this, this process
 # allows for the deferred accrual of changes via the `defer` property. The
-# specification OF this property must follow the following order:
-#   [intial, carry, ...., carry, apply]
-
+# specification of this property must follow the following order:
+#   [initial, carry, ...., carry, apply]
 
 - name: use current VM definition
   when: >

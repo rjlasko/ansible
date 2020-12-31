@@ -49,11 +49,11 @@
         append: true
         create_home: false
 
-    - name: create storage pools
+    - name: manage storage pools
       loop: "{{ libvirt_host.pools | default([]) }}"
       loop_control:
         loop_var: libvirt_pool_item
-      include: create_pool.yml
+      include: manage_pool.yml
       vars:
         libvirt_pool: "{{ libvirt_pool_item }}"
 
