@@ -39,11 +39,12 @@
         libvirt_image_stat: "{{ libvirt_disk_path_stat }}"
         libvirt_image: "{{ libvirt_disk.host }}"
 
-    - name: if file, handle as per file type
+    - name: if file, handle as per file 'type' (aka 'subdriver')
       set_fact:
         virt_attach: "{{ virt_attach }} --driver qemu --subdriver {{ libvirt_disk.host.path.split('.') | last }}"
 
-- name: add type to base command
+
+- name: add iothread to base command
   when: libvirt_disk.guest.iothread is defined
   set_fact:
     virt_attach: "{{ virt_attach }} --iothread {{ libvirt_disk.guest.iothread }}"

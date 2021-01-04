@@ -28,8 +28,13 @@
       set_fact:
         qemu_img_cmd: "{{ qemu_img_cmd }} -o preallocation={{ libvirt_image.preallocation }}"
 
+    - name: add cluster_size to command
+      when: libvirt_image.cluster_size is defined
+      set_fact:
+        qemu_img_cmd: "{{ qemu_img_cmd }} -o cluster_size={{ libvirt_image.cluster_size }}"
+
     - name: "create disk image at path: {{ libvirt_image.path }}"
-      command: "{{ qemu_img_cmd }} {{ libvirt_image.path }} {{ libvirt_image.size | mandatory }}"
+      command: "{{ qemu_img_cmd }} {{ libvirt_image.path }} {{ libvirt_image.capacity | mandatory }}"
 
     - name: set file permissions for disk image
       become: true
