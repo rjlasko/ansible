@@ -22,13 +22,16 @@
 - name: "get UUIDs for all partitions for device: {{ simple_disk.dev }}"
   set_fact:
     dismounts: []
-    selected_device_partition_uuids: "{{ ansible_facts.devices[selected_legacy_devices | first].partitions | dict2items | map(attribute='value') | map(attribute='uuid') | list }}"
+    selected_device_partition_uuids: "{{ ansible_facts.devices[selected_legacy_devices[0]].partitions | dict2items | map(attribute='value') | map(attribute='uuid') | list }}"
 
 - name: "find UUID for partition: {{ selected_partition }}"
-  when: (selected_legacy_partitions | length) == 1
+  when: >
+    ((selected_legacy_partitions | length) == 1)
+    and
+    (selected_legacy_partitions[0] in ansible_facts.device_links.uuids)
   set_fact:
-    selected_partition_uuids: "{{ ansible_facts.device_links.uuids[selected_legacy_partitions | first] }}"
-    selected_partition_uuid: "{{ ansible_facts.device_links.uuids[selected_legacy_partitions | first] | first }}"
+    selected_partition_uuids: "{{ ansible_facts.device_links.uuids[selected_legacy_partitions[0]] }}"
+    selected_partition_uuid: "{{ ansible_facts.device_links.uuids[selected_legacy_partitions[0]][0] }}"
   failed_when: (selected_partition_uuids | length) > 1
 
 # find any mounts associated with the partitions, by UUID

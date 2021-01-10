@@ -12,18 +12,9 @@
 - name: rebuild disk with a single partition
   when: simple_disk.rebuild | default(false)
   block:
-    - name: "Read information from device: {{ selected_device_id_path }}"
-      parted:
-        device: "{{ selected_device_id_path }}"
-        unit: MiB
-      register: selected_device_info
-
+    # this is more robust than using parted to list and iterate removal of individual partitions
     - name: "Remove all partitions from device: {{ selected_device_id_path }}"
-      loop: "{{ selected_device_info.partitions }}"
-      parted:
-        device: "{{ selected_device_info.disk.dev }}"
-        number: "{{ item.num }}"
-        state: absent
+      command: wipefs -a {{ selected_device_id_path }}
 
     - name: "Partition device: {{ selected_device_id_path }}"
       parted:
