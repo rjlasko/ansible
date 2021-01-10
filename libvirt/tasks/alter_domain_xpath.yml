@@ -1,7 +1,7 @@
 ---
-## ---------------------------------------- ##
-## Alter the XPath defined properties of VM ##
-## ---------------------------------------- ##
+## ------------------------------------- ##
+## Alter an XPath defined property of VM ##
+## ------------------------------------- ##
 
 # XXX: editing the VM configuration XML sometimes requires multiple changes to
 # be staged before applying the new definition.  Because of this, this process
@@ -69,6 +69,7 @@
         xml: "{{ altered_domain_xml.xmlstring }}"
 
     - name: remove deferral XML
+      when: libvirt_defered_xml is defined
       file:
         path: "{{ libvirt_defered_xml }}"
         state: absent

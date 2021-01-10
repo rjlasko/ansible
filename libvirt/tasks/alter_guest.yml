@@ -39,27 +39,7 @@
         state: present
 
     - name: begin alter xml block
-      block:
-        - name: create temporary deferred domain XML
-          tempfile:
-            state: file
-            suffix: deferred.xml
-          register: temp_xml
-
-        - name: alter xpaths
-          loop: "{{ libvirt_vm.alter_domain.xpaths }}"
-          loop_control:
-            loop_var: alter_domain_xpath
-          include: alter_xpath.yml
-          vars:
-            libvirt_xpath: "{{ alter_domain_xpath }}"
-            libvirt_defered_xml: "{{ temp_xml.path }}"
-
-      always:
-        - name: remove deferred domain XML
-          file:
-            path: "{{ temp_xml.path }}"
-            state: absent
+      include: alter_domain_xpaths.yml
 
 # - fail:
 #     msg: boom

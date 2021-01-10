@@ -1,0 +1,27 @@
+---
+## ----------------------------------------------------------- ##
+## Alter VM domain model properties by their associated XPaths ##
+## ----------------------------------------------------------- ##
+
+- name: alter domain xml by xpaths
+  block:
+    - name: create temporary deferred domain XML
+      tempfile:
+        state: file
+        suffix: deferred.xml
+      register: temp_xml
+
+    - name: alter xpaths
+      loop: "{{ libvirt_vm.alter_domain.xpaths }}"
+      loop_control:
+        loop_var: alter_domain_xpath
+      include: alter_domain_xpath.yml
+      vars:
+        libvirt_xpath: "{{ alter_domain_xpath }}"
+        libvirt_defered_xml: "{{ temp_xml.path }}"
+
+  always:
+    - name: remove deferred domain XML
+      file:
+        path: "{{ temp_xml.path }}"
+        state: absent
