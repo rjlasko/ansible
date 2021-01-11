@@ -40,7 +40,6 @@
         libvirt_image_path_delete.changed
       include: build_disk_image.yml
       vars:
-        # libvirt_image_stat: "{{ libvirt_disk_path_stat }}"
         libvirt_image: "{{ libvirt_disk.host }}"
 
     - name: attach as file 'type' (aka 'subdriver')
@@ -76,14 +75,22 @@
 # TODO: seems like qemu doesn't accept greater than 32K block sizes, where does the 1M that i've been reading about come into play?
 # XXX: these all are different things.  The cluster size in an image and block size of a block device are different things
 # if it is a block device, then get it with stat
-# - name: apply the blocksize of the source to the machine decription
-#   include: alter_domain_xpath.yml
-#   vars:
-#     libvirt_xpath:
-#       # backticks get resolved as single quotes surrounding the nested & resolved variable name
-#       xpath: "/domain/devices/disk[source/@file='{{ libvirt_disk.host.path }}' or source/@dev='{{ libvirt_disk.host.path }}']"
-#       add_children:
-#         - blockio:
-#             # limited to 32k by QEMU
-#             logical_block_size: "{{ libvirt_disk_blocksize }}"
-#             physical_block_size: "{{ libvirt_disk_blocksize }}"
+
+
+
+
+- name: apply the blocksize of the source to the machine description
+  when: >
+    libvirt_disk.guest.logical_block_size is defined
+    and
+    libvirt_disk.guest.physical_block_size is defined
+  include: alter_domain_xpath.yml
+  vars:
+    libvirt_xpath:
+      # backticks get resolved as single quotes surrounding the nested & resolved variable name
+      xpath: "/domain/devices/disk[source/@file='{{ libvirt_disk.host.path }}' or source/@dev='{{ libvirt_disk.host.path }}']"
+      add_children:
+        - blockio:
+            # limited to 32k by QEMU
+            logical_block_size: "{{ libvirt_disk.guest.logical_block_size }}"
+            physical_block_size: "{{ libvirt_disk.guest.physical_block_size }}"
