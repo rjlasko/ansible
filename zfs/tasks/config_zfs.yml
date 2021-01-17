@@ -1,0 +1,25 @@
+---
+## ------------------------ ##
+## Apply ZFS Config options ##
+## ------------------------ ##
+
+
+- set_fact:
+    zfs_conf_path: "/etc/modprobe.d/zfs.conf"
+
+- name: delete prior config
+  file:
+    path: "{{ zfs_conf_path }}"
+    state: absent
+
+- name: add each property as defined
+  loop: "{{ zfs.conf | dict2items }}"
+  loop_control:
+    loop_var: zfs_conf_item
+  lineinfile:
+    path: "{{ zfs_conf_path }}"
+    create: true
+    line: "options zfs {{ zfs_conf_item.key }}={{ zfs_conf_item.value }}"
+    mode: u=r,g-rwx,o-rwx
+    owner: root
+    group: root

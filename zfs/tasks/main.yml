@@ -33,6 +33,10 @@
   when: zfs is defined
   become: true
   block:
+    - name: configure ZFS
+      when: zfs.conf is defined
+      import_tasks: config_zfs.yml
+
     - name: configure ZED
       when: zfs.email is defined
       import_tasks: config_zed.yml
