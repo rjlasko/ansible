@@ -45,13 +45,14 @@
     # install the latest officially released version of docker-compose
     - name: query for latest officially released docker-compose version
       shell: git ls-remote --tags https://github.com/docker/compose.git | cut -f 2 | sed 's#.*/##' | grep -v "rc" | grep -v "docs" | grep -v "test" | awk '{print $1 " " $1}' | sed 's#^[a-z]*##g' | sort --version-sort -k 1 | tail -n1 | awk '{print $2}' | sed 's:.*/::'
-      register: docker_compose_version
+      register: docker_compose_repo_version
 
-    # - debug: msg="{{ docker_compose_version }}"
+    - set_fact:
+        docker_compose_version: "{{ docker.version.compose | default(docker_compose_repo_version.stdout) }}"
 
     - name: install docker-compose from GitHub
       get_url:
-        url: "https://github.com/docker/compose/releases/download/{{ docker_compose_version.stdout }}/docker-compose-{{ ansible_facts['system'] }}-{{ ansible_facts['architecture'] }}"
+        url: "https://github.com/docker/compose/releases/download/{{ docker_compose_version }}/docker-compose-{{ ansible_facts['system'] }}-{{ ansible_facts['architecture'] }}"
         dest: /usr/local/bin/docker-compose
         mode: u=rwx,g=rx
         group: docker
