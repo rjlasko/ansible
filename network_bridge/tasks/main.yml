@@ -1,0 +1,52 @@
+---
+## ------------------------------------------------------------- ##
+## Creates a network bridge interface usable by containers & VMs ##
+## ------------------------------------------------------------- ##
+
+
+- name: find best (default) physical interface to respond to wake on lan
+  when: not network_bridge.device is defined
+  shell: find /sys/class/net -type l -not -lname '*virtual*' -exec basename {} \; | sort | head -n1
+  register: default_network_device
+
+- set_fact:
+    network_bridge_device: "{{ network_bridge.device | default(default_network_device.stdout | mandatory) }}"
+
+- name: "configure {{ network_bridge.name | mandatory }} as bridge using device {{ network_bridge_device }}"
+  when: >
+    not ansible_facts[network_bridge.name] is defined
+    or
+    not network_bridge_device in ansible_facts[network_bridge.name].interfaces
+  block:
+    - name: required software to support permanent bridge
+      package:
+        name: bridge-utils
+        state: present
+
+    - name: backup and restore /etc/network/interface
+      include_role:
+        name: backup_restore
+      vars:
+        br_target: /etc/network/interfaces
+
+    - name: comment out all lines setting conditions for the adapter
+      replace:
+        path: /etc/network/interfaces
+        regexp: '(.*{{ network_bridge_device }}.*)'
+        replace: '#\1'
+
+    # XXX: consider deleting everything under /etc/network/interfaces.d/
+
+    - name: "/etc/network/interfaces.d/{{ network_bridge.name }}"
+      template:
+        src: bridge.j2
+        dest: "/etc/network/interfaces.d/{{ network_bridge.name }}"
+        owner: root
+        group: root
+        mode: u=r,g=r,o=r
+      vars:
+        bridge_name: "{{ network_bridge.name }}"
+        source_interface: "{{ network_bridge_device }}"
+
+    - reboot:
+        reboot_timeout: 600

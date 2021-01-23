@@ -23,40 +23,6 @@
     loop_var: libvirt_network
   command: virsh net-autostart {{ libvirt_network }} --disable
 
-- name: install software from package manager
-  package:
-    name: bridge-utils
-    state: present
-
-- name: find all existing bridges
-  shell: brctl show
-  register: bridge_found_result
-
-- name: Configure network bridge from best device
-  when: bridge_found_result.stdout is not search(libvirt_host.bridge)
-  block:
-    - name: find best (default) physical interface to respond to wake on lan
-      shell: find /sys/class/net -type l -not -lname '*virtual*' -exec basename {} \; | sort | head -n1
-      register: default_device
-
-    - name: choose WoL device
-      set_fact:
-        selected_wol_device: "{{ wol_device | default(default_device.stdout | mandatory) }}"
-
-    - name: "/etc/network/interfaces.d/{{ libvirt_host.bridge }}"
-      template:
-        src: bridge.j2
-        dest: "/etc/network/interfaces.d/{{ libvirt_host.bridge }}"
-        owner: root
-        group: root
-        mode: u=r,g=r,o=r
-      vars:
-        bridge_name: "{{ libvirt_host.bridge }}"
-        source_interface: "{{ selected_wol_device }}"
-
-    - reboot:
-        reboot_timeout: 600
-
 - name: create bridge network config
   lineinfile:
     line: "allow {{ libvirt_host.bridge }}"
