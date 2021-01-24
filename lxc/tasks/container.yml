@@ -1,0 +1,45 @@
+---
+## -------------------------- ##
+## Build or Restore Container ##
+## -------------------------- ##
+
+- name: create & (re)start container
+  lxd_container:
+    name: "{{lxc_container_name}}"
+    state: absent
+
+# TODO: how to support initial login via SSH?
+- name: create & (re)start container
+  lxd_container:
+    name: "{{lxc_container_name}}"
+    state: restarted
+    source:
+      type: image
+      mode: pull
+      server: https://images.linuxcontainers.org
+      protocol: lxd # if you get a 404, try setting protocol: simplestreams
+      alias: debian/buster/amd64
+    devices:
+      eth0:
+        name: eth0
+        nictype: bridged
+        parent: br0
+        type: nic
+        hwaddr: "{{mac_address}}"
+    profiles:
+      - default
+      - rjl_profile
+    wait_for_ipv4_addresses: true
+    timeout: 600
+
+# - name: test command
+#   shell: lxc exec {{lxc_container_name}} -- apt install -y openssh-server
+#
+# - name: add root ssh
+#   shell: |
+#     lxc exec {{lxc_container_name}} -- mkdir /root/.ssh &&
+#     cat {{hostvars['localhost'].pub_key.stdout}} >> /root/.ssh/authorized_keys &&
+#     chmod -R u=rX,go-rwx /root/.ssh
+
+
+# TODO: https://lxd.readthedocs.io/en/latest/backup/#container-backup-and-restore

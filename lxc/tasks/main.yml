@@ -1,0 +1,25 @@
+---
+## ---------------------------------------------------------------- ##
+## Automates the installation and setup of LXC hosts and containers ##
+## ---------------------------------------------------------------- ##
+
+- name: install LXC to the host
+  when: lxc.host is defined
+  include_tasks: host.yml
+
+# XXX: externally add user to 'lxd' group
+# TODO: use host-provided bridge network
+# TODO: container dedicated MAC address w/ DHCP + DNS
+# TODO: where is the default backing storage located? ZFS dataset?
+# TODO: permissions supporting running docker in LXC
+
+
+- name: setup target as lxc container
+  when: lxc.container is defined
+  include_tasks: container.yml
+
+
+
+
+# XXX: adding the user to the user group 'lxd' enables root-like access to LXD
+# this is similar in behavior with the `docker` group

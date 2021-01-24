@@ -1,0 +1,98 @@
+---
+## ------------------------------------------------ ##
+## Installs LXD (includes LXC), and default profile ##
+## ------------------------------------------------ ##
+
+- name: install snapd
+  package:
+    name: snapd
+
+- name: install snap core
+  snap:
+    name: core
+
+- name: install LXD
+  snap:
+    name: lxd
+
+- name: check LXD executable accessible by Ansible
+  command: which lxd
+  ignore_errors: true
+  register: which_lxd
+
+- name: install LXD wrapper
+  when: which_lxd is failed
+  block:
+    - set_fact:
+        lxd_path: /snap/bin/lxd
+        lxc_path: /snap/bin/lxc
+
+    - stat:
+        path: "{{ lxd_path }}"
+        get_checksum: false
+      register: lxd_stat
+      failed_when: not lxd_stat.stat.exists
+
+    - stat:
+        path: "{{ lxc_path }}"
+        get_checksum: false
+      register: lxc_stat
+      failed_when: not lxc_stat.stat.exists
+
+    - template:
+        src: wrapper.sh.j2
+        dest: /usr/bin/lxd
+        owner: root
+        group: root
+        mode: u=rx,g=rx,o=rx
+      vars:
+        snap_app: lxd
+        snap_app_path: "{{ lxd_path }}"
+
+    - template:
+        src: wrapper.sh.j2
+        dest: /usr/bin/lxc
+        owner: root
+        group: root
+        mode: u=rx,g=rx,o=rx
+      vars:
+        snap_app: lxc
+        snap_app_path: "{{ lxc_path }}"
+
+- name: init LXD without preseed
+  when: not lxc.host.preseed is defined
+  become: true
+  become_method: su
+  command: lxd init --auto
+
+- name: init LXD from preseed
+  when: lxc.host.preseed is defined
+  become: true
+  become_method: su
+  command: "lxd init --preseed < "
+  args:
+    stdin: "{{ lxc.host.preseed }}"
+
+
+  # block:
+  #   - name: create temporary preseed file
+  #     tempfile:
+  #       state: file
+  #       suffix: preseed
+  #     register: lxd_init_preseed
+  #
+  #   - name: generate preseed file from template
+  #     template:
+  #       src: preseed-lxd.yml.j2
+  #       dest: "{{ lxd_init_preseed.path }}"
+  #       force: yes
+  #     vars:
+  #       preseed: "{{ lxc.host.preseed }}"
+  # always:
+  #   - name: remove preseed file
+  #     file:
+  #       path: "{{ lxd_init_preseed.path }}"
+  #       state: absent
+
+
+# TODO: lxd init --preseed < lxd_preseed.yml

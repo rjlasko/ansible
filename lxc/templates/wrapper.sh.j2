@@ -1,0 +1,15 @@
+#!/bin/sh
+
+# {{ ansible_managed }}
+# this file was directly copied from an Ubuntu/PopOS installation process
+
+if ! [ -x {{ snap_app_path }} ]; then
+    echo "" >&2
+    echo "Command '$0' requires the {{ snap_app }} snap to be installed." >&2
+    echo "Please install it with:" >&2
+    echo "" >&2
+    echo "snap install {{ snap_app }}" >&2
+    echo "" >&2
+    exit 1
+fi
+exec {{ snap_app_path }} "$@"
