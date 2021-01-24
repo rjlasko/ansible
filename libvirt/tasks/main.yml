@@ -10,10 +10,10 @@
     libvirt_host: "{{ libvirt.host }}"
 
 - name: setup targets as libvirt guests
-  when: libvirt.guests is defined
-  loop: "{{ libvirt.guests | default([]) }}"
-  loop_control:
-    loop_var: virt_install_vm
+  when: libvirt.guest is defined
+  # loop: "{{ libvirt.guests | default([]) }}"
+  # loop_control:
+  #   loop_var: virt_install_vm
   include: guest.yml
   vars:
-    libvirt_vm: "{{ virt_install_vm }}"
+    libvirt_vm: "{{ libvirt.guest }}"
