@@ -94,5 +94,35 @@
   #       path: "{{ lxd_init_preseed.path }}"
   #       state: absent
 
+- name: find defined containers
+  command: lxc list --format=csv --columns=n
+  register: lxc_containers
 
-# TODO: lxd init --preseed < lxd_preseed.yml
+- name: clear containers
+  loop: "{{ lxc_containers.stdout_lines }}"
+  loop_control:
+    loop_var: lxc_container
+  lxd_container:
+    name: "{{ lxc_container }}"
+    state: absent
+    # TODO: do this only if trying without it fails
+    force_stop: true
+
+- name: clear profiles
+  loop: "{{ lxc.host.profiles | default([]) }}"
+  loop_control:
+    loop_var: lxd_profile
+  lxd_profile:
+    name: "{{ lxd_profile.name | mandatory }}"
+    state: absent
+
+- name: apply profiles
+  loop: "{{ lxc.host.profiles | default([]) }}"
+  loop_control:
+    loop_var: lxd_profile
+  lxd_profile:
+    name: "{{ lxd_profile.name | mandatory }}"
+    description: "{{ lxd_profile.description | default(omit) }}"
+    state: "{{ lxd_profile.state | default(omit) }}"
+    config: "{{ lxd_profile.config | default(omit) }}"
+    devices: "{{ lxd_profile.devices | default(omit) }}"

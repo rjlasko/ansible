@@ -20,6 +20,7 @@
     uid: "{{ user_def.uid | default(omit) }}"
     group: "{{ user_def.group.name | default(omit) }}"
     groups: "{{ user_def.groups | default(omit) }}"
+    shell: "{{ user_def.shell | default(omit) }}"
     append: true
     create_home: "{{ user_def.create_home | default(false) }}"
 

@@ -3,43 +3,32 @@
 ## Build or Restore Container ##
 ## -------------------------- ##
 
-- name: create & (re)start container
+- name: clear pre-existing container
   lxd_container:
-    name: "{{lxc_container_name}}"
+    name: "{{ lxc.container.name | mandatory}}"
     state: absent
+    # TODO: do this only if trying without it fails
+    force_stop: true
 
 # TODO: how to support initial login via SSH?
 - name: create & (re)start container
   lxd_container:
-    name: "{{lxc_container_name}}"
+    name: "{{ lxc.container.name }}"
     state: restarted
     source:
+      server: "{{ lxc.container.server | mandatory }}"
+      alias: "{{ lxc.container.alias | mandatory }}"
+      # if you get a 404, try setting protocol: simplestreams
+      protocol: "{{ lxc.container.protocol | default('lxd') }}"
       type: image
       mode: pull
-      server: https://images.linuxcontainers.org
-      protocol: lxd # if you get a 404, try setting protocol: simplestreams
-      alias: debian/buster/amd64
-    devices:
-      eth0:
-        name: eth0
-        nictype: bridged
-        parent: br0
-        type: nic
-        hwaddr: "{{mac_address}}"
-    profiles:
-      - default
-      - rjl_profile
+    config: "{{ lxc.container.config | default(omit) }}"
+    devices: "{{ lxc.container.devices | default(omit) }}"
+    profiles: "{{ lxc.container.profiles | default(omit) }}"
     wait_for_ipv4_addresses: true
     timeout: 600
 
-# - name: test command
-#   shell: lxc exec {{lxc_container_name}} -- apt install -y openssh-server
-#
-# - name: add root ssh
-#   shell: |
-#     lxc exec {{lxc_container_name}} -- mkdir /root/.ssh &&
-#     cat {{hostvars['localhost'].pub_key.stdout}} >> /root/.ssh/authorized_keys &&
-#     chmod -R u=rX,go-rwx /root/.ssh
-
-
-# TODO: https://lxd.readthedocs.io/en/latest/backup/#container-backup-and-restore
+- name: "wait for {{ lxc.container.name }} to respond with SSHd"
+  wait_for:
+    host: "{{ lxc.container.dns_address | mandatory }}"
+    port: 22
