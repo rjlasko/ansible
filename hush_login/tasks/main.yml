@@ -1,0 +1,11 @@
+---
+## ------------------ ##
+## Supresses the MOTD ##
+## ------------------ ##
+
+# XXX: https://kb.iu.edu/d/acdd
+
+- name: create ~/.hushlogin
+  file:
+    path: ~/.hushlogin
+    state: touch
