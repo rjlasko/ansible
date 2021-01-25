@@ -9,7 +9,7 @@
 - name: "change initial password for {{ initial_login.user }}"
   ignore_unreachable: true
   vars:
-    ansible_ssh_pass: "{{ initial_login.initial_password }}"
+    ansible_ssh_pass: "{{ initial_login.initial_password | default(omit) }}"
     ansible_become_password: "{{ initial_login.become_password | default(omit) }}"
   user:
     name: "{{ initial_login.user }}"
