@@ -11,6 +11,13 @@
   snap:
     name: core
 
+# XXX: simplest way to void a prior LXD installation's configuration
+- name: uninstall prior LXD
+  command: snap remove lxd --purge
+
+- name: clear (ZFS) preseed pools
+  include: reset_storage.yml
+
 - name: install LXD
   snap:
     name: lxd
@@ -25,19 +32,12 @@
   block:
     - set_fact:
         lxd_path: /snap/bin/lxd
-        lxc_path: /snap/bin/lxc
 
     - stat:
         path: "{{ lxd_path }}"
         get_checksum: false
       register: lxd_stat
       failed_when: not lxd_stat.stat.exists
-
-    - stat:
-        path: "{{ lxc_path }}"
-        get_checksum: false
-      register: lxc_stat
-      failed_when: not lxc_stat.stat.exists
 
     - template:
         src: wrapper.sh.j2
@@ -48,6 +48,23 @@
       vars:
         snap_app: lxd
         snap_app_path: "{{ lxd_path }}"
+
+- name: check LXC executable accessible by Ansible
+  command: which lxc
+  ignore_errors: true
+  register: which_lxc
+
+- name: install LXD wrapper
+  when: which_lxc is failed
+  block:
+    - set_fact:
+        lxc_path: /snap/bin/lxc
+
+    - stat:
+        path: "{{ lxc_path }}"
+        get_checksum: false
+      register: lxc_stat
+      failed_when: not lxc_stat.stat.exists
 
     - template:
         src: wrapper.sh.j2
@@ -61,60 +78,13 @@
 
 - name: init LXD without preseed
   when: not lxc.host.preseed is defined
-  become: true
-  become_method: su
   command: lxd init --auto
 
 - name: init LXD from preseed
   when: lxc.host.preseed is defined
-  become: true
-  become_method: su
   command: "lxd init --preseed < "
   args:
     stdin: "{{ lxc.host.preseed }}"
-
-
-  # block:
-  #   - name: create temporary preseed file
-  #     tempfile:
-  #       state: file
-  #       suffix: preseed
-  #     register: lxd_init_preseed
-  #
-  #   - name: generate preseed file from template
-  #     template:
-  #       src: preseed-lxd.yml.j2
-  #       dest: "{{ lxd_init_preseed.path }}"
-  #       force: yes
-  #     vars:
-  #       preseed: "{{ lxc.host.preseed }}"
-  # always:
-  #   - name: remove preseed file
-  #     file:
-  #       path: "{{ lxd_init_preseed.path }}"
-  #       state: absent
-
-- name: find defined containers
-  command: lxc list --format=csv --columns=n
-  register: lxc_containers
-
-- name: clear containers
-  loop: "{{ lxc_containers.stdout_lines }}"
-  loop_control:
-    loop_var: lxc_container
-  lxd_container:
-    name: "{{ lxc_container }}"
-    state: absent
-    # TODO: do this only if trying without it fails
-    force_stop: true
-
-- name: clear profiles
-  loop: "{{ lxc.host.profiles | default([]) }}"
-  loop_control:
-    loop_var: lxd_profile
-  lxd_profile:
-    name: "{{ lxd_profile.name | mandatory }}"
-    state: absent
 
 - name: apply profiles
   loop: "{{ lxc.host.profiles | default([]) }}"
