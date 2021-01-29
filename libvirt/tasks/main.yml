@@ -5,15 +5,12 @@
 
 - name: setup target as libvirt host
   when: libvirt.host is defined
-  import_tasks: host.yml
+  include_tasks: host.yml
   vars:
     libvirt_host: "{{ libvirt.host }}"
 
 - name: setup targets as libvirt guests
   when: libvirt.guest is defined
-  # loop: "{{ libvirt.guests | default([]) }}"
-  # loop_control:
-  #   loop_var: virt_install_vm
-  include: guest.yml
+  include_tasks: guest.yml
   vars:
     libvirt_vm: "{{ libvirt.guest }}"

@@ -23,25 +23,25 @@
         state: present
 
     - name: clear pre-existing VM
-      include: clear_guest.yml
+      include_tasks: clear_guest.yml
 
     - name: vm creation
       when: libvirt_vm.create_mode == 'build'
       block:
         - name: handle VM 'build' (slow)
-          include: build_guest.yml
+          include_tasks: build_guest.yml
 
         - name: backup newly built guest VM
           when: libvirt_vm.backup_dir is defined
-          include: backup_guest.yml
+          include_tasks: backup_guest.yml
 
     - name: handle VM 'restore' (fast)
       when: libvirt_vm.create_mode == 'restore'
-      include: restore_guest.yml
+      include_tasks: restore_guest.yml
 
     - name: alter VM machine definition
       when: libvirt_vm.alter_domain is defined
-      include: alter_guest.yml
+      include_tasks: alter_guest.yml
 
 - name: "complete with {{ libvirt_vm.name }} in running state"
-  include: start_guest.yml
+  include_tasks: start_guest.yml
