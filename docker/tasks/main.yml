@@ -23,11 +23,19 @@
         path: /tmp/install_docker.sh
         state: absent
 
-- name: Verify Docker installation works
+- name: Verify unprivileged Docker container works
   command: "docker run hello-world"
   register: dkr_out
 
-# - debug: msg="{{ dkr_out.stdout_lines }}"
+- name: Verify privileged Docker container works
+  command: "docker run --privileged hello-world"
+  register: dkr_out
+
+- name: get info on Docker installation
+  command: "docker info"
+  register: dkr_out
+
+- debug: msg="{{ dkr_out.stdout_lines }}"
 
 - name: Restart and enable Docker daemon via systemd
   systemd:
