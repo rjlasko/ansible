@@ -1,0 +1,13 @@
+---
+## ------------------------------------------------ ##
+## Installs XFCE for operation on a headless server ##
+## ------------------------------------------------ ##
+
+- name: install xfce4 and supporting packages
+  package:
+    name:
+      - xfce4
+      - xfce4-goodies
+      - xorg
+      - dbus-x11
+      - x11-xserver-utils
