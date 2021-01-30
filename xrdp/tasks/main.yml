@@ -4,73 +4,66 @@
 ## ---------------------------------------------- ##
 # https://wiki.archlinux.org/index.php/xrdp
 
-- when: >
-    ansible_facts['distribution'] != "Debian" or
-    ansible_facts['distribution_version'] is version('9', '<') or
-    ansible_facts['distribution_version'] is version('10', '>')
-  fail:
-    msg: "Only supports Debian [9,10]. Found {{ ansible_facts['lsb']['description'] }}"
-
 - name: install XRDP
-  become: true
+  package:
+    name: xrdp
+
+# see: https://www.cloudsavvyit.com/3177/how-to-install-a-desktop-environment-on-your-headless-linux-server/
+- name: xrdp user has access to secure the connection
+  user:
+    name: xrdp
+    groups: ssl-cert
+    append: true
+    create_home: false
+
+
+
+### backup & restore from configurations
+- set_fact:
+    xrdp_ini_path: /etc/xrdp/xrdp.ini
+    xwrapper_cfg_path: /etc/X11/Xwrapper.config
+
+- name: "backup & restore {{ zed_rc_path }}"
+  loop:
+    - "{{ xrdp_ini_path }}"
+    - "{{ xwrapper_cfg_path }}"
+  loop_control:
+    loop_var: xrdp_conf_item
+  include_role:
+    name: backup_restore
+  vars:
+    br_target: "{{ xrdp_conf_item }}"
+
+
+### update configuration and service ###
+
+# TODO: additional XRDP configuration
+# XXX: 'man xrdp.ini', as in /etc/xrdp/xrdp.ini
+# XXX: 'man sesman.ini', as in /etc/xrdp/sesman.ini
+# TODO: Generate certificate /etc/xrdp/{cert,key}.pem if you don't want to use the self-signed certificate
+
+- when: xrdp.headless | default(true) == false
   block:
-
-    # the Debian 9 XRDP package does not work with MacOS version of Microsoft Remote Desktop
-    - name: build from source for Debian 9
-      when: ansible_facts['distribution_major_version'] == '9'
-      import_tasks: from_source.yml
-      vars:
-        # XXX: the installation from the v0.9.9 source is necessary to support a graphical feature
-        #      required by the MacOS version of the Microsoft Remote Desktop application
-        #      https://github.com/neutrinolabs/xrdp/pull/1235
-        xrdp_version: 0.9.9
-        xorg_xrdp_version: 0.2.9
-
-    - name: install XRDP from apt-get for Debian 10
-      when: ansible_facts['distribution_major_version'] == '10'
-      package:
-        name: xrdp
-
-    ### update configuration and service ###
-
-    # TODO: additional XRDP configuration
-    # XXX: 'man xrdp.ini', as in /etc/xrdp/xrdp.ini
-    # XXX: 'man sesman.ini', as in /etc/xrdp/sesman.ini
+    # see: https://github.com/neutrinolabs/xrdp/issues/218
     - name: disable $HOME/thinclient_drives
       lineinfile:
-        dest: /etc/xrdp/xrdp.ini
+        dest: "{{ xrdp_ini_path }}"
         state: present
         regexp: '^#?;?allow_channels'
         line: 'allow_channels=false'
 
-    # TODO: Generate certificate /etc/xrdp/{cert,key}.pem if you don't want to use the self-signed certificate
-
     # allow anybody to start X.
     # Necessary to run XRDP as a terminal server (Xorg).
-    # default is 'console'
     - name: configure x11
       lineinfile:
-        dest: /etc/X11/Xwrapper.config
+        dest: "{{ xwrapper_cfg_path }}"
         state: present
         regexp: '^allowed_users'
+        # default is 'console'
         line: 'allowed_users=anybody'
 
-
-    - name: restart xrdp
-      service:
-        name: xrdp
-        state: restarted
-        enabled: true
-
-    - name: restarts only applicable to from-source installation for Debian 9
-      when: ansible_facts['distribution_major_version'] == '9'
-      block:
-        - name: restart xrdp-sesman
-          service:
-            name: xrdp-sesman
-            state: restarted
-            enabled: true
-
-        - name: daemon_reload
-          systemd:
-            daemon_reload: true
+- name: restart xrdp
+  service:
+    name: xrdp
+    state: restarted
+    enabled: true
