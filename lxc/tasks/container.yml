@@ -3,30 +3,38 @@
 ## Build or Restore Container ##
 ## -------------------------- ##
 
-- name: clear pre-existing container
-  lxd_container:
-    name: "{{ lxc.container.name | mandatory}}"
-    state: absent
-    # TODO: do this only if trying without it fails
-    force_stop: true
+- name: check invalid create mode
+  when: lxc.container.create_mode | mandatory not in ['skip', 'build']
+  fail:
+    msg: "invalid lxc.container.create_mode: {{ lxc.container.create_mode }}"
 
-# TODO: how to support initial login via SSH?
-- name: create & (re)start container
-  lxd_container:
-    name: "{{ lxc.container.name }}"
-    state: restarted
-    source:
-      server: "{{ lxc.container.server | mandatory }}"
-      alias: "{{ lxc.container.alias | mandatory }}"
-      # if you get a 404, try setting protocol: simplestreams
-      protocol: "{{ lxc.container.protocol | default('lxd') }}"
-      type: image
-      mode: pull
-    config: "{{ lxc.container.config | default(omit) }}"
-    devices: "{{ lxc.container.devices | default(omit) }}"
-    profiles: "{{ lxc.container.profiles | default(omit) }}"
-    wait_for_ipv4_addresses: true
-    timeout: 600
+- name: handle create container
+  when: lxc.container.create_mode == 'build'
+  block:
+    - name: clear pre-existing container
+      lxd_container:
+        name: "{{ lxc.container.name | mandatory}}"
+        state: absent
+        # TODO: do this only if trying without it fails
+        force_stop: true
+
+    # TODO: how to support initial login via SSH?
+    - name: create & (re)start container
+      lxd_container:
+        name: "{{ lxc.container.name }}"
+        state: restarted
+        source:
+          server: "{{ lxc.container.server | mandatory }}"
+          alias: "{{ lxc.container.alias | mandatory }}"
+          # if you get a 404, try setting protocol: simplestreams
+          protocol: "{{ lxc.container.protocol | default('lxd') }}"
+          type: image
+          mode: pull
+        config: "{{ lxc.container.config | default(omit) }}"
+        devices: "{{ lxc.container.devices | default(omit) }}"
+        profiles: "{{ lxc.container.profiles | default(omit) }}"
+        wait_for_ipv4_addresses: true
+        timeout: 600
 
 - name: "wait for {{ lxc.container.name }} to respond with SSHd"
   wait_for:
