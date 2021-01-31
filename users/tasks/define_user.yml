@@ -14,9 +14,10 @@
     user_def.uid is defined or
     user_def.group is defined or
     user_def.groups is defined or
+    user_def.shell is defined or
     user_def.create_home is defined
   user:
-    name: "{{ user_def.name | mandatory }}"
+    name: "{{ user_def.name }}"
     uid: "{{ user_def.uid | default(omit) }}"
     group: "{{ user_def.group.name | default(omit) }}"
     groups: "{{ user_def.groups | default(omit) }}"
@@ -24,10 +25,16 @@
     append: true
     create_home: "{{ user_def.create_home | default(false) }}"
 
+- name: set user password
+  when: user_def.password is defined
+  user:
+    name: "{{ user_def.name }}"
+    password: "{{ user_def.password | password_hash('sha512') }}"
+
 - name: add as sudoer
   when: user_def.sudoer | default(false)
   user:
-    name: "{{ user_def.name | mandatory }}"
+    name: "{{ user_def.name }}"
     groups: "{{ default_sudoers_group }}"
     append: true
 
