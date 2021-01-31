@@ -1,0 +1,35 @@
+---
+## --------------------- ##
+## Install Google Chrome ##
+## --------------------- ##
+
+
+- name: detect 'apt' package manager
+  when: ansible_facts['pkg_mgr'] != 'apt'
+  fail:
+    msg: currently only supports APT package manager installation
+
+# APT installation: there are a couple of ways to do this
+# install via download: https://linuxize.com/post/how-to-install-google-chrome-web-browser-on-debian-10/
+# install via APT repo: https://linuxhint.com/install_google_chrome_ubuntu_ppa/
+# reference: https://www.google.com/linuxrepositories/
+
+- name: get Google Linux signing key
+  apt_key:
+    url: https://dl.google.com/linux/linux_signing_key.pub
+    state: present
+
+- set_fact:
+    dpkg_arch: "{{ 'amd64' if ansible_architecture == 'x86_64' else ansible_architecture }}"
+
+- name: add Chrome repository
+  apt_repository:
+    repo: "deb [arch={{ dpkg_arch }}] http://dl.google.com/linux/chrome/deb/ stable main"
+    filename: "google-chrome"
+    state: present
+    update_cache: yes
+
+- name: install Chrome
+  apt:
+    name: google-chrome-stable
+    state: present
