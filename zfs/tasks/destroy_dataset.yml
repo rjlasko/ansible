@@ -1,0 +1,51 @@
+---
+## ---------------------- ##
+## Destroys a ZFS dataset ##
+## ---------------------- ##
+
+
+- name: get info on all ZFS pools
+  zpool_facts:
+
+- set_fact:
+    zpool_names: "{{ ansible_zfs_pools | map(attribute='name') | list }}"
+    zfs_expected_zpool: "{{ zfs_target_dataset.split('/')[0] }}"
+
+- name: "verify {{ zfs_target_dataset }} is not a zpool"
+  when: zfs_target_dataset in zpool_names
+  fail:
+    msg: LXD pools are not allowed to exist at the root of a ZFS pool
+
+- name: "verify {{ zfs_expected_zpool }} exists"
+  when: not zfs_expected_zpool in zpool_names
+  fail:
+    msg: Parent zPool not found for target LXD storage pool
+
+- name: find all datasets in zpool
+  zfs_facts:
+    name: "{{ zfs_expected_zpool }}"
+    recurse: true
+
+- set_fact:
+    zfs_zpool_children: "{{ ansible_zfs_datasets | map(attribute='name') | list }}"
+
+- when: zfs_target_dataset in zfs_zpool_children
+  block:
+    # if any expected child datasets are declared, compile them
+    - with_items: "{{ zfs_expected_children | default([]) }}"
+      set_fact:
+        zfs_expected_datasets: "{{ zfs_expected_datasets | default([]) }} + [ '{{ zfs_target_dataset }}/{{ item }}' ]"
+
+    # fail if any specified child datasets are not present
+    - name: verify expected child datasets present
+      loop: "{{ zfs_expected_datasets | default([]) }}"
+      loop_control:
+        loop_var: zfs_expected_dataset
+      when: not zfs_expected_dataset in zfs_zpool_children
+      fail:
+        msg: "Could not find expected ZFS child dataset: {{ zfs_expected_dataset }}"
+
+    - name: "remove ZFS dataset: {{ zfs_target_dataset }}"
+      zfs:
+        name: "{{ zfs_target_dataset }}"
+        state: absent

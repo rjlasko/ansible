@@ -3,11 +3,17 @@
 ## Delete all storage pools that exist outside of the normal LXD uninstallation ##
 ## ---------------------------------------------------------------------------- ##
 
-- name: clear preseed zfs pools detected
-  loop: "{{ lxc.host.preseed.storage_pools }}"
-  loop_control:
-    loop_var: lxc_pool
-  when: lxc_pool.driver == 'zfs'
-  zfs:
-    name: "{{ lxc_pool.config.source }}"
-    state: absent
+- name: clear preseed zfs datasets detected
+  when: lxc_storage_pool.driver == 'zfs'
+  block:
+    - name: "delete ZFS dataset: {{ lxc_storage_pool.driver }}"
+      include_role:
+        name: zfs
+        tasks_from: destroy_dataset
+      vars:
+        zfs_target_dataset: "{{ lxc_storage_pool.config.source }}"
+        zfs_expected_children:
+          - images
+          - containers
+          - virtual-machines
+          - custom

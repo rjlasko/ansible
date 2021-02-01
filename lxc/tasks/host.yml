@@ -15,7 +15,10 @@
 - name: uninstall prior LXD
   command: snap remove lxd --purge
 
-- name: clear (ZFS) preseed pools
+- name: clear preseed storage_pools
+  loop: "{{ lxc.host.preseed.storage_pools }}"
+  loop_control:
+    loop_var: lxc_storage_pool
   include: reset_storage.yml
 
 - name: install LXD
