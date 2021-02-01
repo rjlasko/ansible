@@ -35,7 +35,9 @@
   command: "docker info"
   register: dkr_out
 
-- debug: msg="{{ dkr_out.stdout_lines }}"
+- name: docker info
+  debug:
+    var: dkr_out.stdout_lines
 
 - name: Restart and enable Docker daemon via systemd
   systemd:
