@@ -3,6 +3,12 @@
 ## Copies templates and files ##
 ## -------------------------- ##
 
+- name: empty contents of directories
+  loop: "{{ file_drop.empty | default([]) }}"
+  loop_control:
+    loop_var: fd_empty
+  shell: rm -rf {{ fd_empty }}/.[!.]* {{ fd_empty }}/*
+
 - name: create files/directories/links
   loop: "{{ file_drop.files | default([]) }}"
   loop_control:
