@@ -89,8 +89,8 @@
   args:
     stdin: "{{ lxc.host.preseed }}"
 
-- name: apply profiles
-  loop: "{{ lxc.host.profiles | default([]) }}"
+- name: apply extra profiles
+  loop: "{{ lxc.host.extra_profiles | default([]) }}"
   loop_control:
     loop_var: lxd_profile
   lxd_profile:
