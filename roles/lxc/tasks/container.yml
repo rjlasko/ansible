@@ -18,7 +18,6 @@
         # TODO: do this only if trying without it fails
         force_stop: true
 
-    # TODO: how to support initial login via SSH?
     - name: create & (re)start container
       lxd_container:
         name: "{{ lxc.container.name }}"
