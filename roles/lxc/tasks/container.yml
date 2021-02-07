@@ -11,6 +11,25 @@
 - name: handle create container
   when: lxc.container.create_mode == 'build'
   block:
+
+    - name: transform 'selected_cpus' into 'config.limits.cpu'
+      when: lxc.container.selected_cpus is defined
+      block:
+        - command: cat /proc/cpuinfo
+          register: proc_cpuinfo
+        - name: transform 'selected_cpus' into 'config.limits.cpu'
+          set_fact:
+            lxc_custom_config:
+               limits.cpu: "{{ lxc.container.selected_cpus | nativeProcessorIds(proc_cpuinfo.stdout_lines) }}"
+
+    - name: declare and or merge config to custom
+      when: >
+        lxc.container.config is defined
+        or
+        lxc_custom_config is defined
+      set_fact:
+        lxc_custom_config: "{{ lxc.container.config | combine(lxc_custom_config | default({}), recursive=True) }}"
+
     - name: clear pre-existing container
       lxd_container:
         name: "{{ lxc.container.name | mandatory}}"
@@ -29,7 +48,7 @@
           protocol: "{{ lxc.container.protocol | default('lxd') }}"
           type: image
           mode: pull
-        config: "{{ lxc.container.config | default(omit) }}"
+        config: "{{ lxc_custom_config | default(omit) }}"
         devices: "{{ lxc.container.devices | default(omit) }}"
         profiles: "{{ lxc.container.profiles | default(omit) }}"
         wait_for_ipv4_addresses: true
