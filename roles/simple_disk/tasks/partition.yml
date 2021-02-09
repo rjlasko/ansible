@@ -1,0 +1,40 @@
+---
+## ------------------------------------ ##
+## Create, Format and Mount a partition ##
+## ------------------------------------ ##
+
+
+- name: "Create partition: {{ simple_disk_partition_path | mandatory }}"
+  when: simple_disk.rebuild | default(false)
+  parted:
+    device: "{{ simple_disk_device_path | mandatory }}"
+    number: "{{ simple_disk_partition_index | mandatory + 1 }}"
+    part_start: "{{ simple_disk_partition.start | default(omit) }}"
+    part_end: "{{ simple_disk_partition.end | default(omit) }}"
+    label: "{{ simple_disk.partition_table | default('gpt') }}"
+    state: present
+    # XXX: 'fs_type' only seems to work on the first partition
+    # fs_type: "{{ simple_disk_partition.fstype | default(omit) }}"
+
+- name: "Format partition: {{ simple_disk_partition_path | mandatory }} as {{ simple_disk_partition.fstype }}"
+  when: >
+    simple_disk.rebuild | default(false)
+    or
+    simple_disk_partition.format | default(false)
+  filesystem:
+    dev: "{{ simple_disk_device_path }}-part{{ simple_disk_partition_index + 1 }}"
+    fstype: "{{ simple_disk_partition.fstype }}"
+    force: true
+
+- name: "verify {{ simple_disk_partition_path }} has filesystem type: {{ simple_disk_partition.fstype }}"
+  become: true
+  command: blkid -o value -s TYPE {{ simple_disk_partition_path }}
+  register: blkid_dev_partition
+  failed_when: blkid_dev_partition.stdout != simple_disk_partition.fstype
+
+- name: "Mount {{ simple_disk_partition_path }} to {{ simple_disk_partition.mount | mandatory }}"
+  mount:
+    src: "{{ simple_disk_partition_path }}"
+    path: "{{ simple_disk_partition.mount }}"
+    fstype: "{{ simple_disk_partition.fstype }}"
+    state: mounted

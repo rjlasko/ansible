@@ -4,9 +4,10 @@
 ## ------------------------------------------ ##
 
 # TODO: rename module to simple_storage
+
 - name: gather stated fstypes and rebuild targets
   set_fact:
-    simple_disks_fstypes: "{{ simple_disks | selectattr('fstype', 'defined') | map(attribute='fstype') | unique | list }}"
+    simple_disks_fstypes: "{{ simple_disks | map(attribute='partitions') | flatten | map(attribute='fstype') | unique | list }}"
     simple_disks_rebuilds: "{{ simple_disks | selectattr('rebuild', 'defined') | map(attribute='rebuild') | unique | list }}"
 
 - name: install support for XFS
@@ -22,17 +23,23 @@
 - name: dismount disks being updated or rebuilt
   loop: "{{ simple_disks | default([]) }}"
   loop_control:
-    loop_var: simple_disk_item
-  include: dismount_disk.yml
-  vars:
-    simple_disk: "{{ simple_disk_item }}"
+    loop_var: simple_disk
+  include: dismount_disk_partitions.yml
+
+- name: update ansible_facts for mounts
+  setup:
+    gather_subset:
+      - mounts
 
 # rebuild + mount after all potential conflicts have been cleared from declared devices
 
 - name: setup disks
   loop: "{{ simple_disks | default([]) }}"
   loop_control:
-    loop_var: simple_disk_item
-  include: single_disk.yml
-  vars:
-    simple_disk: "{{ simple_disk_item }}"
+    loop_var: simple_disk
+  include: build_disk.yml
+
+- name: update ansible_facts for mounts
+  setup:
+    gather_subset:
+      - mounts

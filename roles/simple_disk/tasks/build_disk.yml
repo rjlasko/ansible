@@ -1,0 +1,22 @@
+---
+## ------------------- ##
+## Build a single disk ##
+## ------------------- ##
+
+# XXX: for simplicity, the following operations use the by-id path of the given device
+- set_fact:
+    simple_disk_device_path: "/dev/disk/by-id/{{ simple_disk.dev }}"
+
+- name: "Remove all partitions from device: {{ simple_disk_device_path }}"
+  when: simple_disk.rebuild | default(false)
+  # this is more robust than using parted to list and iterate removal of individual partitions
+  command: wipefs -a {{ simple_disk_device_path }}
+
+- name: "Create partitions on device: {{ simple_disk_device_path }}"
+  loop: "{{ simple_disk.partitions | default([]) }}"
+  loop_control:
+    loop_var: simple_disk_partition
+    index_var: simple_disk_partition_index
+  include_tasks: partition.yml
+  vars:
+    simple_disk_partition_path: "{{ simple_disk_device_path }}-part{{ simple_disk_partition_index + 1 }}"
