@@ -18,21 +18,26 @@
 
 - name: "Format partition: {{ simple_disk_partition_path | mandatory }} as {{ simple_disk_partition.fstype }}"
   when: >
-    simple_disk.rebuild | default(false)
-    or
-    simple_disk_partition.format | default(false)
+    simple_disk_partition.fstype is defined
+    and (
+      simple_disk.rebuild | default(false)
+      or
+      simple_disk_partition.format | default(false)
+    )
   filesystem:
     dev: "{{ simple_disk_device_path }}-part{{ simple_disk_partition_index + 1 }}"
     fstype: "{{ simple_disk_partition.fstype }}"
     force: true
 
-- name: "verify {{ simple_disk_partition_path }} has filesystem type: {{ simple_disk_partition.fstype }}"
+- name: "verify {{ simple_disk_partition_path }} has filesystem type: {{ simple_disk_partition.fstype | default('None') }}"
+  when: simple_disk_partition.fstype is defined
   become: true
   command: blkid -o value -s TYPE {{ simple_disk_partition_path }}
   register: blkid_dev_partition
   failed_when: blkid_dev_partition.stdout != simple_disk_partition.fstype
 
-- name: "Mount {{ simple_disk_partition_path }} to {{ simple_disk_partition.mount | mandatory }}"
+- name: "Mount {{ simple_disk_partition_path }} to {{ simple_disk_partition.mount }}"
+  when: simple_disk_partition.mount is defined
   mount:
     src: "{{ simple_disk_partition_path }}"
     path: "{{ simple_disk_partition.mount }}"

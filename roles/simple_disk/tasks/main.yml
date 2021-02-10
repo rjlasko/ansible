@@ -7,7 +7,7 @@
 
 - name: gather stated fstypes and rebuild targets
   set_fact:
-    simple_disks_fstypes: "{{ simple_disks | map(attribute='partitions') | flatten | map(attribute='fstype') | unique | list }}"
+    simple_disks_fstypes: "{{ simple_disks | map(attribute='partitions') | flatten | selectattr('fstype', 'defined') | map(attribute='fstype') | unique | list }}"
     simple_disks_rebuilds: "{{ simple_disks | selectattr('rebuild', 'defined') | map(attribute='rebuild') | unique | list }}"
 
 - name: install support for XFS

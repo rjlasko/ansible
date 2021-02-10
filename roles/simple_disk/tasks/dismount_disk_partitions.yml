@@ -21,7 +21,7 @@
   when: simple_disk.rebuild | default(false)
   set_fact:
     selected_partition_uuids: "{{ ansible_facts.devices[selected_legacy_devices[0]].partitions | dict2items | map(attribute='value') | map(attribute='uuid') }}"
-    dismount_paths: "{{ simple_disk.partitions | map(attribute='mount') }}"
+    dismount_paths: "{{ simple_disk.partitions | selectattr('mount', 'defined') | map(attribute='mount') }}"
 
 
 # if not rebuild, gather all partitions that are true to format
@@ -56,7 +56,7 @@
     loop_var: selected_partition_uuid
   when: selected_partition_uuid in mounts_by_uuid
   set_fact:
-    dismount_paths: "{{ dismount_paths | default([]) + [ mounts_by_uuid[selected_partition_uuid].mount ] }}"
+    dismount_paths: "{{ dismount_paths | default([]) + [ mounts_by_uuid[selected_partition_uuid].mount ] | sort | unique | list }}"
 
 - name: dismount partitions being rebuilt or formatted
   loop: "{{ dismount_paths }}"
