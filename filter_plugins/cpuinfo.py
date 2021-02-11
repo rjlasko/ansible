@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import re
-from collections import defaultdict
+from collections import defaultdict, Iterable
 
 
 class FilterModule(object):
@@ -10,7 +10,7 @@ class FilterModule(object):
             'parse' : self.parseCpuInfo,
             'idMap' : self.getIdMap,
             'vcpuMap' : self.getVcpuMap,
-            'nativeProcessorIds' : self.asNative
+            'asNative' : self.asNative
         }
 
     def parseCpuInfo(self, proc_cpuinfo):
@@ -73,7 +73,14 @@ class FilterModule(object):
 
     def asNative(self, natural_ids, proc_cpuinfo):
         vcpuMap = self.getVcpuMap(proc_cpuinfo)
-        return ','.join([str(vcpuMap[i]) for i in natural_ids])
+        if isinstance(natural_ids, Iterable):
+            ret = list()
+            for i in natural_ids:
+                ret.append(self.asNative(i, proc_cpuinfo))
+            return ret
+        else:
+            return str(vcpuMap[natural_ids])
+
 
 # XXX: for testing only
 # import sys, json
