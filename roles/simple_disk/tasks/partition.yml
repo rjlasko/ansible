@@ -16,7 +16,7 @@
     # XXX: 'fs_type' only seems to work on the first partition
     # fs_type: "{{ simple_disk_partition.fstype | default(omit) }}"
 
-- name: "Format partition: {{ simple_disk_partition_path | mandatory }} as {{ simple_disk_partition.fstype }}"
+- name: "Format partition: {{ simple_disk_partition_path | mandatory }} as {{ simple_disk_partition.fstype | default('None') }}"
   when: >
     simple_disk_partition.fstype is defined
     and (
