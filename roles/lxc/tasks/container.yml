@@ -20,7 +20,7 @@
         - name: transform 'selected_cpus' into 'config.limits.cpu'
           set_fact:
             lxc_custom_config:
-               limits.cpu: "{{ lxc.container.selected_cpus | asNative(proc_cpuinfo.stdout_lines) }}"
+               limits.cpu: "{{ ','.join(lxc.container.selected_cpus | asNative(proc_cpuinfo.stdout_lines)) }}"
 
     - name: declare and or merge config to custom
       when: >
