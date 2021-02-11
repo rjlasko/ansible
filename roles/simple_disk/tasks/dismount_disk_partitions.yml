@@ -51,7 +51,7 @@
         selected_partition_id: "{{ simple_disk.dev }}-part{{ simple_disk_partition_ix + 1 }}"
 
 - name: gather mountpoints to dismount, via device partitions
-  loop: "{{ selected_partition_uuids }}"
+  loop: "{{ selected_partition_uuids | default([]) }}"
   loop_control:
     loop_var: selected_partition_uuid
   when: selected_partition_uuid in mounts_by_uuid
@@ -59,7 +59,7 @@
     dismount_paths: "{{ dismount_paths | default([]) + [ mounts_by_uuid[selected_partition_uuid].mount ] | sort | unique | list }}"
 
 - name: dismount partitions being rebuilt or formatted
-  loop: "{{ dismount_paths }}"
+  loop: "{{ dismount_paths | default([]) }}"
   loop_control:
     loop_var: dismount_path
   mount:
