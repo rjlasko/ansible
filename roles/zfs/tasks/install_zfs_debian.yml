@@ -3,33 +3,42 @@
 ## Installs ZFS on Linux for Debian ##
 ## -------------------------------- ##
 
-- name: add repos
-  loop:
-    - "deb http://ftp.us.debian.org/debian/ {{ ansible_facts['distribution_release'] }} main contrib non-free"
-    - "deb-src http://ftp.us.debian.org/debian/ {{ ansible_facts['distribution_release'] }} main contrib non-free"
-  apt_repository:
-    repo: "{{ item }}"
-    state: present
-    update_cache: yes
 
-- name: add build dependencies
-  package:
-    name:
-      - dpkg-dev
-      - "linux-headers-{{ ansible_facts['kernel'] }}"
-      - linux-image-amd64
-    state: present
+# XXX: a preemptive test because the DKMS installation is expensive
+- name: check if ZFS is installed
+  shell: 'type zfs'
+  ignore_errors: true
+  register: zfs_exists
 
-- name: install ZFS via Dynamic Kernal Module Support
-  # it is likely that this will fail when ZFS disks, new to this system, are
-  # detected upon installation. Continue despite this, knowing latter tasks
-  # will fail if there is an issue.
-  # We have observed this behavior in Debian, and accept it
-  ignore_errors: "{{ ansible_facts['distribution'] == 'Debian' }}"
-  package:
-    name:
-      - zfs-dkms
-    state: present
+- when: zfs_exists.rc != 0
+  block:
+    - name: add repos
+      loop:
+        - "deb http://ftp.us.debian.org/debian/ {{ ansible_facts['distribution_release'] }} main contrib non-free"
+        - "deb-src http://ftp.us.debian.org/debian/ {{ ansible_facts['distribution_release'] }} main contrib non-free"
+      apt_repository:
+        repo: "{{ item }}"
+        state: present
+        update_cache: yes
+
+    - name: add build dependencies
+      package:
+        name:
+          - dpkg-dev
+          - "linux-headers-{{ ansible_facts['kernel'] }}"
+          - linux-image-amd64
+        state: present
+
+    - name: install ZFS via Dynamic Kernal Module Support
+      # it is likely that this will fail when ZFS disks, new to this system, are
+      # detected upon installation. Continue despite this, knowing latter tasks
+      # will fail if there is an issue.
+      # We have observed this behavior in Debian, and accept it
+      ignore_errors: "{{ ansible_facts['distribution'] == 'Debian' }}"
+      package:
+        name:
+          - zfs-dkms
+        state: present
 
 - name: load ZFS module into the kernel
   modprobe:

@@ -12,21 +12,12 @@
   fail:
     msg: "Only supports Debian based distributions"
 
-# XXX: a preemptive test because the DKMS installation is expensive
-- name: check if ZFS is installed
-  shell: 'type zfs'
-  ignore_errors: true
-  register: zfs_exists
+- name: Install ZFS on Debian
+  when: ansible_facts['distribution'] == 'Debian'
+  include_tasks: install_zfs_debian.yml
 
-- name: add ZFS install dependencies [Debian]
-  when: zfs_exists.rc != 0
-  block:
-    - name: Install ZFS on Debian
-      when: ansible_facts['distribution'] == 'Debian'
-      import_tasks: install_zfs_debian.yml
-
-    - name: Install ZFS on Ubuntu variants
-      when: >
-        ansible_facts['distribution'] == 'Ubuntu' or
-        ansible_facts['distribution'] == 'Pop!_OS'
-      import_tasks: install_zfs_ubuntu.yml
+- name: Install ZFS on Ubuntu variants
+  when: >
+    ansible_facts['distribution'] == 'Ubuntu' or
+    ansible_facts['distribution'] == 'Pop!_OS'
+  include_tasks: install_zfs_ubuntu.yml
