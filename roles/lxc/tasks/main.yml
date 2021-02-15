@@ -5,6 +5,19 @@
 
 # XXX: https://github.com/lxc/lxd/tree/master/doc
 
+- name: initialize directories for LXC host and container usage
+  when: >
+    lxc.container.create_mode == 'build'
+    and
+    lxc.file_drop is defined
+  become: true
+  # XXX: 'include_role' didn't seem to like 'become'
+  import_role:
+    name: file_drop
+  vars:
+    file_drop: "{{ lxc.file_drop }}"
+
+
 - name: install LXC to the host
   when: lxc.host is defined
   include_tasks: host.yml
