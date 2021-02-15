@@ -3,6 +3,12 @@
 ## Create or update libvirt pool ##
 ## ----------------------------- ##
 
+- name: get storage dependencies
+  package:
+    name:
+      - python-libvirt
+      - python-lxml
+
 - name: get listing of defined pools
   virt_pool:
     command: info
