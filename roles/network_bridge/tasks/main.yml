@@ -10,7 +10,7 @@
   register: default_network_device
 
 - set_fact:
-    network_bridge_device: "{{ network_bridge.device | default(default_network_device.stdout | mandatory) }}"
+    network_bridge_device: "{{ network_bridge.device | default(default_network_device.stdout) }}"
 
 - name: "configure {{ network_bridge.name | mandatory }} as bridge using device {{ network_bridge_device }}"
   when: >
@@ -32,7 +32,7 @@
     - name: comment out all lines setting conditions for the adapter
       replace:
         path: /etc/network/interfaces
-        regexp: '(.*{{ network_bridge_device }}.*)'
+        regexp: '(.*{{ network_bridge_device | mandatory }}.*)'
         replace: '#\1'
 
     # XXX: consider deleting everything under /etc/network/interfaces.d/
@@ -46,7 +46,7 @@
         mode: u=r,g=r,o=r
       vars:
         bridge_name: "{{ network_bridge.name }}"
-        source_interface: "{{ network_bridge_device }}"
+        source_interface: "{{ network_bridge_device | mandatory }}"
 
     - reboot:
         reboot_timeout: 600
