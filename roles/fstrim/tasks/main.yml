@@ -1,0 +1,23 @@
+---
+## ------------------------------------------------- ##
+## enables fstrim for devices mounted via /etc/fstab ##
+## ------------------------------------------------- ##
+
+- name: enable fstrim.service for mounts defined in /etc/fstab
+  service:
+    name: fstrim
+    enabled: true
+    state: restarted
+
+- name: discover installed ZFS version
+  command: cat /sys/module/zfs/version
+  register: zfs_version
+  ignore_errors: true
+
+- name: test for ZoL TRIM support
+  when: >
+    zfs_version.rc == 0
+    and
+    zfs_version.stdout is version('0.8', '>=')
+  fail:
+    msg: "{{('Trim is now suported by installed version of ZFS! FIXME' | warn_custom() )}}"
