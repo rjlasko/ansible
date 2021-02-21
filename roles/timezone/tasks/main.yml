@@ -1,0 +1,13 @@
+---
+## ---------------- ##
+## Set the timezone ##
+## ---------------- ##
+
+- name: set the timezone
+  timezone:
+    name: "{{ timezone | mandatory }}"
+
+- name: restart crond
+  service:
+    name: cron
+    state: restarted
