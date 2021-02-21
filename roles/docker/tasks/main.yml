@@ -24,11 +24,11 @@
         state: absent
 
 - name: Verify unprivileged Docker container works
-  command: "docker run hello-world"
+  command: "docker run --rm hello-world"
   register: dkr_out
 
 - name: Verify privileged Docker container works
-  command: "docker run --privileged hello-world"
+  command: "docker run --privileged --rm hello-world"
   register: dkr_out
 
 - name: get info on Docker installation
