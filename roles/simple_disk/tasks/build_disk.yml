@@ -10,7 +10,7 @@
 - name: "Remove all partitions from device: {{ simple_disk_device_path }}"
   when: simple_disk.rebuild | default(false)
   # this is more robust than using parted to list and iterate removal of individual partitions
-  command: wipefs -a {{ simple_disk_device_path }}
+  command: wipefs -a -f {{ simple_disk_device_path }}
 
 - name: "Create partitions on device: {{ simple_disk_device_path }}"
   loop: "{{ simple_disk.partitions | default([]) }}"
