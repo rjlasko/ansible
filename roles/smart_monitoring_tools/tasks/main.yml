@@ -14,6 +14,7 @@
 # Notes on scheduling choices:
 # "DEVICESCAN" - scans all connected disk devices
 # "-a" - monitors all attributes
+# "-d sat" - includes devices connected via "SCSI to ATA Translation"
 # "-S on" - enable attribute auto-save
 # "-o off" - disable SMART Automatic Offline Testing (in favor of daily short tests)
 # "-R 190 -R 194 -R 231" - use raw values (celsius) for Airflow Temp and Temperature for monitoring
@@ -27,8 +28,8 @@
     dest: /etc/smartd.conf
     state: present
     regexp: '^DEVICESCAN'
-    line: "DEVICESCAN -a -S on -o off -R 190 -R 194 -R 231 -W 4,40,45 -m {{ smartmontools_email | mandatory }} -s (S/../(02|10|18|26)/./03|L/../28/./03)"
-    # line: "DEVICESCAN -a -S on -o off -R 190 -R 194 -R 231 -W 4,40,45 -m {{ smartmontools_email | mandatory }} -M test -s (S/../(02|10|18|26)/./03|L/../28/./03)"
+    line: "DEVICESCAN -a -d sat -S on -o off -R 190 -R 194 -R 231 -W 4,40,45 -m {{ smartmontools_email | mandatory }} -s (S/../(02|10|18|26)/./03|L/../28/./03)"
+    # line: "DEVICESCAN -a -d sat -S on -o off -R 190 -R 194 -R 231 -W 4,40,45 -m {{ smartmontools_email | mandatory }} -M test -s (S/../(02|10|18|26)/./03|L/../28/./03)"
 
 - name: find location of environment file
   shell: systemctl cat smartd | grep -i EnvironmentFile | sed -n -e 's/^.*=-//p'
