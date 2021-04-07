@@ -11,6 +11,12 @@
     name: smartmontools
     state: present
 
+- name:
+  include_role:
+    name: backup_restore
+  vars:
+    br_target: /etc/smartd.conf
+
 # Notes on scheduling choices:
 # "DEVICESCAN" - scans all connected disk devices
 # "-a" - monitors all attributes
@@ -23,13 +29,26 @@
 # "-M test" - send test email for each device on SMART daemon restart
 # "-s (S/../(02|10|18|26)/./03|L/../28/./03)" - short @ 3am (2nd,10th,18th,26th of the month), long @ 3am (28th of the month)
 
-- name: smartd scheduling
+- set_fact:
+    smartd_params: "-a -d sat -S on -o off -R 190 -R 194 -R 231 -W 4,40,45 -m {{ smartmontools_email | mandatory }} -s (S/../(02|10|18|26)/./03|L/../28/./03)"
+
+- name: common smartd scheduling
   lineinfile:
     dest: /etc/smartd.conf
     state: present
     regexp: '^DEVICESCAN'
-    line: "DEVICESCAN -a -d sat -S on -o off -R 190 -R 194 -R 231 -W 4,40,45 -m {{ smartmontools_email | mandatory }} -s (S/../(02|10|18|26)/./03|L/../28/./03)"
+    line: "DEVICESCAN {{ smartd_params }}"
     # line: "DEVICESCAN -a -d sat -S on -o off -R 190 -R 194 -R 231 -W 4,40,45 -m {{ smartmontools_email | mandatory }} -M test -s (S/../(02|10|18|26)/./03|L/../28/./03)"
+
+- name: smartd scheduling for SCSI attached ATA (sat) devices
+  loop: "{{ smartd_sat_devices | default([]) }}"
+  loop_control:
+    loop_var: device_path
+  lineinfile:
+    dest: /etc/smartd.conf
+    state: present
+    insertbefore: BOF
+    line: "{{ device_path }} {{ smartd_params }}"
 
 - name: find location of environment file
   shell: systemctl cat smartd | grep -i EnvironmentFile | sed -n -e 's/^.*=-//p'
