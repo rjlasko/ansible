@@ -3,9 +3,9 @@
 ## enables fstrim for devices mounted via /etc/fstab ##
 ## ------------------------------------------------- ##
 
-- name: enable fstrim.service for mounts defined in /etc/fstab
+- name: enable fstrim.timer for mounts defined in /etc/fstab
   service:
-    name: fstrim
+    name: fstrim.timer
     enabled: true
     state: restarted
 
