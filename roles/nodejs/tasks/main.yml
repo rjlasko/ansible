@@ -1,0 +1,18 @@
+---
+## --------------- ##
+## Installs NodeJs ##
+## --------------- ##
+
+- name: install snapd
+  package:
+    name: snapd
+
+- name: install snap core
+  snap:
+    name: core
+
+- name: install LXD
+  snap:
+    name: node
+    channel: "{{ nodejs.version | default(omit) }}"
+    classic: "{{ nodejs.classic | default(omit) }}"
