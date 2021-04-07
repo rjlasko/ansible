@@ -1,0 +1,9 @@
+---
+## ----------------------- ##
+## Install Mozilla Firefox ##
+## ----------------------- ##
+
+- name: install Firefox
+  package:
+    name: firefox
+    state: present
