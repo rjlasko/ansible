@@ -1,0 +1,18 @@
+---
+## ------------- ##
+## Installs Atom ##
+## ------------- ##
+
+- name: install snapd
+  package:
+    name: snapd
+
+- name: install snap core
+  snap:
+    name: core
+
+- name: install LXD
+  snap:
+    name: atom
+    channel: "{{ atom.version | default(omit) }}"
+    classic: "{{ atom.classic | default(omit) }}"
