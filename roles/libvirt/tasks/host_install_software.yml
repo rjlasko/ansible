@@ -5,7 +5,7 @@
 
 
 - name: install software from package manager
-  when: libvirt_host.source is not defined
+  when: libvirt.host.source is not defined
   package:
     name: "{{ kvm_packages }}"
     state: present

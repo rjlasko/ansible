@@ -6,11 +6,7 @@
 - name: setup target as libvirt host
   when: libvirt.host is defined
   include_tasks: host.yml
-  vars:
-    libvirt_host: "{{ libvirt.host }}"
 
 - name: setup targets as libvirt guests
-  when: libvirt.guest is defined
+  when: libvirt.vm is defined
   include_tasks: guest.yml
-  vars:
-    libvirt_vm: "{{ libvirt.guest }}"

@@ -13,20 +13,20 @@
   when: >
     libvirt_existing_vms.list_vms | length > 0
     and
-    libvirt_vm.name in libvirt_existing_vms.list_vms
+    libvirt.vm.name in libvirt_existing_vms.list_vms
   block:
     - name: shutdown VM
       include: shutdown_guest.yml
-    - name: "undefine VM: {{ libvirt_vm.name }}"
+    - name: "undefine VM: {{ libvirt.vm.name }}"
       virt:
         command: undefine
-        name: "{{ libvirt_vm.name }}"
+        name: "{{ libvirt.vm.name }}"
 
 # FIXME: for some reason, sometimes this doesn't find everything
 # XXX: maybe it never does.  Does the QEMU URI have something to do with it? Is that properly set for this call?
 # Handle like-named VM volume
 - name: list volumes
-  shell: virsh vol-list --pool default | tail -n+3 | grep {{ libvirt_vm.name }} | awk '{print $1}'
+  shell: virsh vol-list --pool default | tail -n+3 | grep {{ libvirt.vm.name }} | awk '{print $1}'
   register: libvirt_existing_vols
 
 # FIXME: for some reason, sometimes this doesn't delete everything

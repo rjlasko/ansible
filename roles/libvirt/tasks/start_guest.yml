@@ -3,10 +3,10 @@
 ## Start Guest VM ##
 ## -------------- ##
 
-- name: "detect VM state before attempt restart: {{ libvirt_vm.name }}"
+- name: "detect VM state before attempt restart: {{ libvirt.vm.name }}"
   virt:
     command: status
-    name: "{{ libvirt_vm.name }}"
+    name: "{{ libvirt.vm.name }}"
   register: libvirt_vm_status
 
 - name: error out if VM is in unacceptable state
@@ -15,28 +15,28 @@
     and
     libvirt_vm_status.status != 'shutdown'
   fail:
-    msg: "Cannot (re)start {{ libvirt_vm.name }} from state: {{ libvirt_vm_status.status }}"
+    msg: "Cannot (re)start {{ libvirt.vm.name }} from state: {{ libvirt_vm_status.status }}"
 
 - name: start from shutdown state
   when: libvirt_vm_status.status == 'shutdown'
   block:
-    - name: "start VM: {{ libvirt_vm.name }}"
+    - name: "start VM: {{ libvirt.vm.name }}"
       virt:
         command: start
-        name: "{{ libvirt_vm.name }}"
+        name: "{{ libvirt.vm.name }}"
 
-    - name: "waiting until restarted: {{ libvirt_vm.name }}"
+    - name: "waiting until restarted: {{ libvirt.vm.name }}"
       virt:
         command: status
-        name: "{{ libvirt_vm.name }}"
+        name: "{{ libvirt.vm.name }}"
       register: libvirt_vm_status
       until: libvirt_vm_status.status == 'running'
       # check for desired status for 5 minutes
       delay: 3
       retries: 100
 
-- name: "wait for {{ libvirt_vm.name }} to respond with SSHd"
-  when: libvirt_vm.check_ssh | default(true)
+- name: "wait for {{ libvirt.vm.name }} to respond with SSHd"
+  when: libvirt.vm.check_ssh | default(true)
   wait_for:
-    host: "{{ libvirt_vm.dns_address | mandatory }}"
+    host: "{{ libvirt.vm.dns_address | mandatory }}"
     port: 22

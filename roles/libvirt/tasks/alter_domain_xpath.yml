@@ -17,7 +17,7 @@
     - name: get XML of current VM definition
       virt:
         command: get_xml
-        name: "{{ libvirt_vm.name }}"
+        name: "{{ libvirt.vm.name }}"
       register: current_domain_xml
 
     - set_fact:

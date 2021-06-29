@@ -12,7 +12,7 @@
       register: temp_xml
 
     - name: alter xpaths
-      loop: "{{ libvirt_vm.alter_domain.xpaths }}"
+      loop: "{{ libvirt.vm.alter_domain.xpaths }}"
       loop_control:
         loop_var: alter_domain_xpath
       include: alter_domain_xpath.yml

@@ -5,7 +5,7 @@
 
 - name: build attach-disk base command
   set_fact:
-    virt_attach: "virsh attach-disk {{ libvirt_vm.name | mandatory }} {{ libvirt_disk.host.path }} {{ libvirt_disk.guest.dev | mandatory }}"
+    virt_attach: "virsh attach-disk {{ libvirt.vm.name | mandatory }} {{ libvirt_disk.host.path }} {{ libvirt_disk.guest.dev | mandatory }}"
 
 - name: add target_bus to base command
   when: libvirt_disk.guest.bus is defined
@@ -66,7 +66,7 @@
   set_fact:
     virt_attach: "{{ virt_attach }} --serial {{ libvirt_disk.guest.serial }}"
 
-- name: "attach disk to {{ libvirt_vm.name }}"
+- name: "attach disk to {{ libvirt.vm.name }}"
   command: "{{ virt_attach }} --config"
 
 # XXX: The following can only be done (currently) from within libvirt's XML model

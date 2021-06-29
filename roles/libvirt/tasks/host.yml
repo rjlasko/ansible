@@ -19,28 +19,28 @@
   become: true
   block:
     - name: enable IOMMU support
-      when: libvirt_host.iommu is defined
+      when: libvirt.host.iommu | default(false)
       include: iommu.yml
 
     - name: install software
       include: host_install_software.yml
 
     - name: define LIBVIRT_DEFAULT_URI in all environments
-      when: libvirt_host.default_uri is defined
+      when: libvirt.host.default_uri is defined
       include_role:
         name: global_environment
       vars:
         global_env_vars:
           # https://libvirt.org/uri.html#URI_default
-          - [ 'LIBVIRT_DEFAULT_URI', "{{ libvirt_host.default_uri }}" ]
+          - [ 'LIBVIRT_DEFAULT_URI', "{{ libvirt.host.default_uri }}" ]
 
     - name: install network bridge
-      when: libvirt_host.bridge is defined
+      when: libvirt.host.bridge is defined
       include: network_bridge.yml
 
     # FIXME: seems to miss adding the group to 'libvirt_qemu'
     - name: grant user permissions to run Virtual Machine Manager
-      loop: "{{ libvirt_host.users | default([]) }}"
+      loop: "{{ libvirt.host.users | default([]) }}"
       loop_control:
         loop_var: libvirt_user
       user:
@@ -50,7 +50,7 @@
         create_home: false
 
     - name: manage storage pools
-      loop: "{{ libvirt_host.pools | default([]) }}"
+      loop: "{{ libvirt.host.pools | default([]) }}"
       loop_control:
         loop_var: libvirt_pool_item
       include: manage_pool.yml

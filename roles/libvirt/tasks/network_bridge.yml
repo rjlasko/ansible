@@ -25,7 +25,7 @@
 
 - name: create bridge network config
   lineinfile:
-    line: "allow {{ libvirt_host.bridge }}"
+    line: "allow {{ libvirt.host.bridge }}"
     path: /etc/qemu/bridge.conf
     create: true
     state: present

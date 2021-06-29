@@ -9,12 +9,12 @@
 # 3. (build) build from ISO, if given
 
 - name: check invalid create mode
-  when: libvirt_vm.create_mode | mandatory not in ['skip', 'restore', 'build']
+  when: libvirt.vm.create_mode | mandatory not in ['skip', 'restore', 'build']
   fail:
-    msg: "invalid libvirt_vm.create_mode: {{ libvirt_vm.create_mode }}"
+    msg: "invalid libvirt.vm.create_mode: {{ libvirt.vm.create_mode }}"
 
 - name: handle create VM
-  when: libvirt_vm.create_mode != 'skip'
+  when: libvirt.vm.create_mode != 'skip'
   block:
     - name: install packages for Ansible libvirt support
       become: true
@@ -26,22 +26,22 @@
       include_tasks: clear_guest.yml
 
     - name: vm creation
-      when: libvirt_vm.create_mode == 'build'
+      when: libvirt.vm.create_mode == 'build'
       block:
         - name: handle VM 'build' (slow)
           include_tasks: build_guest.yml
 
         - name: backup newly built guest VM
-          when: libvirt_vm.backup_dir is defined
+          when: libvirt.vm.backup_dir is defined
           include_tasks: backup_guest.yml
 
     - name: handle VM 'restore' (fast)
-      when: libvirt_vm.create_mode == 'restore'
+      when: libvirt.vm.create_mode == 'restore'
       include_tasks: restore_guest.yml
 
     - name: alter VM machine definition
-      when: libvirt_vm.alter_domain is defined
+      when: libvirt.vm.alter_domain is defined
       include_tasks: alter_guest.yml
 
-- name: "complete with {{ libvirt_vm.name }} in running state"
+- name: "complete with {{ libvirt.vm.name }} in running state"
   include_tasks: start_guest.yml

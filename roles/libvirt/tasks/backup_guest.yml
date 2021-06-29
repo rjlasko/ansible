@@ -8,20 +8,20 @@
 
 - name: clear existing backup directory
   file:
-    path: "{{ libvirt_vm.backup_dir }}"
+    path: "{{ libvirt.vm.backup_dir }}"
     state: absent
 
 - name: remake backup directory
   file:
-    path: "{{ libvirt_vm.backup_dir }}"
+    path: "{{ libvirt.vm.backup_dir }}"
     state: directory
     mode: u=rwx,g=rx,o-rwx
 
 - name: backup XML
-  shell: virsh dumpxml {{ libvirt_vm.name }} > {{ libvirt_vm.backup_dir }}/domain.xml
+  shell: virsh dumpxml {{ libvirt.vm.name }} > {{ libvirt.vm.backup_dir }}/domain.xml
 
 - name: list VM block devices
-  shell: virsh domblklist {{ libvirt_vm.name }} | tail -n+3 | awk '{print $2}'
+  shell: virsh domblklist {{ libvirt.vm.name }} | tail -n+3 | awk '{print $2}'
   register: libvirt_vm_domblklist_vols
 
 - name: list volumes
@@ -34,4 +34,4 @@
     loop_var: libvirt_vm_vol
   when: libvirt_vm_vol in libvirt_existing_vols.stdout_lines
   become: true
-  command: qemu-img convert -O qcow2 {{ libvirt_vm_vol }} {{ libvirt_vm.backup_dir }}/{{ libvirt_vm_vol | basename | splitext | first }}.qcow2
+  command: qemu-img convert -O qcow2 {{ libvirt_vm_vol }} {{ libvirt.vm.backup_dir }}/{{ libvirt_vm_vol | basename | splitext | first }}.qcow2

@@ -5,21 +5,21 @@
 
 - name: restore VM from XML
   # TODO: look into using "virt" module to do this
-  command: virsh define --file {{ libvirt_vm.backup_dir | mandatory }}/domain.xml
+  command: virsh define --file {{ libvirt.vm.backup_dir | mandatory }}/domain.xml
 
 - name: get XML of restored VM definition
   virt:
     command: get_xml
-    name: "{{ libvirt_vm.name }}"
+    name: "{{ libvirt.vm.name }}"
   register: restored_domain_xml
 
 - name: list expected VM block devices
-  shell: virsh domblklist {{ libvirt_vm.name }} | tail -n+3 | awk '{print $2}' | sed '/^$/d'
+  shell: virsh domblklist {{ libvirt.vm.name }} | tail -n+3 | awk '{print $2}' | sed '/^$/d'
   register: libvirt_vm_domblklist_vols
 
 - name: list files in backup directory
   find:
-    paths: "{{ libvirt_vm.backup_dir }}"
+    paths: "{{ libvirt.vm.backup_dir }}"
     file_type: file
   register: libvirt_vm_backup_dir_listing
 

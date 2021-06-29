@@ -1,0 +1,23 @@
+---
+## --------------------------------------------- ##
+## Enables IOMMU for OSes using the systemd-boot ##
+## --------------------------------------------- ##
+
+# see: https://pop-planet.info/wiki/index.php?title=Kernel_parameters&oldid=386
+# see: https://github.com/isantop/kernelstub
+
+- fail:
+    msg: systemd-boot implementation not complete!
+
+- set_fact:
+    kernelstub_filepath: /etc/kernelstub/configuration
+
+- name: "backup & restore {{ kernelstub_filepath }}"
+  include_role:
+    name: backup_restore
+  vars:
+    br_target: "{{ kernelstub_filepath }}"
+
+- name: find existing kernel parameters
+  command: "cat {{ kernelstub_filepath }}"
+  register: kernelstub_conf

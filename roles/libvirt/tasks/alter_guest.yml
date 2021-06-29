@@ -7,14 +7,14 @@
   include: shutdown_guest.yml
 
 - name: alter cpu topology and affinity
-  when: libvirt_vm.alter_domain.cpuset is defined
+  when: libvirt.vm.alter_domain.cpuset is defined
   include: alter_cpus.yml
   vars:
-    libvirt_cpu: "{{ libvirt_vm.alter_domain.cpuset }}"
+    libvirt_cpu: "{{ libvirt.vm.alter_domain.cpuset }}"
 
 - name: attach disks
-  when: libvirt_vm.alter_domain.disks is defined
-  loop: "{{ libvirt_vm.alter_domain.disks }}"
+  when: libvirt.vm.alter_domain.disks is defined
+  loop: "{{ libvirt.vm.alter_domain.disks }}"
   loop_control:
     loop_var: alter_domain_disk
   include: attach_disk.yml
@@ -22,7 +22,7 @@
     libvirt_disk: "{{ alter_domain_disk }}"
 
 - name: alter VM by XPath
-  when: libvirt_vm.alter_domain.xpaths is defined
+  when: libvirt.vm.alter_domain.xpaths is defined
   block:
     - name: install lxml for python2
       when: ansible_python_version is version('3', '<')
