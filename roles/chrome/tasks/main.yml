@@ -24,8 +24,7 @@
 
 - name: add Chrome repository
   apt_repository:
-    repo: "deb [arch={{ dpkg_arch }}] http://dl.google.com/linux/chrome/deb/ stable main"
-    filename: "google-chrome"
+    repo: "deb [arch={{ dpkg_arch }}] https://dl.google.com/linux/chrome/deb/ stable main"
     state: present
     update_cache: yes
 

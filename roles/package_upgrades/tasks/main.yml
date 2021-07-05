@@ -3,6 +3,10 @@
 ## Handles general update of all packages installed by package manager ##
 ## ------------------------------------------------------------------- ##
 
+- name: install Debian repos
+  when: ansible_facts['distribution'] == 'Debian'
+  include_tasks: debian_repos.yml
+
 - name: update 'apt' packages
   when: ansible_facts['pkg_mgr'] == 'apt'
   become: true
