@@ -16,12 +16,6 @@
 - name: handle create VM
   when: libvirt.vm.create_mode != 'skip'
   block:
-    - name: install packages for Ansible libvirt support
-      become: true
-      package:
-        name: python-libvirt
-        state: present
-
     - name: clear pre-existing VM
       include_tasks: clear_guest.yml
 

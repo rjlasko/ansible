@@ -23,23 +23,7 @@
 
 - name: alter VM by XPath
   when: libvirt.vm.alter_domain.xpaths is defined
-  block:
-    - name: install lxml for python2
-      when: ansible_python_version is version('3', '<')
-      become: true
-      package:
-        name: python-lxml
-        state: present
-
-    - name: install lxml for python3
-      when: ansible_python_version is version('3', '>=')
-      become: true
-      package:
-        name: python3-lxml
-        state: present
-
-    - name: begin alter xml block
-      include: alter_domain_xpaths.yml
+  include: alter_domain_xpaths.yml
 
 # - fail:
 #     msg: boom

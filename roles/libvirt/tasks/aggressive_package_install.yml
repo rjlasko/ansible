@@ -1,0 +1,15 @@
+---
+
+- when: ansible_facts['distribution'] == 'Debian'
+  apt:
+    name: "{{ aggressive_package }}"
+    state: latest
+    autoremove: true
+    default_release: "{{ ansible_facts['distribution_release'] }}-backports"
+  register: aggressive_debian
+  ignore_errors: true
+
+- when: not aggressive_debian.changed
+  package:
+    name: "{{ aggressive_package }}"
+    state: present

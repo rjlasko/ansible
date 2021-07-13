@@ -4,25 +4,26 @@
 ## -------------------------------------------------- ##
 
 
-- name: install software from package manager
-  when: libvirt.host.source is not defined
-  package:
-    name: "{{ kvm_packages }}"
-    state: present
-  vars:
-    kvm_packages:
-      - qemu-kvm
-      - qemu-utils
-      - libvirt-daemon-system
-      - libvirt-clients
-      - virtinst
+- name:
+  loop:
+    - "{{ 'python3-lxml' if ansible_python_version is version('3', '>=') else 'python-lxml' }}"
+    # - qemu-kvm
+    - qemu-system
+    - qemu-utils
+    - python-libvirt
+    - libvirt-daemon-system
+    - libvirt-clients
+    - virtinst
 # TODO: checkout "ovirt" instead of "virt-manager"
-      - virt-manager
-# XXX: enables UEFI support for VMs
-      # - ovmf
+    - virt-manager
+# XXX: UEFI support for VMs
+    - ovmf
 # XXX: evaluate purpose
-      # - libguestfs-tools
-      # - genisoimage
+    # - libguestfs-tools
+    # - genisoimage
+  loop_control:
+    loop_var: aggressive_package
+  include: aggressive_package_install.yml
 
 - name: restart libvirtd
   service:
