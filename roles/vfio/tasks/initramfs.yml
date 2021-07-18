@@ -1,0 +1,47 @@
+---
+## ----------------------------------- ##
+## Apply VFIO-pci driver by PCI bus ID ##
+## ----------------------------------- ##
+
+- set_fact:
+    initramfs_path: /etc/initramfs-tools
+
+- name: check if initramfs exists
+  stat:
+    path: "{{ initramfs_path }}"
+  register: initramfs_path_exists
+  failed_when: not initramfs_path_exists.stat.exists
+
+- loop: "{{ vfio_pci_ids }}"
+  loop_control:
+    loop_var: vfio_pci_id
+  set_fact:
+    vfio_initramfs_pci_ids: "{{ vfio_initramfs_pci_ids | default([]) + [':'.join(['0000', vfio_pci_id]) ] }}"
+
+- set_fact:
+    vfio_initramfs_pci_ids_formatted: "{{ ' '.join(vfio_initramfs_pci_ids) }}"
+
+- template:
+    src: vfio.sh.j2
+    dest: "{{ initramfs_path }}/scripts/init-top/vfio.sh"
+    mode: u+rx,go-rwx
+    owner: root
+    group: root
+
+- name: "backup & restore {{ initramfs_path }}/modules"
+  include_role:
+    name: backup_restore
+  vars:
+    br_target: "{{ initramfs_path }}/modules"
+
+- name: "add kernel modules to {{ initramfs_path }}/modules"
+  lineinfile:
+    path: "{{ initramfs_path }}/modules"
+    line: 'vfio_pci'
+    state: present
+
+- name: update initramfs with new kernel boot parameters
+  command: update-initramfs -u
+
+- reboot:
+    reboot_timeout: 600

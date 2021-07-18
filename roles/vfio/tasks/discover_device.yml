@@ -1,0 +1,18 @@
+---
+## -------------------------------------------------- ##
+## Discovers all devices associated with a given name ##
+## -------------------------------------------------- ##
+
+- name: extract vfio_pci_id
+  when: vfio_pci_id_given is defined
+  set_fact:
+    vfio_pci_id: "{{ vfio_pci_id_given }}"
+
+- name: extract vfio_pci_id
+  when: vfio_pci_id_given is not defined
+  set_fact:
+    vfio_pci_id: "{{ vfio_pci_device.split(' ')[0] }}"
+
+- name: accumulate vfio_pci_ids
+  set_fact:
+    vfio_pci_ids: "{{ ( ( vfio_pci_ids | default([]) ) + [vfio_pci_id] ) | unique }}"

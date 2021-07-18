@@ -1,0 +1,60 @@
+---
+## ---------------------------------------- ##
+## Setup kernel options via GRUB bootloader ##
+## ---------------------------------------- ##
+
+# see: https://wiki.archlinux.org/title/Kernel_parameters#GRUB
+
+- set_fact:
+    grub_filepath: /etc/default/grub
+
+- name: check if GRUB is the boot manager
+  stat:
+    path: "{{ grub_filepath }}"
+  register: grub_file
+  failed_when: not grub_file.stat.exists
+
+- name: "backup & restore {{ grub_filepath }}"
+  include_role:
+    name: backup_restore
+  vars:
+    br_target: "{{ grub_filepath }}"
+
+- name: detect host hardware supports iommu
+  command: grep -E '^flags.*(svm|vmx)' /proc/cpuinfo
+
+- name: detect Intel architecture
+  when: ansible_facts.processor[1] == 'GenuineIntel'
+  set_fact:
+    arch_iommu: intel_iommu
+- name: detect AMD architecture
+  when: ansible_facts.processor[1] == 'AuthenticAMD'
+  set_fact:
+    arch_iommu: amd_iommu
+
+- name: detect unsupported architecture
+  when: arch_iommu is not defined
+  fail:
+    msg: "Only supports Intel and AMD distributions. Found: {{ ansible_facts.processor[1] }}"
+
+- set_fact:
+    grub_cmdline: GRUB_CMDLINE_LINUX_DEFAULT
+    cmdline_args: "['{{ arch_iommu }}=on', 'iommu=pt'] + {{ vfio.grub_extra | default([]) }}"
+
+- name: find existing kernel parameters
+  command: "grep {{ grub_cmdline }} {{ grub_filepath }}"
+  register: grub_cmdline_grep
+
+- name: "add kernel parameters to {{ GRUB_CMDLINE_LINUX_DEFAULT }}"
+  lineinfile:
+    path: "{{ grub_filepath }}"
+    regexp: '.*({{ grub_cmdline }}=".*)(")'
+    line: '\1 {{ cmdline_args | join(" ")}}\2'
+    backrefs: true
+    state: present
+
+- name: update grub with new kernel boot parameters
+  command: update-grub
+
+- reboot:
+    reboot_timeout: 600

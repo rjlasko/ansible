@@ -18,10 +18,6 @@
 - name: install software, configure virtualized resources, permissions
   become: true
   block:
-    - name: enable IOMMU support
-      when: libvirt.host.iommu | default(false)
-      include: iommu.yml
-
     - name: install software
       include: host_install_software.yml
 

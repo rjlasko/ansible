@@ -1,0 +1,78 @@
+---
+## --------------------------------- ##
+## VFIO setup for device passthrough ##
+## --------------------------------- ##
+
+- name: update grub for VFIO
+  include: grub.yml
+
+- name: device discovery
+  include: discovery.yml
+
+- name: setup initramfs
+  include: initramfs.yml
+
+# - fail:
+#     msg: boo
+
+
+
+
+
+# Notes:
+# - might need to undo kvm.ignore_msrs=1
+#     see: https://www.reddit.com/r/VFIO/comments/jdh9pp/so_i_just_updated_to_kernel_591_and/
+#     see: https://mathiashueber.com/pci-passthrough-ubuntu-2004-virtual-machine/
+# XXX: reference the mathiashueber doc about using device-ids vs pci-bus-ids
+#     - currently using device-ids because no identical devices
+# - needed to disable EFI framebuffer & configure Xorg to use 2nd slot GPU for host UI
+#     see: https://passthroughpo.st/explaining-csm-efifboff-setting-boot-gpu-manually/
+# - will probably need to load the guest GPU VBIOS as part of the VM definition
+#     see: https://passthroughpo.st/explaining-csm-efifboff-setting-boot-gpu-manually/
+
+
+
+# XXX: more stuff to do that seems to move toward success:
+# 1. add following to /etc/default/grub
+#       GRUB_CMDLINE_LINUX_DEFAULT="quiet amd_iommu=on iommu=pt video=efifb:off"
+# 2. run `update-grub`, as already done
+# 3. create /etc/modules-load.d/vfio.conf and add the following lines:
+#       vfio
+#       vfio_iommu_type1
+#       vfio_pci
+#       vfio_virqfd
+#     note: this might have only needed vfio_pci
+#       see: https://gist.github.com/TomFaulkner/389e8e2e9525e11afe2e775355954cdf
+# 4. create /etc/modprobe.d/vfio.conf and add the following lines:
+#       options kvm ignore_msrs=1
+#       options vfio-pci ids=10de:21c4,10de:1aeb,10de:1aec,10de:1aed,1987:5018,10ec:8125
+#       softdep nouveau pre: vfio_pci
+#       softdep xhci_hcd pre: vfio_pci
+#       softdep snd_hda_intel pre: vfio_pci
+#       softdep nvme pre: vfio_pci
+#     XXX: still missing USB device_id for passthrough
+#     note: the softdep lines should be added for each driver associated to the prescribed device-ids, as can be seen with `lspci -nn`
+#     note: that we could likely search for a common device name to find all associated device-ids, as can be seen with `lspci -nn`
+#         we would probably want to confirm that they have different pci-bus-id prefixes
+#     note: might want to also add kvm_amd to the list of softdeps w/ vfio_pci
+#       see: https://gist.github.com/TomFaulkner/389e8e2e9525e11afe2e775355954cdf
+# 5. run `sudo update-initramfs -u` + reboot ensure modules are loaded + configured on boot
+# 6. run the following to ensure Xorg uses the 2nd slot GPU for the UI
+#       sudo service lightdm stop
+#       sudo Xorg -configure
+#       sudo cp /root/xorg.conf.new /etc/X11/xorg.conf
+#       sudo service lightdm start
+#     note: the GPU should be displaying now, but probably want to reboot anyway
+#     note: it might also be useful to remove the 1st slot GPU information from the newly created /etc/X11/xorg.conf
+
+
+# ----  ready to create a VM!
+
+
+
+
+# at some point we will hook up the primary and secondary GPUs, which may be in opposing PCIe slots.
+# if the motherboard does not provide a mechanism to set the second slot gpu as the primary display
+# adapter, then we will need to do this manually by setting kernel parameters and manually generating an XORG config
+# see: https://passthroughpo.st/explaining-csm-efifboff-setting-boot-gpu-manually/
+# see: https://ubuntuforums.org/showthread.php?t=2123353

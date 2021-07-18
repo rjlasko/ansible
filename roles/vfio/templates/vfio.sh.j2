@@ -1,0 +1,27 @@
+#!/bin/sh
+# {{ ansible_managed }}
+
+PREREQ=""
+
+prereqs()
+{
+    echo "$PREREQ"
+}
+
+case $1 in
+prereqs)
+    prereqs
+    exit 0
+    ;;
+esac
+
+for dev in {{ vfio_initramfs_pci_ids_formatted }}
+do
+    echo "$dev" > /sys/bus/pci/devices/$dev/driver/unbind
+    echo "vfio-pci" > /sys/bus/pci/devices/$dev/driver_override
+    echo "$dev" > /sys/bus/pci/drivers/vfio-pci/bind
+done
+
+modprobe -i vfio-pci
+
+exit 0
