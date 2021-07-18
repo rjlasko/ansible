@@ -1,0 +1,32 @@
+---
+## ---------------------------- ##
+## Xorg setup for multiple GPUs ##
+## ---------------------------- ##
+
+- name: shutdown LightDM (display manager)
+  service:
+    name: lightdm
+    state: stopped
+
+# normally the OS distribution will autoconfigure Xorg, but typically doesn't
+# pickup multiple GPUs. This is especially useful when having multiple GPUs, but
+# preferring to use the secondary GPU for host display, while the primary may be
+# passed through to a VM guest.
+- name: create Xorg configuration file (which enables multiple gpus)
+  command: Xorg -configure
+
+- name: copy Xorg config to expected location
+  copy:
+    remote_src: true
+    src: /root/xorg.conf.new
+    dest: /etc/X11/xorg.conf
+
+- name: cleanup generated xorg config
+  file:
+    path: /root/xorg.conf.new
+    state: absent
+
+- name: restart LightDM (display manager)
+  service:
+    name: lightdm
+    state: started
