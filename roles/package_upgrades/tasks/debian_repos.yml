@@ -21,7 +21,14 @@
 
     - "deb {{ mirror_url.stdout }} {{ ansible_facts['distribution_release'] }}-updates main contrib non-free"
     - "deb-src {{ mirror_url.stdout }} {{ ansible_facts['distribution_release'] }}-updates main contrib non-free"
+  apt_repository:
+    repo: "{{ item }}"
+    state: present
+    update_cache: yes
 
+- name: install Debian backports repo
+  when: package_upgrades.backports is defined and package_upgrades.backports
+  loop:
     - "deb {{ mirror_url.stdout }} {{ ansible_facts['distribution_release'] }}-backports main contrib non-free"
     - "deb-src {{ mirror_url.stdout }} {{ ansible_facts['distribution_release'] }}-backports main contrib non-free"
   apt_repository:
