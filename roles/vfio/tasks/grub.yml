@@ -45,7 +45,7 @@
   command: "grep {{ grub_cmdline }} {{ grub_filepath }}"
   register: grub_cmdline_grep
 
-- name: "add kernel parameters to {{ GRUB_CMDLINE_LINUX_DEFAULT }}"
+- name: "add kernel parameters to {{ grub_filepath }}"
   lineinfile:
     path: "{{ grub_filepath }}"
     regexp: '.*({{ grub_cmdline }}=".*)(")'
