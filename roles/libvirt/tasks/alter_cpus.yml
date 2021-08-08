@@ -14,7 +14,7 @@
       loop_control:
         loop_var: vcpupin_cpuset
         index_var: vcpupin_idx
-      command: "virsh vcpupin {{ libvirt.vm.name }} {{ vcpupin_idx }} {{ ','.join(vcpupin_cpuset | asNative(proc_cpuinfo.stdout_lines)) }} --config"
+      command: "virsh vcpupin {{ libvirt.vm.name }} {{ vcpupin_idx }} {{ vcpupin_cpuset | asNative(proc_cpuinfo.stdout_lines) }} --config"
 
 - name: configure iothread pinning
   when: libvirt_cpu.iothread is defined
@@ -34,10 +34,10 @@
       loop_control:
         loop_var: iothread_cpuset
         index_var: iothread_idx
-      command: "virsh iothreadpin {{ libvirt.vm.name }} {{ iothread_idx + 1 }} {{ ','.join(iothread_cpuset | asNative(proc_cpuinfo.stdout_lines)) }} --config"
+      command: "virsh iothreadpin {{ libvirt.vm.name }} {{ iothread_idx + 1 }} {{ iothread_cpuset | asNative(proc_cpuinfo.stdout_lines) }} --config"
 
 - name: configure emulator emulator
   when: libvirt_cpu.emulator is defined
   block:
     - name: pin emulator
-      command: "virsh emulatorpin {{ libvirt.vm.name }} {{ ','.join(libvirt_cpu.emulator | asNative(proc_cpuinfo.stdout_lines)) }} --config"
+      command: "virsh emulatorpin {{ libvirt.vm.name }} {{ libvirt_cpu.emulator | asNative(proc_cpuinfo.stdout_lines) }} --config"

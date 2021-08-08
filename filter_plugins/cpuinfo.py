@@ -77,11 +77,17 @@ class FilterModule(object):
             ret = list()
             for i in natural_ids:
                 ret.append(self.asNative(i, proc_cpuinfo))
-            return ret
+            return ','.join(ret)
         else:
             return str(vcpuMap[natural_ids])
 
-
 # XXX: for testing only
-# import sys, json
-# print(json.dumps(FilterModule().getVcpuMap(sys.stdin.readlines())))
+# def readCpuInfo():
+#     with open('/proc/cpuinfo') as f:
+#         lines = f.read().splitlines()
+#     return lines
+#
+# def rjl_test(myIds):
+#     cpuinfo_lines = readCpuInfo()
+#     x = FilterModule().asNative(myIds, cpuinfo_lines)
+#     print(x)

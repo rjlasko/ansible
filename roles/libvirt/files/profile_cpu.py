@@ -3,10 +3,9 @@
 import re
 from collections import defaultdict
 
-numericRegex = r'^[+-]{0,1}((\d*\.)|\d*)\d+$'
-
 
 def readNextProcessor(file):
+    numericRegex = r'^[+-]{0,1}((\d*\.)|\d*)\d+$'
     proc = dict()
     while(True):
         line = file.readline().strip()
