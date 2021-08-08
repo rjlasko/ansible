@@ -4,26 +4,25 @@
 ## -------------------------------------------------- ##
 
 
-- name:
-  loop:
-    - "{{ 'python3-lxml' if ansible_python_version is version('3', '>=') else 'python-lxml' }}"
-    # - qemu-kvm
-    - qemu-system
-    - qemu-utils
-    - python-libvirt
-    - libvirt-daemon-system
-    - libvirt-clients
-    - virtinst
-# TODO: checkout "ovirt" instead of "virt-manager"
-    - virt-manager
-# XXX: UEFI support for VMs
-    - ovmf
-# XXX: evaluate purpose
-    # - libguestfs-tools
-    # - genisoimage
-  loop_control:
-    loop_var: aggressive_package
-  include: aggressive_package_install.yml
+- name: install libvirt libraries and tools
+  package:
+    state: present
+    name:
+      - "{{ 'python3-lxml' if ansible_python_version is version('3', '>=') else 'python-lxml' }}"
+      - qemu-kvm
+      # - qemu-system
+      - qemu-utils
+      - python-libvirt
+      - libvirt-daemon-system
+      - libvirt-clients
+      - virtinst
+  # TODO: checkout "ovirt" instead of "virt-manager"
+      - virt-manager
+  # XXX: UEFI support for VMs
+      - ovmf
+  # XXX: evaluate purpose
+      # - libguestfs-tools
+      # - genisoimage
 
 - name: restart libvirtd
   service:
