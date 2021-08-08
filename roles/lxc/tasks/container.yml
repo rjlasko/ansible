@@ -11,7 +11,6 @@
 - name: handle create container
   when: lxc.container.create_mode == 'build'
   block:
-
     - name: transform 'selected_cpus' into 'config.limits.cpu'
       when: lxc.container.selected_cpus is defined
       block:
@@ -36,6 +35,15 @@
         state: absent
         # TODO: do this only if trying without it fails
         force_stop: true
+
+    - name: initialize host directories for LXC container usage
+      when: lxc.file_drop is defined
+      become: true
+      # XXX: 'include_role' didn't seem to like 'become'
+      import_role:
+        name: file_drop
+      vars:
+        file_drop: "{{ lxc.file_drop }}"
 
     - name: create & (re)start container
       lxd_container:
