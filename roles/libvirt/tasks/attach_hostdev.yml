@@ -1,0 +1,27 @@
+---
+## ---------------------------- ##
+## Attach a host device to a VM ##
+## ---------------------------- ##
+
+- name: attach host device to VM
+  block:
+    - name: create temporary deferred hostdev XML
+      tempfile:
+        state: file
+        suffix: .hostdev.xml
+      register: temp_xml
+
+    - name: create hostdev XML element from template
+      template:
+        src: hostdev.xml.j2
+        dest: "{{ temp_xml.path }}"
+        mode: u=rw,go-rwx
+
+    - name: "attach device to {{ libvirt.vm.name }}"
+      command: "virsh attach-device {{ libvirt.vm.name }} --file {{ temp_xml.path }} --config"
+
+  always:
+    - name: remove deferred domain XML
+      file:
+        path: "{{ temp_xml.path }}"
+        state: absent

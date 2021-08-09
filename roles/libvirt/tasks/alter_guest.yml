@@ -21,6 +21,15 @@
   vars:
     libvirt_disk: "{{ alter_domain_disk }}"
 
+- name: attach host devices
+  when: libvirt.vm.alter_domain.hostdevs is defined
+  loop: "{{ libvirt.vm.alter_domain.hostdevs }}"
+  loop_control:
+    loop_var: alter_domain_hostdev
+  include: attach_hostdev.yml
+  vars:
+    libvirt_hostdev: "{{ alter_domain_hostdev }}"
+
 - name: alter VM by XPath
   when: libvirt.vm.alter_domain.xpaths is defined
   include: alter_domain_xpaths.yml
