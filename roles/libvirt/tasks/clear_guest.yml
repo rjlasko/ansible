@@ -17,10 +17,10 @@
   block:
     - name: shutdown VM
       include: shutdown_guest.yml
+
+    # XXX: the "nvram" option was introduced to delete VMs using UEFI
     - name: "undefine VM: {{ libvirt.vm.name }}"
-      virt:
-        command: undefine
-        name: "{{ libvirt.vm.name }}"
+      command: virsh undefine --nvram {{ libvirt.vm.name }}
 
 # FIXME: for some reason, sometimes this doesn't find everything
 # XXX: maybe it never does.  Does the QEMU URI have something to do with it? Is that properly set for this call?
