@@ -16,7 +16,9 @@
   package:
     name: "{{ nvidia_driver_list.stdout_lines }}"
     state: present
+  register: nvidia_driver_install
 
 - name: reboot to load new drivers
+  when: nvidia_driver_install.changed
   reboot:
     reboot_timeout: 60
