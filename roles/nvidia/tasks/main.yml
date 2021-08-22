@@ -1,0 +1,22 @@
+---
+## ---------------------- ##
+## Install Nvidia drivers ##
+## ---------------------- ##
+
+- name: install nvidia-detect
+  package:
+    name: nvidia-detect
+    state: present
+
+- name: detect nvidia recommended driver packages
+  shell: nvidia-detect | awk '/recommended to install/{getline; print}' | awk '{$1=$1};1' | sort | uniq
+  register: nvidia_driver_list
+
+- name: install nvidia recommended drivers
+  package:
+    name: "{{ nvidia_driver_list.stdout_lines }}"
+    state: present
+
+- name: reboot to load new drivers
+  reboot:
+    reboot_timeout: 60
