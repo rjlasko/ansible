@@ -7,15 +7,8 @@
   shell: "grep {{ ansible_facts['distribution_release'] }} /etc/apt/sources.list | grep -ve '^#' | grep -v security | sort | head -n1 | cut -d' ' -f2 | sed s#http#https#g"
   register: mirror_url
 
-- name: find selected mirror
-  shell: "grep {{ ansible_facts['distribution_release'] }} /etc/apt/sources.list | grep -ve '^#' | grep security | sort | head -n1 | cut -d' ' -f2"
-  register: security_mirror_url
-
 - name: install Debian repos
   loop:
-    - "deb {{ security_mirror_url.stdout }} {{ ansible_facts['distribution_release'] }}/updates main contrib non-free"
-    - "deb-src {{ security_mirror_url.stdout }} {{ ansible_facts['distribution_release'] }}/updates main contrib non-free"
-
     - "deb {{ mirror_url.stdout }} {{ ansible_facts['distribution_release'] }} main contrib non-free"
     - "deb-src {{ mirror_url.stdout }} {{ ansible_facts['distribution_release'] }} main contrib non-free"
 
@@ -35,3 +28,19 @@
     repo: "{{ item }}"
     state: present
     update_cache: yes
+
+- name: security updates
+  when: package_upgrades.security is defined and package_upgrades.security
+  block:
+    - name: find selected mirror
+      shell: "grep {{ ansible_facts['distribution_release'] }} /etc/apt/sources.list | grep -ve '^#' | grep security | sort | head -n1 | cut -d' ' -f2"
+      register: security_mirror_url
+
+    - name: update Debian security repo
+      loop:
+        - "deb {{ security_mirror_url.stdout }} {{ ansible_facts['distribution_release'] }}/updates main contrib non-free"
+        - "deb-src {{ security_mirror_url.stdout }} {{ ansible_facts['distribution_release'] }}/updates main contrib non-free"
+      apt_repository:
+        repo: "{{ item }}"
+        state: present
+        update_cache: yes
