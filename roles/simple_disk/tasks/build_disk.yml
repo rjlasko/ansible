@@ -10,6 +10,7 @@
 - name: "Remove all partitions from device: {{ simple_disk_device_path }}"
   when: simple_disk.rebuild | default(false)
   # this is more robust than using parted to list and iterate removal of individual partitions
+  # however it is less comprehensive than running `dd if=/dev/zero of=/dev/sdX bs=1M`
   command: wipefs -a -f {{ simple_disk_device_path }}
 
 - name: "Create partitions on device: {{ simple_disk_device_path }}"

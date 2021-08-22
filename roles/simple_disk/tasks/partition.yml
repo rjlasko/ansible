@@ -34,6 +34,10 @@
   become: true
   command: blkid -o value -s TYPE {{ simple_disk_partition_path }}
   register: blkid_dev_partition
+  # XXX: if this step failed, it is likely that `wipefs` was unable to sufficiently
+  # the disk, and mkfs was unable to bind a UUID to the disk, making it not visible
+  # to `blkid`. The errant drive can be restored by running:
+  #                     `dd if=/dev/zero of=/dev/sdX bs=1M`
   failed_when: blkid_dev_partition.stdout != simple_disk_partition.fstype
 
 - name: "Mount {{ simple_disk_partition_path }} to {{ simple_disk_partition.mount }}"
