@@ -12,7 +12,7 @@
       - qemu-kvm
       # - qemu-system
       - qemu-utils
-      - python-libvirt
+      - "{{ 'python3-libvirt' if ansible_python_version is version('3', '>=') else 'python-libvirt' }}"
       - libvirt-daemon-system
       - libvirt-clients
       - virtinst
