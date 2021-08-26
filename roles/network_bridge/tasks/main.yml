@@ -1,7 +1,8 @@
 ---
-## ------------------------------------------------------------- ##
-## Creates a network bridge interface usable by containers & VMs ##
-## ------------------------------------------------------------- ##
+## ------------------------------------------------------ ##
+## Configures network interfaces for bonding and bridging ##
+## ------------------------------------------------------ ##
+
 
 
 - name: find best (default) physical interface to respond to wake on lan
@@ -47,6 +48,11 @@
       vars:
         bridge_name: "{{ network_bridge.name }}"
         source_interface: "{{ network_bridge_device | mandatory }}"
+        # XXX: assign the mac address of the specified source device, otherwise
+        # linux may choose to either use a randomly generated MAC, or dynamically
+        # switch to the lowest alphanumerically sorted MAC of all conected devices
+        # which appears to include lxc+libvirt devices.
+        bridge_mac: "{{ ansible_facts[network_bridge_device].macaddress }}"
 
     - reboot:
-        reboot_timeout: 600
+        reboot_timeout: 120
