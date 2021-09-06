@@ -50,7 +50,7 @@
         name: "{{ lxc.container.name }}"
         state: restarted
         source:
-          server: "{{ lxc.container.server | mandatory }}"
+          server: "{{ lxc.container.server | default('https://images.linuxcontainers.org') }}"
           alias: "{{ lxc.container.alias | mandatory }}"
           # if you get a 404, try setting protocol: simplestreams
           protocol: "{{ lxc.container.protocol | default('lxd') }}"
