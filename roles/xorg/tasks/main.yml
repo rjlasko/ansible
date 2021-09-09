@@ -2,6 +2,7 @@
 ## ---------------------------- ##
 ## Xorg setup for multiple GPUs ##
 ## ---------------------------- ##
+# FIXME: this doesn't seem to work with the 'nvidia' driver, only 'nouveau'
 
 - name: shutdown LightDM (display manager)
   service:
@@ -26,7 +27,18 @@
     path: /root/xorg.conf.new
     state: absent
 
+- name: pause for LightDM to shutdown
+  pause:
+    seconds: 10
+
 - name: restart LightDM (display manager)
   service:
     name: lightdm
     state: restarted
+
+# XXX: possibly erroring because of login?
+# XXX: find errors in
+#         - /var/log/lightdm/lightdm.log
+#         - /var/log/lightdm/x-0.log
+# - reboot:
+#     reboot_timeout: 120
