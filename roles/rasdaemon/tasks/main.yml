@@ -13,6 +13,45 @@
     name: rasdaemon
     state: present
 
+# XXX: there is a known issue with the 0.6.6 version of rasdaemon currently
+# available via apt in Debian Bullseye, which causes an error while running
+# the ras-mc-ctl command. It can be manually fixed via a patch found in the
+# following thread.
+# https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=973053
+- name: detect broken Debian installation
+  when: ansible_distribution == 'Debian'
+  block:
+    - name: Gather the package facts
+      ansible.builtin.package_facts:
+        manager: auto
+
+    - name: find rasdaemon version
+      when: ansible_facts.packages['rasdaemon'] | length != 1
+      fail:
+        msg: Found more than one version of rasdaemon installed!
+
+    - name: find location of ras-mc-ctl
+      command: which ras-mc-ctl
+      register: ras_mc_ctl_path
+
+    - name: detect broken Debian installation version
+      when: >
+        ansible_facts.packages['rasdaemon'][0].version is version('0.6.6', '>=')
+        and
+        ansible_facts.packages['rasdaemon'][0].version is version('0.6.7', '<')
+      block:
+        - name: backup & restore ras-mc-ctl executable
+          include_role:
+            name: backup_restore
+          vars:
+            br_target: "{{ ras_mc_ctl_path.stdout }}"
+
+        - name: patch {{ ras_mc_ctl_path.stdout }}
+          ansible.posix.patch:
+            src: ras-mc-ctl.patch
+            dest: "{{ ras_mc_ctl_path.stdout }}"
+
+
 - name: Restart and enable the rasdaemon service
   service:
     name: rasdaemon

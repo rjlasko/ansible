@@ -1,0 +1,54 @@
+--- /usr/sbin/ras-mc-ctl.orig	2021-06-22 15:50:32.446791084 +0200
++++ /usr/sbin/ras-mc-ctl	2021-06-22 15:50:15.047428558 +0200
+@@ -1179,6 +1179,7 @@
+     $query_handle->finish;
+ 
+     # devlink errors
++    if (0) {
+     $query = "select dev_name, count(*) from devlink_event group by dev_name";
+     $query_handle = $dbh->prepare($query);
+     $query_handle->execute();
+@@ -1193,7 +1194,9 @@
+         print "No devlink errors.\n";
+     }
+     $query_handle->finish;
++    }
+ 
++    if(0) {
+     # Disk errors
+     $query = "select dev, count(*) from disk_errors group by dev";
+     $query_handle = $dbh->prepare($query);
+@@ -1209,6 +1212,7 @@
+         print "No disk errors.\n";
+     }
+     $query_handle->finish;
++    }
+ 
+     # MCE mce_record errors
+     $query = "select error_msg, count(*) from mce_record group by error_msg";
+@@ -1301,6 +1305,7 @@
+     }
+     $query_handle->finish;
+ 
++    if (0) {
+     # devlink errors
+     $query = "select id, timestamp, bus_name, dev_name, driver_name, reporter_name, msg from devlink_event order by id";
+     $query_handle = $dbh->prepare($query);
+@@ -1322,7 +1327,9 @@
+         print "No devlink errors.\n\n";
+     }
+     $query_handle->finish;
++    }
+ 
++    if (0) {
+     # Disk errors
+     $query = "select id, timestamp, dev, sector, nr_sector, error, rwbs, cmd from disk_errors order by id";
+     $query_handle = $dbh->prepare($query);
+@@ -1345,6 +1352,7 @@
+         print "No disk errors.\n\n";
+     }
+     $query_handle->finish;
++    }
+ 
+     # MCE mce_record errors
+     $query = "select id, timestamp, mcgcap, mcgstatus, status, addr, misc, ip, tsc, walltime, cpu, cpuid, apicid, socketid, cs, bank, cpuvendor, bank_name, error_msg, mcgstatus_msg, mcistatus_msg, user_action, mc_location from mce_record order by id";
