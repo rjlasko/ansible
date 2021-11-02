@@ -11,23 +11,9 @@
 - name: handle create container
   when: lxc.container.create_mode == 'build'
   block:
-    - name: transform 'selected_cpus' into 'config.limits.cpu'
-      when: lxc.container.selected_cpus is defined
-      block:
-        - command: cat /proc/cpuinfo
-          register: proc_cpuinfo
-        - name: transform 'selected_cpus' into 'config.limits.cpu'
-          set_fact:
-            lxc_custom_config:
-               limits.cpu: "{{ lxc.container.selected_cpus | asNative(proc_cpuinfo.stdout_lines) }}"
 
-    - name: declare and or merge config to custom
-      when: >
-        lxc.container.config is defined
-        or
-        lxc_custom_config is defined
-      set_fact:
-        lxc_custom_config: "{{ lxc.container.config | combine(lxc_custom_config | default({}), recursive=True) }}"
+    - name: define custom container configuration
+      include_tasks: container_config.yml
 
     - name: clear pre-existing container
       lxd_container:
@@ -46,14 +32,14 @@
         file_drop: "{{ lxc.file_drop }}"
 
     - name: create & (re)start container
-      lxd_container:
+      community.general.lxd_container:
         name: "{{ lxc.container.name }}"
         state: restarted
         source:
           server: "{{ lxc.container.server | default('https://images.linuxcontainers.org') }}"
           alias: "{{ lxc.container.alias | mandatory }}"
-          # if you get a 404, try setting protocol: simplestreams
-          protocol: "{{ lxc.container.protocol | default('lxd') }}"
+          # 'simplstreams' seems more reliable than the default protocol 'lxd'
+          protocol: "{{ lxc.container.protocol | default('simplestreams') }}"
           type: image
           mode: pull
         config: "{{ lxc_custom_config | default(omit) }}"

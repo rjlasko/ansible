@@ -1,0 +1,90 @@
+---
+## --------------------------------- ##
+## Assemble the custom configuration ##
+## --------------------------------- ##
+
+- name: declare and or merge config to custom
+  when: lxc.container.config is defined
+  set_fact:
+    lxc_custom_config: "{{ lxc.container.config }}"
+
+- name: transform 'selected_cpus' into 'config.limits.cpu'
+  when: lxc.container.selected_cpus is defined
+  block:
+    - command: cat /proc/cpuinfo
+      register: proc_cpuinfo
+    - name: transform 'selected_cpus' into 'config.limits.cpu'
+      set_fact:
+        lxc_custom_config_limits_cpu:
+           limits.cpu: "{{ lxc.container.selected_cpus | asNative(proc_cpuinfo.stdout_lines) }}"
+
+    - name: merge limits.cpu into custom config
+      set_fact:
+        lxc_custom_config: "{{ lxc_custom_config_limits_cpu | combine(lxc_custom_config | default({}), recursive=True) }}"
+
+- name: transform 'host_idmap' into 'config.raw.idmap'
+  when: lxc.container.host_idmap is defined
+  block:
+    - name: load UID map
+      getent:
+        database: passwd
+    - name: load GID map
+      getent:
+        database: group
+
+    # the raw.idmap needs to have its ids appear in ascending order
+    - when: lxc.container.host_idmap.both is defined
+      block:
+        - name: get UID from username
+          loop: "{{ lxc.container.host_idmap.both }}"
+          loop_control:
+            loop_var: lxc_host_id
+          set_fact:
+            lxc_both_idmap: "{{ lxc_both_idmap | default([]) + [ ansible_facts.getent_passwd[lxc_host_id][1] | int ] }}"
+
+        - name: build raw "both" mapping
+          loop: "{{ lxc_both_idmap | sort }}"
+          loop_control:
+            loop_var: lxc_host_id
+          set_fact:
+            lxc_raw_idmap: "{{ lxc_raw_idmap | default([]) + [ 'both ' + lxc_host_id | string + ' ' + lxc_host_id | string ] }}"
+
+    - when: lxc.container.host_idmap.users is defined
+      block:
+        - name: uid mapping
+          loop: "{{ lxc.container.host_idmap.users }}"
+          loop_control:
+            loop_var: lxc_host_id
+          set_fact:
+            lxc_user_idmap: "{{ lxc_user_idmap | default([]) + [ ansible_facts.getent_passwd[lxc_host_id][1] | int ] }}"
+
+        - name: build raw "uid" mapping
+          loop: "{{ lxc_user_idmap | sort }}"
+          loop_control:
+            loop_var: lxc_host_id
+          set_fact:
+            lxc_raw_idmap: "{{ lxc_raw_idmap | default([]) + [ 'uid ' + lxc_host_id | string + ' ' + lxc_host_id | string ] }}"
+
+    - when: lxc.container.host_idmap.groups is defined
+      block:
+        - name: gid mapping
+          loop: "{{ lxc.container.host_idmap.groups }}"
+          loop_control:
+            loop_var: lxc_host_id
+          set_fact:
+            lxc_group_idmap: "{{ lxc_group_idmap | default([]) + [ ansible_facts.getent_group[lxc_host_id][1] | int ] }}"
+
+        - name: build raw "gid" mapping
+          loop: "{{ lxc_group_idmap | sort }}"
+          loop_control:
+            loop_var: lxc_host_id
+          set_fact:
+            lxc_raw_idmap: "{{ lxc_raw_idmap | default([]) + [ 'gid ' + lxc_host_id | string + ' ' + lxc_host_id | string ] }}"
+
+    - set_fact:
+        lxc_custom_config_raw_idmap:
+          raw.idmap: "{{ lxc_raw_idmap | join('\n') }}"
+
+    - name: merge raw.idmap into custom config
+      set_fact:
+        lxc_custom_config: "{{ lxc_custom_config_raw_idmap | combine(lxc_custom_config | default({}), recursive=True) }}"
