@@ -53,8 +53,9 @@
         name: git
 
     # install the latest officially released version of docker-compose
+    # must strictly follow v1.2.3 or 1.2.3, no extra prefix or suffix allowed
     - name: query for latest officially released docker-compose version
-      shell: git ls-remote --tags https://github.com/docker/compose.git | cut -f 2 | sed 's#.*/##' | grep -v "rc" | grep -v "docs" | grep -v "test" | awk '{print $1 " " $1}' | sed 's#^[a-z]*##g' | sort --version-sort -k 1 | tail -n1 | awk '{print $2}' | sed 's:.*/::'
+      shell: git ls-remote --tags https://github.com/docker/compose.git | cut -f 2 | sed 's#.*/##' | grep -E '^v*([0-9]+)\.([0-9]+)\.([0-9]+)$' | awk '{print $1 " " $1}' | sed 's#^[a-z]*##g' | sort --version-sort -k 1 | tail -n1 | awk '{print $2}' | sed 's:.*/::'
       register: docker_compose_repo_version
 
     - set_fact:
