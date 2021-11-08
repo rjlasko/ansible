@@ -48,10 +48,11 @@ This Ansible role can be used to:
 
 
 ##### Parameters specific to `create_mode` = `build`
-- `iso` - location of the OS installation ISO file
-- `virt_install_args` - command line arguments to pass to `virt-install`
-- `preseed` - parameters to be passed into preseed template
-    - `template` - path to the preseed (Jinja2 formatted) template to pass to `virt-install`
+- `virt_install`
+    - `iso` - location of the OS installation ISO file
+    - `args` - command line arguments to pass to `virt-install`
+    - `preseed` - parameters to be passed into preseed template
+        - `template` - path to the preseed (Jinja2 formatted) template to pass to `virt-install`
 
 ### Example properties for linux guest
 ```
@@ -60,50 +61,51 @@ libvirt_vm:
   create_mode: build
   dns_address: linbox.home.lan
   backup_dir: /some/path/somewhere/linbox
-  iso: /iso/os/linux/debian-10.3.0-amd64-netinst.iso
-  virt_install_args:
-    - "--os-type=linux"
-    - "--os-variant=debian10"
-    - "--virt-type=kvm"
-    - "--autostart"
-    - "--cpu=host-passthrough"
-    - "--vcpus=4,sockets=1,cores=2,threads=2"
-    - "--memory=8192"
-    - "--memorybacking=hugepages=yes"
-    - "--network=bridge=br0,model=virtio"
-    - "--disk=size=32,format=qcow2,io=threads,bus=virtio,serial=linbox-disk0"
-  preseed:
-    template: "/resource/libvirt/preseed-debian.cfg.j2"
-    hostname: linbox
-    domain: home.lan
-    username: admin
-    userpass: password
-    rootpass: password
-    partitions:
-      - type: linux-swap
-        method: swap
-        priority: 4096
-        size:
-          min: 4096
-          max: 4096
-      - type: ext3
-        primary: true
-        bootable: true
-        method: format
-        filesystem: ext3
-        mountpoint: /
-        priority: 6144
-        size:
-          min: 6144
-          max: 6144
-      - type: ext3
-        method: format
-        filesystem: ext3
-        mountpoint: /other
-        priority: 1000000000
-        size:
-          min: 16384
-          max: -1
+  virt_install:
+    iso: /iso/os/linux/debian-10.3.0-amd64-netinst.iso
+    args:
+        - "--os-type=linux"
+        - "--os-variant=debian10"
+        - "--virt-type=kvm"
+        - "--autostart"
+        - "--cpu=host-passthrough"
+        - "--vcpus=4,sockets=1,cores=2,threads=2"
+        - "--memory=8192"
+        - "--memorybacking=hugepages=yes"
+        - "--network=bridge=br0,model=virtio"
+        - "--disk=size=32,format=qcow2,io=threads,bus=virtio,serial=linbox-disk0"
+    preseed:
+        template: "/resource/libvirt/preseed-debian.cfg.j2"
+        hostname: linbox
+        domain: home.lan
+        username: admin
+        userpass: password
+        rootpass: password
+        partitions:
+          - type: linux-swap
+            method: swap
+            priority: 4096
+            size:
+              min: 4096
+              max: 4096
+          - type: ext3
+            primary: true
+            bootable: true
+            method: format
+            filesystem: ext3
+            mountpoint: /
+            priority: 6144
+            size:
+              min: 6144
+              max: 6144
+          - type: ext3
+            method: format
+            filesystem: ext3
+            mountpoint: /other
+            priority: 1000000000
+            size:
+              min: 16384
+              max: -1
   alter_domain:
     cpuset:
       iothread:
@@ -133,19 +135,20 @@ libvirt_vm:
   check_manual: true
   check_ssh: false
   backup_dir: /some/path/somewhere/winbox
-  iso: /iso/os/windows/Win10_1909_English_x64.iso
-  virt_install_args:
-    - "--os-type=windows"
-    - "--os-variant=win10"
-    - "--virt-type=kvm"
-    - "--autostart"
-    - "--cpu=host-passthrough"
-    - "--vcpus=6,sockets=1,cores=3,threads=2"
-    - "--memory=24576"
-    - "--memorybacking=hugepages=yes"
-    - "--network=bridge=br0,model=virtio"
-    - "--disk=/iso/os/windows/virtio-win-0.1.171.iso,device=cdrom,bus=sata"
-    - "--disk=size=128,format=qcow2,io=threads,bus=virtio,serial=winbox-disk0"
+  virt_install:
+    iso: /iso/os/windows/Win10_1909_English_x64.iso
+    args:
+        - "--os-type=windows"
+        - "--os-variant=win10"
+        - "--virt-type=kvm"
+        - "--autostart"
+        - "--cpu=host-passthrough"
+        - "--vcpus=6,sockets=1,cores=3,threads=2"
+        - "--memory=24576"
+        - "--memorybacking=hugepages=yes"
+        - "--network=bridge=br0,model=virtio"
+        - "--disk=/iso/os/windows/virtio-win-0.1.171.iso,device=cdrom,bus=sata"
+        - "--disk=size=128,format=qcow2,io=threads,bus=virtio,serial=winbox-disk0"
   alter_domain:
     cpuset:
       iothread:
