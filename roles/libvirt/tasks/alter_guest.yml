@@ -33,6 +33,8 @@
 - name: alter VM by XPath
   when: libvirt.vm.alter_domain.xpaths is defined
   include: alter_domain_xpaths.yml
+  vars:
+    alter_domain_xpaths: "{{ libvirt.vm.alter_domain.xpaths }}"
 
 # - fail:
 #     msg: boom

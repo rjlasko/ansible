@@ -6,10 +6,34 @@
 - command: cat /proc/cpuinfo
   register: proc_cpuinfo
 
-- name: configure vcpu pinning
+- name: configure vcpu
   when: libvirt_cpu.vcpupin is defined
   block:
-    - name: pin vcpu
+    - name: alter topology by XPath
+      include: alter_domain_xpaths.yml
+      vars:
+        alter_domain_xpaths:
+          - xpath: /domain/vcpu
+            value: "{{ libvirt_cpu.vcpupin | length }}"
+            defer: 'initial'
+          - xpath: /domain/cpu/topology
+            attribute: sockets
+            value: '1'
+            defer: true
+          - xpath: /domain/cpu/topology
+            attribute: dies
+            value: '1'
+            defer: true
+          - xpath: /domain/cpu/topology
+            attribute: cores
+            value: "{{ ( (libvirt_cpu.vcpupin | length) / ansible_facts.processor_threads_per_core ) | round(0, 'ceil') | int }}"
+            defer: true
+          - xpath: /domain/cpu/topology
+            attribute: threads
+            value: "{{ ansible_facts.processor_threads_per_core }}"
+            defer: 'apply'
+
+    - name: pin vcpus
       loop: "{{ libvirt_cpu.vcpupin }}"
       loop_control:
         loop_var: vcpupin_cpuset
@@ -19,10 +43,6 @@
 - name: configure iothread pinning
   when: libvirt_cpu.iothread is defined
   block:
-    - name: remove iothread assignments
-      shell: virsh iothreadinfo {{ libvirt.vm.name }} | tail -n+3 | awk '{print $1}' | xargs -n1 virsh iothreaddel boundary
-      ignore_errors: true
-
     - name: add iothread id
       loop: "{{ libvirt_cpu.iothread }}"
       loop_control:
