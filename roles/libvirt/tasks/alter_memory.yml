@@ -1,0 +1,34 @@
+---
+## --------------------------------------- ##
+## Alter the memory configuration for a VM ##
+## --------------------------------------- ##
+
+- name: configure memory allocation
+  block:
+    - name: set maximum memory to {{ libvirt_mem.mem_alloc | mandatory }}
+      command: "virsh setmaxmem {{ libvirt.vm.name }} {{ libvirt_mem.mem_alloc }} --config"
+
+    - name: set current memory to {{ libvirt_mem.mem_alloc | mandatory }}
+      command: "virsh setmem {{ libvirt.vm.name }} {{ libvirt_mem.mem_alloc }} --config"
+
+- name: enable hugepages
+  when: libvirt_mem.hugepages is defined and libvirt_mem.hugepages
+  include: alter_domain_xpaths.yml
+  vars:
+    alter_domain_xpaths:
+      - xpath: "/domain"
+        add_children:
+          - memoryBacking
+        defer: 'initial'
+      - xpath: "/domain/memoryBacking"
+        add_children:
+          - hugepages
+        defer: 'apply'
+
+- name: disable hugepages
+  when: libvirt_mem.hugepages is not defined or not libvirt_mem.hugepages
+  include: alter_domain_xpaths.yml
+  vars:
+    libvirt_xpath:
+      xpath: "/domain/currentMemory"
+      state: 'absent'

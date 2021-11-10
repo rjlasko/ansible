@@ -12,6 +12,12 @@
   vars:
     libvirt_cpu: "{{ libvirt.vm.alter_domain.cpuset }}"
 
+- name: alter memory configuration
+  when: libvirt.vm.alter_domain.memset is defined
+  include: alter_memory.yml
+  vars:
+    libvirt_mem: "{{ libvirt.vm.alter_domain.memset }}"
+
 - name: attach disks
   when: libvirt.vm.alter_domain.disks is defined
   loop: "{{ libvirt.vm.alter_domain.disks }}"

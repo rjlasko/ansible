@@ -1,7 +1,7 @@
 ---
-## ----------------------------------------------------------------------- ##
-## Alter the topology and cpu affinity for a VM via its XML representation ##
-## ----------------------------------------------------------------------- ##
+## -------------------------------------------- ##
+## Alter the topology and cpu affinity for a VM ##
+## -------------------------------------------- ##
 
 - command: cat /proc/cpuinfo
   register: proc_cpuinfo

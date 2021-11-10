@@ -35,6 +35,10 @@
     - set_fact:
         selected_domain_xml: "{{ deferred_domain_xml.stdout }}"
 
+# - name: print selected_domain_xml
+#   debug:
+#     var: selected_domain_xml
+
 - name: alter XML by XPath "{{ libvirt_xpath.xpath }}"
   xml:
     xmlstring: "{{ selected_domain_xml }}"
@@ -46,7 +50,8 @@
     pretty_print: true
   register: altered_domain_xml
 
-# - debug:
+# - name: print altered_domain_xml
+#   debug:
 #     var: altered_domain_xml.xmlstring
 
 - name: capture deferred domain XML alteration
