@@ -1,0 +1,23 @@
+---
+## ------------------------------------- ##
+## Installs tmpreaper, to autoclean /tmp ##
+## ------------------------------------- ##
+
+- name: install tmpreaper
+  package:
+    name: tmpreaper
+
+- name: backup & restore /etc/tmpreaper.conf
+  include_role:
+    name: backup_restore
+  vars:
+    br_target: /etc/tmpreaper.conf
+
+- name: disable cron warning
+  ini_file:
+    path: /etc/tmpreaper.conf
+    section: null
+    option: SHOWWARNING
+    value: 'false'
+    no_extra_spaces: true
+    create: false
