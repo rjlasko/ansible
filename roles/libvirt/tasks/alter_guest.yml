@@ -6,17 +6,16 @@
 - name: shutdown VM
   include: shutdown_guest.yml
 
-- name: alter cpu topology and affinity
-  when: libvirt.vm.alter_domain.cpuset is defined
-  include: alter_cpus.yml
-  vars:
-    libvirt_cpu: "{{ libvirt.vm.alter_domain.cpuset }}"
+- name: apply CPU and Memory definitions
+  when: libvirt.vm.alter_domain.cpu_mem is defined
+  block:
+    - name: alter cpu topology and affinity
+      include: alter_cpus.yml
 
-- name: alter memory configuration
-  when: libvirt.vm.alter_domain.memset is defined
-  include: alter_memory.yml
+    - name: alter memory configuration
+      include: alter_memory.yml
   vars:
-    libvirt_mem: "{{ libvirt.vm.alter_domain.memset }}"
+    libvirt_cpumem: "{{ libvirt.vm.alter_domain.cpu_mem }}"
 
 - name: attach disks
   when: libvirt.vm.alter_domain.disks is defined

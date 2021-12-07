@@ -15,6 +15,11 @@
     - name: define custom container configuration
       include_tasks: container_config.yml
 
+    - name: merge user custom config
+      when: lxc.container.config is defined
+      set_fact:
+        lxc_custom_config: "{{ ( lxc.container.config ) | combine(lxc_custom_config | default({}), recursive=True) }}"
+
     - name: clear pre-existing container
       lxd_container:
         name: "{{ lxc.container.name | mandatory}}"

@@ -7,14 +7,14 @@
   register: proc_cpuinfo
 
 - name: configure vcpu
-  when: libvirt_cpu.vcpupin is defined
+  when: libvirt_cpumem.cpus is defined
   block:
     - name: alter topology by XPath
       include: alter_domain_xpaths.yml
       vars:
         alter_domain_xpaths:
           - xpath: /domain/vcpu
-            value: "{{ libvirt_cpu.vcpupin | length }}"
+            value: "{{ libvirt_cpumem.cpus | length }}"
             defer: 'initial'
           - xpath: /domain/cpu/topology
             attribute: sockets
@@ -26,7 +26,7 @@
             defer: true
           - xpath: /domain/cpu/topology
             attribute: cores
-            value: "{{ ( (libvirt_cpu.vcpupin | length) / ansible_facts.processor_threads_per_core ) | round(0, 'ceil') | int }}"
+            value: "{{ ( (libvirt_cpumem.cpus | length) / ansible_facts.processor_threads_per_core ) | round(0, 'ceil') | int }}"
             defer: true
           - xpath: /domain/cpu/topology
             attribute: threads
@@ -34,30 +34,30 @@
             defer: 'apply'
 
     - name: pin vcpus
-      loop: "{{ libvirt_cpu.vcpupin }}"
+      loop: "{{ libvirt_cpumem.cpus }}"
       loop_control:
         loop_var: vcpupin_cpuset
         index_var: vcpupin_idx
       command: "virsh vcpupin {{ libvirt.vm.name }} {{ vcpupin_idx }} {{ vcpupin_cpuset | asNative(proc_cpuinfo.stdout_lines) }} --config"
 
 - name: configure iothread pinning
-  when: libvirt_cpu.iothread is defined
+  when: libvirt_cpumem.io_cpus is defined
   block:
     - name: add iothread id
-      loop: "{{ libvirt_cpu.iothread }}"
+      loop: "{{ libvirt_cpumem.io_cpus }}"
       loop_control:
         index_var: iothread_idx
       command: "virsh iothreadadd {{ libvirt.vm.name }} {{ iothread_idx + 1 }} --config"
 
     - name: pin iothread
-      loop: "{{ libvirt_cpu.iothread }}"
+      loop: "{{ libvirt_cpumem.io_cpus }}"
       loop_control:
         loop_var: iothread_cpuset
         index_var: iothread_idx
       command: "virsh iothreadpin {{ libvirt.vm.name }} {{ iothread_idx + 1 }} {{ iothread_cpuset | asNative(proc_cpuinfo.stdout_lines) }} --config"
 
 - name: configure emulator emulator
-  when: libvirt_cpu.emulator is defined
+  when: libvirt_cpumem.emulator_cpus is defined
   block:
     - name: pin emulator
-      command: "virsh emulatorpin {{ libvirt.vm.name }} {{ libvirt_cpu.emulator | asNative(proc_cpuinfo.stdout_lines) }} --config"
+      command: "virsh emulatorpin {{ libvirt.vm.name }} {{ libvirt_cpumem.emulator_cpus | asNative(proc_cpuinfo.stdout_lines) }} --config"

@@ -8,11 +8,11 @@
   package:
     state: present
     name:
-      - "{{ 'python3-lxml' if ansible_python_version is version('3', '>=') else 'python-lxml' }}"
+      - python3-lxml
       - qemu-kvm
       # - qemu-system
       - qemu-utils
-      - "{{ 'python3-libvirt' if ansible_python_version is version('3', '>=') else 'python-libvirt' }}"
+      - python3-libvirt
       - libvirt-daemon-system
       - libvirt-clients
       - virtinst

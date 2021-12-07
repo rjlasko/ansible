@@ -3,26 +3,37 @@
 ## Assemble the custom configuration ##
 ## --------------------------------- ##
 
-- name: declare and or merge config to custom
-  when: lxc.container.config is defined
-  set_fact:
-    lxc_custom_config: "{{ lxc.container.config }}"
+# this should build `lxc_custom_config` for use externally
 
-- name: transform 'selected_cpus' into 'config.limits.cpu'
-  when: lxc.container.selected_cpus is defined
+- name: process cpu limits
+  when: >
+    lxc.container.cpu_mem is defined
+    and
+    lxc.container.cpu_mem.cpus is defined
   block:
     - command: cat /proc/cpuinfo
       register: proc_cpuinfo
-    - name: transform 'selected_cpus' into 'config.limits.cpu'
+    - name: transform 'cpus' into 'config.limits.cpu'
       set_fact:
-        lxc_custom_config_limits_cpu:
-           limits.cpu: "{{ lxc.container.selected_cpus | asNative(proc_cpuinfo.stdout_lines) }}"
+        lxc_custom_config:
+           limits.cpu: "{{ lxc.container.cpu_mem.cpus | asNative(proc_cpuinfo.stdout_lines) }}"
 
-    - name: merge limits.cpu into custom config
+- name: process memory limits
+  when: >
+    lxc.container.cpu_mem is defined
+    and
+    lxc.container.cpu_mem.memory is defined
+  block:
+    - name: transform 'memory' into 'config.limits.memory'
+      vars:
+        tmp_lxc_config:
+          limits.memory: "{{ lxc.container.cpu_mem.memory }}"
       set_fact:
-        lxc_custom_config: "{{ lxc_custom_config_limits_cpu | combine(lxc_custom_config | default({}), recursive=True) }}"
+        lxc_custom_config: "{{ ( lxc_custom_config | default({}) ) | combine(tmp_lxc_config, recursive=True) }}"
 
-- name: transform 'host_idmap' into 'config.raw.idmap'
+
+
+- name: process user + group + both idmap
   when: lxc.container.host_idmap is defined
   block:
     - name: load UID map
@@ -81,10 +92,9 @@
           set_fact:
             lxc_raw_idmap: "{{ lxc_raw_idmap | default([]) + [ 'gid ' + lxc_host_id | string + ' ' + lxc_host_id | string ] }}"
 
-    - set_fact:
-        lxc_custom_config_raw_idmap:
+    - name: transform 'host_idmap' into 'config.raw.idmap'
+      vars:
+        tmp_lxc_config:
           raw.idmap: "{{ lxc_raw_idmap | join('\n') }}"
-
-    - name: merge raw.idmap into custom config
       set_fact:
-        lxc_custom_config: "{{ lxc_custom_config_raw_idmap | combine(lxc_custom_config | default({}), recursive=True) }}"
+        lxc_custom_config: "{{ ( lxc_custom_config | default({}) ) | combine(tmp_lxc_config, recursive=True) }}"

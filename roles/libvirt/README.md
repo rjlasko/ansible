@@ -27,18 +27,13 @@ This Ansible role can be used to:
 - `check_ssh` - default(true) - VM start waits for SSH response to continue, requires `dns_address`
 - `dns_address` - network resolvable address used to verify restart
 - `alter_domain` - alters machine's XML definition
-    - `cpuset` - define CPU topology and affinity
-        - `iothread`
-            - `count` - number of iothreads to pin
-            - `physical_core_pool` - list of which host cpu cores to pin iothreads to
-            - `logical_set_size` - how many logical cores per iothread
-        - `vcpupin`
-            - `count` - number of vcpus to pin
-            - `physical_core_pool` - list of which host cpu cores to pin vcpus to
-            - `logical_set_size` - default(1) - how many logical cores per vcpu
-        - `emulator`
-            - `physical_core_pool` - list of which host cpu cores to pin emulator process to
-            - `logical_set_size` - default(1) - how many logical cores used by emulator process
+    - `cpu_mem` - define CPU topology and affinity
+        - `cpus` - list of natural (not native) cpu ids to assign the VM
+        - `emulator_cpus` - list of natural (not native) cpu ids to assign the VM's emulator processes
+        - `io_cpus` - list of natural (not native) cpu ids to assign the VM's IO processes
+        - `memory` - amount of memory to assign to the VM
+        - `hugepages` - indication of whether the memory should be pulled from hugepages pool
+        - `isolate` - indication of whether the VM's cpus should be isolated from host processes
     - `xpaths` - list of XPath modifications to domain XML
         - (list of definitions)
             - `xpath` - XPath to target XML element(s)
@@ -107,18 +102,13 @@ libvirt_vm:
               min: 16384
               max: -1
   alter_domain:
-    cpuset:
-      iothread:
-        count: 2
-        physical_core_pool: [1]
-        logical_set_size: 2
-      vcpupin:
-        count: 4
-        physical_core_pool: [2,3]
-        logical_set_size: 1
-      emulator:
-        physical_core_pool: [1]
-        logical_set_size: 2
+    cpu_mem:
+      cpus: "{{ range(16, 32) | list }}"
+      emulator_cpus: [14]
+      io_cpus: [15]
+      memory: "32GiB"
+      hugepages: true
+      isolate: true
     xpaths:
       - xpath: /domain/devices/disk[@device='cdrom']
         state: absent
@@ -150,18 +140,13 @@ libvirt_vm:
         - "--disk=/iso/os/windows/virtio-win-0.1.171.iso,device=cdrom,bus=sata"
         - "--disk=size=128,format=qcow2,io=threads,bus=virtio,serial=winbox-disk0"
   alter_domain:
-    cpuset:
-      iothread:
-        count: 2
-        physical_core_pool: [1]
-        logical_set_size: 2
-      vcpupin:
-        count: 4
-        physical_core_pool: [2,3]
-        logical_set_size: 1
-      emulator:
-        physical_core_pool: [1]
-        logical_set_size: 2
+    cpu_mem:
+      cpus: "{{ range(16, 32) | list }}"
+      emulator_cpus: [14]
+      io_cpus: [15]
+      memory: "32GiB"
+      hugepages: true
+      isolate: true
     xpaths:
       - xpath: /domain/devices/disk[@device='cdrom']
         state: absent
