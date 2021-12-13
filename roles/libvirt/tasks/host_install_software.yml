@@ -23,8 +23,10 @@
   # XXX: evaluate purpose
       # - libguestfs-tools
       # - genisoimage
+  register: libvirt_software_install
 
 - name: restart libvirtd
+  when: libvirt_software_install.changed
   service:
     name: libvirtd
     state: restarted

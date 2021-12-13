@@ -1,0 +1,59 @@
+---
+## ------------- ##
+## CPU isolation ##
+## ------------- ##
+
+- become: true
+  vars:
+    qemu_hook_path: /etc/libvirt/hooks/qemu
+    # qemu_hook_path: /tmp/x
+    qemu_isolated_guests_path: /etc/libvirt/hooks/isolated_guests.txt
+  block:
+    - when: libvirt.isolate is not defined
+      block:
+        - with_items:
+            - "{{ qemu_hook_path }}"
+            - "{{ qemu_isolated_guests_path }}"
+          file:
+            path: "{{ item }}"
+            state: absent
+          register: libvirt_isolate_update
+
+    - when: libvirt.isolate is defined
+      block:
+        - name: install python3 pip
+          package:
+            name: python3-pip
+
+        - name: install vfio-isolate library
+          pip:
+            name: vfio-isolate
+
+        - command: cat /proc/cpuinfo
+          register: proc_cpuinfo
+
+        - name: apply vfio-isolate from template
+          template:
+            src: isolate.sh.j2
+            dest: "{{ qemu_hook_path }}"
+            mode: ug=rx,o=r
+          vars:
+            libvirt_isolate:
+              vm_cpus: "{{ libvirt.isolate.cpuset | asNative(proc_cpuinfo.stdout_lines) }}"
+              host_cpus: "{{ range(0, ansible_facts.processor_vcpus) | difference(libvirt.isolate.cpuset) | asNative(proc_cpuinfo.stdout_lines) }}"
+              max_cpu_id: "{{ ansible_facts.processor_vcpus - 1 }}"
+              isolated_guests_filepath: "{{ qemu_isolated_guests_path }}"
+          register: libvirt_isolate_update
+
+        - name: create file with VMs to isolate from host
+          copy:
+            dest: "{{ qemu_isolated_guests_path }}"
+            content: "{{ libvirt.isolate.names | sort | unique | join('\n') }}\n"
+            mode: a=r
+
+    - name: restart libvirtd
+      when: libvirt_isolate_update.changed
+      service:
+        name: libvirtd
+        state: restarted
+        enabled: true
