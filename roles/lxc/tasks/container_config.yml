@@ -16,7 +16,7 @@
     - name: transform 'cpus' into 'config.limits.cpu'
       set_fact:
         lxc_custom_config:
-           limits.cpu: "{{ lxc.container.cpu_mem.cpus | asNative(proc_cpuinfo.stdout_lines) }}"
+           limits.cpu: "{{ lxc.container.cpu_mem.cpus | asNative(proc_cpuinfo.stdout_lines) | sort | unique | join(',') }}"
 
 - name: process memory limits
   when: >

@@ -71,15 +71,17 @@ class FilterModule(object):
                 natural_id += 1
         return vcpuMap
 
+    # FIXME? should this return a string?
     def asNative(self, natural_ids, proc_cpuinfo):
         vcpuMap = self.getVcpuMap(proc_cpuinfo)
         if isinstance(natural_ids, Iterable):
             ret = list()
             for i in natural_ids:
                 ret.append(self.asNative(i, proc_cpuinfo))
-            return ','.join(ret)
+            # return ','.join(ret)
+            return ret
         else:
-            return str(vcpuMap[natural_ids])
+            return vcpuMap[natural_ids]
 
 # XXX: for testing only
 # def readCpuInfo():
