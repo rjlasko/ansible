@@ -1,0 +1,8 @@
+---
+## ---------------------------------------- ##
+## Records the host key(s) for a given host ##
+## ---------------------------------------- ##
+
+- name: "Write the host key for {{ ssh_known_host }} to ~/.ssh/known_hosts"
+  # shell: "ssh-keyscan -H {{ ssh_known_host }} | sed 's/[^ ]* /{{ ssh_known_host }} /' >> ~/.ssh/known_hosts"
+  shell: "ssh-keyscan -H {{ ssh_known_host }} >> ~/.ssh/known_hosts"

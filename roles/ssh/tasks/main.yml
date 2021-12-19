@@ -19,6 +19,12 @@
     path: ~/.ssh/known_hosts
     state: absent
 
+- name: predefine known hosts
+  loop: "{{ ssh.known_hosts | default([]) }}"
+  loop_control:
+    loop_var: ssh_known_host
+  include: recognize_known_host.yml
+
 - name: purge authorized_keys
   when: ssh.purge_authorized_keys | default(false)
   file:
