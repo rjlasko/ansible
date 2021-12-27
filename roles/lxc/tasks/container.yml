@@ -39,6 +39,7 @@
     - name: create & (re)start container
       community.general.lxd_container:
         name: "{{ lxc.container.name }}"
+        type: "{{ lxc.container.type | default('container') }}"
         state: restarted
         source:
           server: "{{ lxc.container.server | default('https://images.linuxcontainers.org') }}"
