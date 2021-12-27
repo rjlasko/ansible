@@ -1,8 +1,17 @@
 #!/usr/bin/env python
 
 import re
-from collections import defaultdict, Iterable
+import traceback
+from collections import defaultdict
+from ansible.module_utils.common.text.converters import to_native
+from ansible.errors import AnsibleError, AnsibleFilterError
 
+# XXX: leverage PDB debugging
+# see https://stackoverflow.com/a/47278931/4027379
+# see: https://realpython.com/python-debugging-pdb/
+# import sys; sys.stdin = open('/dev/tty')
+# XXX: move this line to wherever we want to start debugging
+# import pdb; pdb.set_trace()
 
 class FilterModule(object):
     def filters(self):
@@ -71,25 +80,19 @@ class FilterModule(object):
                 natural_id += 1
         return vcpuMap
 
-    # FIXME? should this return a string?
-    def asNative(self, natural_ids, proc_cpuinfo):
+    def asNativeCore(self, natural_ids, proc_cpuinfo):
         vcpuMap = self.getVcpuMap(proc_cpuinfo)
-        if isinstance(natural_ids, Iterable):
+        try:
             ret = list()
             for i in natural_ids:
                 ret.append(self.asNative(i, proc_cpuinfo))
-            # return ','.join(ret)
             return ret
-        else:
+
+        except TypeError:
             return vcpuMap[natural_ids]
 
-# XXX: for testing only
-# def readCpuInfo():
-#     with open('/proc/cpuinfo') as f:
-#         lines = f.read().splitlines()
-#     return lines
-#
-# def rjl_test(myIds):
-#     cpuinfo_lines = readCpuInfo()
-#     x = FilterModule().asNative(myIds, cpuinfo_lines)
-#     print(x)
+    def asNative(self, natural_ids, proc_cpuinfo):
+        try:
+            return self.asNativeCore(natural_ids, proc_cpuinfo)
+        except Exception as e:
+            raise AnsibleFilterError("Custom plugin failure: {}\n{}".format(to_native(e), traceback.format_exc()))
