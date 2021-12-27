@@ -11,7 +11,7 @@
   snap:
     name: core
 
-- name: install LXD
+- name: install atom
   snap:
     name: atom
     channel: "{{ atom.version | default(omit) }}"
