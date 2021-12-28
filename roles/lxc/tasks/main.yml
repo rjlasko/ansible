@@ -13,8 +13,8 @@
 # TODO: where is the default backing storage located? ZFS dataset?
 # TODO: permissions supporting running docker in LXC
 
-- name: setup target as lxc container
-  when: lxc.container is defined
+- name: setup target as lxd instance
+  when: lxd.instance is defined
   include_tasks: container.yml
 
 

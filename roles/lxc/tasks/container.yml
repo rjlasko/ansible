@@ -1,60 +1,60 @@
 ---
 ## -------------------------- ##
-## Build or Restore Container ##
+## Build or Restore Instance ##
 ## -------------------------- ##
 
 - name: check invalid create mode
-  when: lxc.container.create_mode | mandatory not in ['skip', 'build']
+  when: lxd.instance.create_mode | mandatory not in ['skip', 'build']
   fail:
-    msg: "invalid lxc.container.create_mode: {{ lxc.container.create_mode }}"
+    msg: "invalid lxd.instance.create_mode: {{ lxd.instance.create_mode }}"
 
-- name: handle create container
-  when: lxc.container.create_mode == 'build'
+- name: handle create instance
+  when: lxd.instance.create_mode == 'build'
   block:
 
-    - name: define custom container configuration
+    - name: define custom instance configuration
       include_tasks: container_config.yml
 
     - name: merge user custom config
-      when: lxc.container.config is defined
+      when: lxd.instance.config is defined
       set_fact:
-        lxc_custom_config: "{{ ( lxc.container.config ) | combine(lxc_custom_config | default({}), recursive=True) }}"
+        lxd_custom_config: "{{ ( lxd.instance.config ) | combine(lxd_custom_config | default({}), recursive=True) }}"
 
-    - name: clear pre-existing container
-      lxd_container:
-        name: "{{ lxc.container.name | mandatory}}"
+    - name: clear pre-existing instance
+      community.general.lxd_container:
+        name: "{{ lxd.instance.name | mandatory}}"
         state: absent
         # TODO: do this only if trying without it fails
         force_stop: true
 
-    - name: initialize host directories for LXC container usage
-      when: lxc.file_drop is defined
+    - name: initialize host directories for LXD instance usage
+      when: lxd.file_drop is defined
       become: true
       # XXX: 'include_role' didn't seem to like 'become'
       import_role:
         name: file_drop
       vars:
-        file_drop: "{{ lxc.file_drop }}"
+        file_drop: "{{ lxd.file_drop }}"
 
-    - name: create & (re)start container
+    - name: create & (re)start instance
       community.general.lxd_container:
-        name: "{{ lxc.container.name }}"
-        type: "{{ lxc.container.type | default('container') }}"
+        name: "{{ lxd.instance.name }}"
+        type: "{{ lxd.instance.type | default(omit) }}"
         state: restarted
         source:
-          server: "{{ lxc.container.server | default('https://images.linuxcontainers.org') }}"
-          alias: "{{ lxc.container.alias | mandatory }}"
-          # 'simplstreams' seems more reliable than the default protocol 'lxd'
-          protocol: "{{ lxc.container.protocol | default('simplestreams') }}"
+          server: "{{ lxd.instance.server | default('https://images.linuxcontainers.org') }}"
+          alias: "{{ lxd.instance.alias | mandatory }}"
+          # 'simplestreams' seems more reliable than the default protocol 'lxd'
+          protocol: "{{ lxd.instance.protocol | default('simplestreams') }}"
           type: image
           mode: pull
-        config: "{{ lxc_custom_config | default(omit) }}"
-        devices: "{{ lxc.container.devices | default(omit) }}"
-        profiles: "{{ lxc.container.profiles | default(omit) }}"
+        config: "{{ lxd_custom_config | default(omit) }}"
+        devices: "{{ lxd.instance.devices | default(omit) }}"
+        profiles: "{{ lxd.instance.profiles | default(omit) }}"
         wait_for_ipv4_addresses: true
         timeout: 600
 
-- name: "wait for {{ lxc.container.name }} to respond with SSHd"
+- name: "wait for {{ lxd.instance.name }} to respond with SSHd"
   wait_for:
-    host: "{{ lxc.container.dns_address | mandatory }}"
+    host: "{{ lxd.instance.dns_address | mandatory }}"
     port: 22
