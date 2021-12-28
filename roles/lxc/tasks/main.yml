@@ -15,7 +15,7 @@
 
 - name: setup target as lxd instance
   when: lxd.instance is defined
-  include_tasks: container.yml
+  include_tasks: instance.yml
 
 
 
