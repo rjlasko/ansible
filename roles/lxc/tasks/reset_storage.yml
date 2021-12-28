@@ -4,14 +4,14 @@
 ## ---------------------------------------------------------------------------- ##
 
 - name: clear preseed zfs datasets detected
-  when: lxc_storage_pool.driver == 'zfs'
+  when: lxd_storage_pool.driver == 'zfs'
   block:
-    - name: "delete ZFS dataset: {{ lxc_storage_pool.driver }}"
+    - name: "delete ZFS dataset: {{ lxd_storage_pool.driver }}"
       include_role:
         name: zfs
         tasks_from: destroy_dataset
       vars:
-        zfs_target_dataset: "{{ lxc_storage_pool.config.source }}"
+        zfs_target_dataset: "{{ lxd_storage_pool.config.source }}"
         zfs_expected_children:
           - images
           - containers

@@ -1,12 +1,12 @@
 ---
-## ---------------------------------------------------------------- ##
-## Automates the installation and setup of LXC hosts and containers ##
-## ---------------------------------------------------------------- ##
+## --------------------------------------------------------------- ##
+## Automates the installation and setup of LXD hosts and instances ##
+## --------------------------------------------------------------- ##
 
 # XXX: https://github.com/lxc/lxd/tree/master/doc
 
-- name: install LXC to the host
-  when: lxc.host is defined
+- name: install LXD to the host
+  when: lxd.host is defined
   include_tasks: host.yml
 
 # XXX: externally add user to 'lxd' group
