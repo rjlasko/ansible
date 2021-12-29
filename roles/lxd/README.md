@@ -1,7 +1,6 @@
 # LXD
 
 ## TODO:
-* rename role and related variable prefixes from `lxc` to `lxd`
 * add support for `qemu` virtual machines
 * Virtual machine feature parity with `libvirt` role
 * Run, backup, snapshot, restore to/from ZFS

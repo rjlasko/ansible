@@ -1,0 +1,100 @@
+---
+## --------------------------------- ##
+## Assemble the custom configuration ##
+## --------------------------------- ##
+
+# this should build `lxd_custom_config` for use externally
+
+- name: process cpu limits
+  when: >
+    lxd.instance.cpu_mem is defined
+    and
+    lxd.instance.cpu_mem.cpus is defined
+  block:
+    - command: cat /proc/cpuinfo
+      register: proc_cpuinfo
+    - name: transform 'cpus' into 'config.limits.cpu'
+      set_fact:
+        lxd_custom_config:
+           limits.cpu: "{{ lxd.instance.cpu_mem.cpus | asNative(proc_cpuinfo.stdout_lines) | sort | unique | join(',') }}"
+
+- name: process memory limits
+  when: >
+    lxd.instance.cpu_mem is defined
+    and
+    lxd.instance.cpu_mem.memory is defined
+  block:
+    - name: transform 'memory' into 'config.limits.memory'
+      vars:
+        tmp_lxd_config:
+          limits.memory: "{{ lxd.instance.cpu_mem.memory }}"
+      set_fact:
+        lxd_custom_config: "{{ ( lxd_custom_config | default({}) ) | combine(tmp_lxd_config, recursive=True) }}"
+
+
+
+- name: process user + group + both idmap
+  when: lxd.instance.host_idmap is defined
+  block:
+    - name: load UID map
+      getent:
+        database: passwd
+    - name: load GID map
+      getent:
+        database: group
+
+    # the raw.idmap needs to have its ids appear in ascending order
+    - when: lxd.instance.host_idmap.both is defined
+      block:
+        - name: get UID from username
+          loop: "{{ lxd.instance.host_idmap.both }}"
+          loop_control:
+            loop_var: lxd_host_id
+          set_fact:
+            lxd_both_idmap: "{{ lxd_both_idmap | default([]) + [ ansible_facts.getent_passwd[lxd_host_id][1] | int ] }}"
+
+        - name: build raw "both" mapping
+          loop: "{{ lxd_both_idmap | sort }}"
+          loop_control:
+            loop_var: lxd_host_id
+          set_fact:
+            lxd_raw_idmap: "{{ lxd_raw_idmap | default([]) + [ 'both ' + lxd_host_id | string + ' ' + lxd_host_id | string ] }}"
+
+    - when: lxd.instance.host_idmap.users is defined
+      block:
+        - name: uid mapping
+          loop: "{{ lxd.instance.host_idmap.users }}"
+          loop_control:
+            loop_var: lxd_host_id
+          set_fact:
+            lxd_user_idmap: "{{ lxd_user_idmap | default([]) + [ ansible_facts.getent_passwd[lxd_host_id][1] | int ] }}"
+
+        - name: build raw "uid" mapping
+          loop: "{{ lxd_user_idmap | sort }}"
+          loop_control:
+            loop_var: lxd_host_id
+          set_fact:
+            lxd_raw_idmap: "{{ lxd_raw_idmap | default([]) + [ 'uid ' + lxd_host_id | string + ' ' + lxd_host_id | string ] }}"
+
+    - when: lxd.instance.host_idmap.groups is defined
+      block:
+        - name: gid mapping
+          loop: "{{ lxd.instance.host_idmap.groups }}"
+          loop_control:
+            loop_var: lxd_host_id
+          set_fact:
+            lxd_group_idmap: "{{ lxd_group_idmap | default([]) + [ ansible_facts.getent_group[lxd_host_id][1] | int ] }}"
+
+        - name: build raw "gid" mapping
+          loop: "{{ lxd_group_idmap | sort }}"
+          loop_control:
+            loop_var: lxd_host_id
+          set_fact:
+            lxd_raw_idmap: "{{ lxd_raw_idmap | default([]) + [ 'gid ' + lxd_host_id | string + ' ' + lxd_host_id | string ] }}"
+
+    - name: transform 'host_idmap' into 'config.raw.idmap'
+      vars:
+        tmp_lxd_config:
+          raw.idmap: "{{ lxd_raw_idmap | join('\n') }}"
+      set_fact:
+        lxd_custom_config: "{{ ( lxd_custom_config | default({}) ) | combine(tmp_lxd_config, recursive=True) }}"

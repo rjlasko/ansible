@@ -16,9 +16,9 @@
   command: snap remove lxd --purge
 
 - name: clear preseed storage_pools
-  loop: "{{ lxc.host.preseed.storage_pools }}"
+  loop: "{{ lxd.host.preseed.storage_pools | default([]) }}"
   loop_control:
-    loop_var: lxc_storage_pool
+    loop_var: lxd_storage_pool
   include: reset_storage.yml
 
 - name: install LXD
@@ -80,17 +80,17 @@
         snap_app_path: "{{ lxc_path }}"
 
 - name: init LXD without preseed
-  when: not lxc.host.preseed is defined
+  when: not lxd.host.preseed is defined
   command: lxd init --auto
 
 - name: init LXD from preseed
-  when: lxc.host.preseed is defined
+  when: lxd.host.preseed is defined
   command: "lxd init --preseed < "
   args:
-    stdin: "{{ lxc.host.preseed }}"
+    stdin: "{{ lxd.host.preseed }}"
 
 - name: apply extra profiles
-  loop: "{{ lxc.host.extra_profiles | default([]) }}"
+  loop: "{{ lxd.host.extra_profiles | default([]) }}"
   loop_control:
     loop_var: lxd_profile
   lxd_profile:
