@@ -23,6 +23,7 @@
     - name: clear pre-existing instance
       community.general.lxd_container:
         name: "{{ lxd.instance.name | mandatory}}"
+        type: "{{ lxd.instance.type | default(omit) }}"
         state: absent
         # TODO: do this only if trying without it fails
         force_stop: true
