@@ -5,33 +5,34 @@
 
 # this should build `lxd_custom_config` for use externally
 
-- name: process cpu limits
-  when: >
-    lxd.instance.cpu_mem is defined
-    and
-    lxd.instance.cpu_mem.cpus is defined
+- name: process cpu + memory limit overrides
+  when: lxd.instance.cpu_mem is defined
   block:
-    - command: cat /proc/cpuinfo
-      register: proc_cpuinfo
-    - name: transform 'cpus' into 'config.limits.cpu'
-      set_fact:
-        lxd_custom_config:
-           limits.cpu: "{{ lxd.instance.cpu_mem.cpus | asNative(proc_cpuinfo.stdout_lines) | sort | unique | join(',') }}"
+    - name: apply 'config.limits.cpu' override
+      when: lxd.instance.cpu_mem.cpus is defined
+      block:
+        - command: cat /proc/cpuinfo
+          register: proc_cpuinfo
+        - name: transform 'cpus' into 'config.limits.cpu'
+          set_fact:
+            lxd_custom_config:
+               limits.cpu: "{{ lxd.instance.cpu_mem.cpus | asNative(proc_cpuinfo.stdout_lines) | sort | unique | join(',') }}"
 
-- name: process memory limits
-  when: >
-    lxd.instance.cpu_mem is defined
-    and
-    lxd.instance.cpu_mem.memory is defined
-  block:
-    - name: transform 'memory' into 'config.limits.memory'
+    - name: apply 'config.limits.memory' override
+      when: lxd.instance.cpu_mem.memory is defined
       vars:
         tmp_lxd_config:
           limits.memory: "{{ lxd.instance.cpu_mem.memory }}"
       set_fact:
         lxd_custom_config: "{{ ( lxd_custom_config | default({}) ) | combine(tmp_lxd_config, recursive=True) }}"
 
-
+    - name: apply 'config.limits.memory.hugepages' override
+      when: lxd.instance.cpu_mem.hugepages is defined
+      vars:
+        tmp_lxd_config:
+          limits.memory.hugepages: "{{ lxd.instance.cpu_mem.hugepages | string }}"
+      set_fact:
+        lxd_custom_config: "{{ ( lxd_custom_config | default({}) ) | combine(tmp_lxd_config, recursive=True) }}"
 
 - name: process user + group + both idmap
   when: lxd.instance.host_idmap is defined
