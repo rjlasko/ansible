@@ -21,11 +21,13 @@
         lxd_custom_config: "{{ ( lxd.instance.config ) | combine(lxd_custom_config | default({}), recursive=True) }}"
 
     - name: clear pre-existing instance
+      with_items:
+        - container
+        - virtual-machine
       community.general.lxd_container:
         name: "{{ lxd.instance.name | mandatory}}"
-        type: "{{ lxd.instance.type | default(omit) }}"
+        type: "{{ item }}"
         state: absent
-        # TODO: do this only if trying without it fails
         force_stop: true
 
     - name: initialize host directories for LXD instance usage
