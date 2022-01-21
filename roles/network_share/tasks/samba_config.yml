@@ -12,4 +12,4 @@
     section: "{{ samba_config.section }}"
     option: "{{ samba_config_option[0] }}"
     value: "{{ samba_config_option[1] }}"
-    no_extra_spaces: no
+    no_extra_spaces: false

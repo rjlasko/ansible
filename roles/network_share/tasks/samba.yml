@@ -38,7 +38,7 @@
       loop: "{{ net_share.samba.config | default([]) }}"
       loop_control:
         loop_var: samba_config
-      include: samba_config.yml
+      include_tasks: samba_config.yml
 
     - name: restart SAMBA service
       service:
