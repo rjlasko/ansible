@@ -1,7 +1,7 @@
 ---
-## --------------------------------- ##
-## Assemble the custom configuration ##
-## --------------------------------- ##
+## ----------------------------- ##
+## Assemble custom configuration ##
+## ----------------------------- ##
 
 # this should build `lxd_custom_config` for use externally
 

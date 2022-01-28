@@ -12,14 +12,6 @@
   when: lxd.instance.create_mode == 'build'
   block:
 
-    - name: define custom instance configuration
-      include_tasks: instance_config.yml
-
-    - name: merge user custom config
-      when: lxd.instance.config is defined
-      set_fact:
-        lxd_custom_config: "{{ ( lxd.instance.config ) | combine(lxd_custom_config | default({}), recursive=True) }}"
-
     - name: clear pre-existing instance
       with_items:
         - container
@@ -38,6 +30,14 @@
         name: file_drop
       vars:
         file_drop: "{{ lxd.file_drop }}"
+
+    - name: define custom instance configuration
+      include_tasks: instance_config.yml
+
+    - name: merge and override instance base config with custom config
+      when: lxd.instance.config is defined
+      set_fact:
+        lxd_custom_config: "{{ ( lxd.instance.config ) | combine(lxd_custom_config | default({}), recursive=True) }}"
 
     - name: create & (re)start instance
       community.general.lxd_container:
