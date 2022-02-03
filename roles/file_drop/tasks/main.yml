@@ -3,6 +3,7 @@
 ## Copies templates and files ##
 ## -------------------------- ##
 
+# XXX: this command won't return non-zero if applied to non-existent files & directories
 - name: empty contents of directories
   loop: "{{ file_drop.empty | default([]) }}"
   loop_control:
