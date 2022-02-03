@@ -17,7 +17,7 @@
       register: crontab_staging_dir
 
     - name: stage provided crontab
-      copy:
+      template:
         src: "{{ crontab.file }}"
         dest: "{{ crontab_staging_dir.path }}/cron.tab"
         force: yes
