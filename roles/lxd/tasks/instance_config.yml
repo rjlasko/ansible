@@ -16,7 +16,17 @@
         - name: transform 'cpus' into 'config.limits.cpu'
           set_fact:
             lxd_custom_config:
-               limits.cpu: "{{ lxd.instance.cpu_mem.cpus | asNative(proc_cpuinfo.stdout_lines) | sort | unique | join(',') }}"
+              limits.cpu: "{{ lxd.instance.cpu_mem.cpus | asNative(proc_cpuinfo.stdout_lines) | sort | unique }}"
+        - name: handle multiple cores
+          when: lxd_custom_config['limits.cpu'] | length > 1
+          set_fact:
+            lxd_custom_config:
+              limits.cpu: "{{ lxd_custom_config['limits.cpu'] | join(',') }}"
+        - name: handle single core
+          when: lxd_custom_config['limits.cpu'] | length == 1
+          set_fact:
+            lxd_custom_config:
+              limits.cpu: "{{ lxd_custom_config['limits.cpu'][0] }}-{{ lxd_custom_config['limits.cpu'][0] }}"
 
     - name: apply 'config.limits.memory' override
       when: lxd.instance.cpu_mem.memory is defined
