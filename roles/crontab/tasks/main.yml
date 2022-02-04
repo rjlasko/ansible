@@ -15,29 +15,31 @@
       tempfile:
         state: directory
       register: crontab_staging_dir
-
     - name: stage provided crontab
       template:
         src: "{{ crontab.file }}"
         dest: "{{ crontab_staging_dir.path }}/cron.tab"
         force: yes
-    - command: crontab "{{ crontab_staging_dir.path }}/cron.tab"
+    - name: load staged crontab file
+      command: crontab "{{ crontab_staging_dir.path }}/cron.tab"
   always:
     - name: remove staging directory
       file:
         path: "{{ crontab_staging_dir.path }}"
         state: absent
 
-- name: MAILTO
-  when: crontab.mailto is defined
+- name: "insert crontab entry"
+  when: crontab.entries is defined
+  loop: "{{ crontab.entries }}"
+  loop_control:
+    loop_var: crontab_entry
   cron:
-    env: true
-    name: MAILTO
-    job: "{{ crontab.mailto }}"
-
-- name: PATH
-  when: crontab.path is defined
-  cron:
-    env: true
-    name: PATH
-    job: "{{ crontab.path }}"
+    name: "{{ crontab_entry.name | mandatory }}"
+    job: "{{ crontab_entry.job | mandatory }}"
+    env: "{{ crontab_entry.env | default(omit) }}"
+    special_time: "{{ crontab_entry.special_time | default(omit) }}"
+    minute: "{{ crontab_entry.crontime[0] if crontab_entry.crontime is defined else omit }}"
+    hour: "{{ crontab_entry.crontime[1] if crontab_entry.crontime is defined else omit }}"
+    day: "{{ crontab_entry.crontime[2] if crontab_entry.crontime is defined else omit }}"
+    month: "{{ crontab_entry.crontime[3] if crontab_entry.crontime is defined else omit }}"
+    weekday: "{{ crontab_entry.crontime[4] if crontab_entry.crontime is defined else omit }}"
