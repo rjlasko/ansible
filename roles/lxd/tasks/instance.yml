@@ -22,15 +22,6 @@
         state: absent
         force_stop: true
 
-    - name: initialize host directories for LXD instance usage
-      when: lxd.file_drop is defined
-      become: true
-      # XXX: 'include_role' didn't seem to like 'become'
-      import_role:
-        name: file_drop
-      vars:
-        file_drop: "{{ lxd.file_drop }}"
-
     - name: define custom instance configuration
       include_tasks: instance_config.yml
 
