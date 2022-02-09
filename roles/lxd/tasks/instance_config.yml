@@ -44,6 +44,14 @@
       set_fact:
         lxd_custom_config: "{{ ( lxd_custom_config | default({}) ) | combine(tmp_lxd_config, recursive=True) }}"
 
+    - name: apply 'config.limits.cpu.priority'
+      when: lxd.instance.cpu_mem.cpu_priority is defined
+      vars:
+        tmp_lxd_config:
+          limits.cpu.priority: "{{ lxd.instance.cpu_mem.cpu_priority }}"
+      set_fact:
+        lxd_custom_config: "{{ ( lxd_custom_config | default({}) ) | combine(tmp_lxd_config, recursive=True) }}"
+
 - name: process user + group + both idmap
   when: lxd.instance.host_idmap is defined
   block:

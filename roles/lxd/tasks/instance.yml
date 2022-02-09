@@ -22,7 +22,7 @@
         state: absent
         force_stop: true
 
-    - name: define custom instance configuration
+    - name: define custom instance configuration 'lxd_custom_config'
       include_tasks: instance_config.yml
 
     - name: merge and override instance base config with custom config
