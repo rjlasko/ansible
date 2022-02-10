@@ -17,7 +17,7 @@
         - container
         - virtual-machine
       community.general.lxd_container:
-        name: "{{ lxd.instance.name | mandatory}}"
+        name: "{{ lxd.instance.name | mandatory }}"
         type: "{{ item }}"
         state: absent
         force_stop: true
