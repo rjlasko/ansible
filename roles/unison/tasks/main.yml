@@ -27,4 +27,4 @@
 
     - name: install unison
       when: unison.versions is defined
-      include: install_unison.yml
+      include_tasks: install_unison.yml

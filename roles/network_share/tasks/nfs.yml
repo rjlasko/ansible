@@ -66,7 +66,7 @@
       loop: "{{ net_share.nfs }}"
       loop_control:
         loop_var: nfs_share
-      include: nfs_share.yml
+      include_tasks: nfs_share.yml
 
     - name: export udpated NFS shares
       command: "exportfs -r"
