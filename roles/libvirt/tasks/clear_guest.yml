@@ -16,7 +16,7 @@
     libvirt.vm.name in libvirt_existing_vms.list_vms
   block:
     - name: shutdown VM
-      include: shutdown_guest.yml
+      include_tasks: shutdown_guest.yml
 
     # XXX: the "nvram" option was introduced to delete VMs using UEFI
     - name: "undefine VM: {{ libvirt.vm.name }}"

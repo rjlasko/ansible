@@ -15,7 +15,7 @@
       loop: "{{ alter_domain_xpaths }}"
       loop_control:
         loop_var: alter_domain_xpath
-      include: alter_domain_xpath.yml
+      include_tasks: alter_domain_xpath.yml
       vars:
         libvirt_xpath: "{{ alter_domain_xpath }}"
         libvirt_defered_xml: "{{ temp_xml.path }}"

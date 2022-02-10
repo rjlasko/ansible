@@ -4,13 +4,13 @@
 ## --------------------------------- ##
 
 - name: update grub for VFIO
-  include: grub.yml
+  include_tasks: grub.yml
 
 - name: device discovery
-  include: discovery.yml
+  include_tasks: discovery.yml
 
 - name: setup initramfs
-  include: initramfs.yml
+  include_tasks: initramfs.yml
 
 # - fail:
 #     msg: boo

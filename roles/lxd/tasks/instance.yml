@@ -21,6 +21,8 @@
         type: "{{ item }}"
         state: absent
         force_stop: true
+        # XXX: ansible will always indicate a change when volatile options are present in the LXD config
+        ignore_volatile_options: false
 
     - name: define custom instance configuration 'lxd_custom_config'
       include_tasks: instance_config.yml
@@ -42,6 +44,8 @@
           protocol: "{{ lxd.instance.protocol | default('simplestreams') }}"
           type: image
           mode: pull
+        # XXX: ansible will always indicate a change when volatile options are present in the LXD config
+        ignore_volatile_options: false
         config: "{{ lxd_custom_config | default(omit) }}"
         devices: "{{ lxd.instance.devices | default(omit) }}"
         profiles: "{{ lxd.instance.profiles | default(omit) }}"

@@ -31,7 +31,7 @@
   loop_control:
     loop_var: libvirt_vm_domblklist_vol
   when: libvirt_vm_domblklist_vol | basename | splitext | first in libvirt_vm_backup_files
-  include: restore_disk_image.yml
+  include_tasks: restore_disk_image.yml
   vars:
     libvirt_vm_vol: "{{ libvirt_vm_domblklist_vol }}"
     libvirt_vm_xml: "{{ restored_domain_xml.get_xml }}"

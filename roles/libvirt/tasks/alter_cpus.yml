@@ -10,7 +10,7 @@
   when: libvirt_cpumem.cpus is defined
   block:
     - name: alter topology by XPath
-      include: alter_domain_xpaths.yml
+      include_tasks: alter_domain_xpaths.yml
       vars:
         alter_domain_xpaths:
           - xpath: /domain/vcpu

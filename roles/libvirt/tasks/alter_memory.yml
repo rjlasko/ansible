@@ -14,7 +14,7 @@
 
 - name: enable hugepages
   when: libvirt_cpumem.hugepages is defined and libvirt_cpumem.hugepages
-  include: alter_domain_xpaths.yml
+  include_tasks: alter_domain_xpaths.yml
   vars:
     alter_domain_xpaths:
       - xpath: "/domain"
@@ -28,7 +28,7 @@
 
 - name: disable hugepages
   when: libvirt_cpumem.hugepages is not defined or not libvirt_cpumem.hugepages
-  include: alter_domain_xpath.yml
+  include_tasks: alter_domain_xpath.yml
   vars:
     libvirt_xpath:
       xpath: "/domain/currentMemory"

@@ -19,7 +19,7 @@
   become: true
   block:
     - name: install software
-      include: host_install_software.yml
+      include_tasks: host_install_software.yml
 
     - name: define LIBVIRT_DEFAULT_URI in all environments
       when: libvirt.host.default_uri is defined
@@ -32,7 +32,7 @@
 
     - name: install network bridge
       when: libvirt.host.bridge is defined
-      include: network_bridge.yml
+      include_tasks: network_bridge.yml
 
     # FIXME: seems to miss adding the group to 'libvirt_qemu'
     - name: grant user permissions to run Virtual Machine Manager
@@ -49,7 +49,7 @@
       loop: "{{ libvirt.host.pools | default([]) }}"
       loop_control:
         loop_var: libvirt_pool_item
-      include: manage_pool.yml
+      include_tasks: manage_pool.yml
       vars:
         libvirt_pool: "{{ libvirt_pool_item }}"
 

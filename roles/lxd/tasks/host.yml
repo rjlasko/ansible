@@ -19,7 +19,7 @@
   loop: "{{ lxd.host.preseed.storage_pools | default([]) }}"
   loop_control:
     loop_var: lxd_storage_pool
-  include: reset_storage.yml
+  include_tasks: reset_storage.yml
 
 - name: install LXD
   snap:

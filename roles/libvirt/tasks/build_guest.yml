@@ -54,4 +54,4 @@
         argv: "{{ [virt_install_cmd] + [virt_install_name] + virt_install_given_args + [virt_install_iso_cdrom] }}"
 
 - name: "conclude build with {{ libvirt.vm.name }} in running state"
-  include: start_guest.yml
+  include_tasks: start_guest.yml
