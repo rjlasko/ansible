@@ -37,8 +37,8 @@
 
     - name: "handle novel key generation for '{{ ssh_key_user }}'"
       when: ssh_key_def.source is not defined
-      include: create_key.yml
+      include_tasks: create_key.yml
 
     - name: "handle provided key insertion for '{{ ssh_key_user }}'"
       when: ssh_key_def.source is defined
-      include: copy_keys.yml
+      include_tasks: copy_keys.yml

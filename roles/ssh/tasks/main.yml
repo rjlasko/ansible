@@ -5,13 +5,13 @@
 
 - name: purge existing SSH keys
   when: ssh.purge_keys | default(false)
-  include: purge_keys.yml
+  include_tasks: purge_keys.yml
 
 - name: loop over given key definitions
   loop: "{{ ssh.key_definitions | default([]) }}"
   loop_control:
     loop_var: ssh_key_def
-  include: define_key.yml
+  include_tasks: define_key.yml
 
 - name: purge known_hosts
   when: ssh.purge_known_hosts | default(false)
@@ -23,7 +23,7 @@
   loop: "{{ ssh.known_hosts | default([]) }}"
   loop_control:
     loop_var: ssh_known_host
-  include: recognize_known_host.yml
+  include_tasks: recognize_known_host.yml
 
 - name: purge authorized_keys
   when: ssh.purge_authorized_keys | default(false)
@@ -35,7 +35,7 @@
   loop: "{{ ssh.authorized_keys | default([]) }}"
   loop_control:
     loop_var: authorized_key
-  include: authorize_key.yml
+  include_tasks: authorize_key.yml
 
 - name: authorize SSH self-login
   when: ssh.authorize_self | default(false)
@@ -52,6 +52,6 @@
       register: user_pubkey
 
     - name: set user's SSH key as authorized
-      include: authorize_key.yml
+      include_tasks: authorize_key.yml
       vars:
         authorized_key: "{{ user_pubkey.stdout }}"
