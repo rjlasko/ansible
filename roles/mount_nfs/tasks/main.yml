@@ -26,4 +26,4 @@
   loop: "{{ nfs_mounts }}"
   loop_control:
     loop_var: mount
-  include: mount.yml
+  include_tasks: mount.yml

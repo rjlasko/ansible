@@ -24,7 +24,7 @@
   loop: "{{ simple_disks | default([]) }}"
   loop_control:
     loop_var: simple_disk
-  include: dismount_disk_partitions.yml
+  include_tasks: dismount_disk_partitions.yml
 
 - name: update ansible_facts for mounts
   setup:
@@ -37,7 +37,7 @@
   loop: "{{ simple_disks | default([]) }}"
   loop_control:
     loop_var: simple_disk
-  include: build_disk.yml
+  include_tasks: build_disk.yml
 
 - name: update ansible_facts for mounts
   setup:
