@@ -1,0 +1,20 @@
+libvirt_host_packages:
+  debian:
+    backports:
+      - qemu-kvm
+      - qemu-utils
+      - libvirt-daemon-system
+      - libvirt-clients
+
+    # backports:
+    #   - qemu-system
+    stable:
+      - python3-lxml
+      - python3-libvirt
+      - virtinst
+      - virt-manager
+      - ovmf
+  # evaluate_at_a_later_date:
+    # - libguestfs-tools
+    # - genisoimage
+    # ovirt (instead of virt-manager)

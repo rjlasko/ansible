@@ -3,30 +3,31 @@
 ## Installs libvirt and related libraries & utilities ##
 ## -------------------------------------------------- ##
 
+- when: ansible_facts['distribution'] != 'Debian'
+  fail:
+    msg: only tested for Debian
 
-- name: install libvirt libraries and tools
-  package:
-    state: present
-    name:
-      - python3-lxml
-      - qemu-kvm
-      # - qemu-system
-      - qemu-utils
-      - python3-libvirt
-      - libvirt-daemon-system
-      - libvirt-clients
-      - virtinst
-  # TODO: checkout "ovirt" instead of "virt-manager"
-      - virt-manager
-  # XXX: UEFI support for VMs
-      - ovmf
-  # XXX: evaluate purpose
-      # - libguestfs-tools
-      # - genisoimage
-  register: libvirt_software_install
+- name: install backported packages
+  when: libvirt.host.backport | default(false)
+  apt:
+    name: "{{ libvirt_host_packages.debian.backports }}"
+    state: latest
+    autoremove: true
+    default_release: "{{ ansible_facts['distribution_release'] }}-backports"
+  register: libvirt_backport_packages
+
+- name: install stable packages
+  apt:
+    name: "{{
+      libvirt_host_packages.debian.stable +
+      ([] if (libvirt.host.backport | default(false)) else libvirt_host_packages.debian.backports)
+    }}"
+    state: latest
+    autoremove: true
+  register: libvirt_stable_packages
 
 - name: restart libvirtd
-  when: libvirt_software_install.changed
+  when: libvirt_stable_packages.changed or libvirt_backport_packages.changed
   service:
     name: libvirtd
     state: restarted
