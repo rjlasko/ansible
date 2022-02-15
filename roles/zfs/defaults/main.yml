@@ -1,0 +1,13 @@
+zfs_supported_distros:
+  - Debian
+  - Ubuntu
+  - Pop!_OS
+
+zfs_dkms_plus_dependencies:
+  Debian:
+    - dpkg-dev
+    - "linux-headers-{{ ansible_facts['kernel'] }}"
+    - linux-image-amd64
+  Pop!_OS:
+    - dpkg-dev
+    - "linux-headers-{{ ansible_facts['kernel'] }}"

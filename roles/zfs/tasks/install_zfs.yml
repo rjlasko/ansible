@@ -5,19 +5,47 @@
 
 
 - name: fail on unsupported distributions
-  when: >
-    ansible_facts['distribution'] != 'Debian' and
-    ansible_facts['distribution'] != 'Ubuntu' and
-    ansible_facts['distribution'] != 'Pop!_OS'
+  when: ansible_facts['distribution'] not in zfs_supported_distros
   fail:
-    msg: "Only supports Debian based distributions"
+    msg: "Only supports distributions: {{ zfs_supported_distros | string }}"
 
-- name: Install ZFS on Debian
-  when: ansible_facts['distribution'] == 'Debian'
-  include_tasks: install_zfs_debian.yml
+- name: detect if kernel module is available to be loaded
+  find:
+    path: "/lib/modules/{{ ansible_facts['kernel'] }}"
+    file_type: directory
+    recurse: true
+    pattern: "zfs"
+  register: zfs_detect_modules
 
-- name: Install ZFS on Ubuntu variants
-  when: >
-    ansible_facts['distribution'] == 'Ubuntu' or
-    ansible_facts['distribution'] == 'Pop!_OS'
-  include_tasks: install_zfs_ubuntu.yml
+- when: (zfs_detect_modules.files | length) == 0
+  block:
+    - when: ansible_facts['distribution'] not in zfs_dkms_plus_dependencies
+      fail:
+        msg: "ZFS DKMS dependencies for {{ ansible_facts['distribution'] }} have not been defined!"
+
+    - name: add build dependencies
+      package:
+        name: "{{ zfs_dkms_plus_dependencies[ansible_facts['distribution']] }}"
+        state: present
+
+    - name: install ZFS via Dynamic Kernal Module Support
+      # it is likely that this will fail when ZFS disks, new to this system, are
+      # detected upon installation. Continue despite this, knowing latter tasks
+      # will fail if there is an issue.
+      # We have observed this behavior in Debian, and accept it
+      ignore_errors: "{{ ansible_facts['distribution'] == 'Debian' }}"
+      package:
+        name:
+          - zfs-dkms
+        state: present
+
+
+- name: load ZFS module into the kernel
+  modprobe:
+    name: zfs
+    state: present
+
+- name: install zfsutils-linux
+  package:
+    name: zfsutils-linux
+    state: present
