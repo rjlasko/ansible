@@ -3,22 +3,20 @@
 ## Set the hostname ##
 ## ---------------- ##
 
-- name: get the current hostname
-  command: hostname
-  register: initial_hostname
-
-- name: only try to change the hostname if there is a difference
-  when: new_hostname != initial_hostname.stdout
+- name: change hostname if the new name is different than the current
+  vars:
+    hostname_new: "{{ new_hostname | default(inventory_hostname )}}"
+  when: new_hostname != ansible_hostname
   block:
     - name: change the hostname
       hostname:
-        name: "{{ new_hostname }}"
+        name: "{{ hostname_new }}"
 
     - name: change the hostname in the /etc/hosts
       replace:
         path: /etc/hosts
-        regexp: '(?i){{ initial_hostname.stdout }}'
-        replace: "{{ new_hostname }}"
+        regexp: '(?i){{ ansible_hostname }}'
+        replace: "{{ hostname_new }}"
 
     - name: reboot
       reboot:
