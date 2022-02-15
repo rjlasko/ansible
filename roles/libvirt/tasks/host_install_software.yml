@@ -3,30 +3,41 @@
 ## Installs libvirt and related libraries & utilities ##
 ## -------------------------------------------------- ##
 
+- when: ansible_facts['distribution'] not in libvirt_host_packages
+  fail:
+    msg: "libvirt role not tested for {{ ansible_facts['distribution'] }}"
 
-- name: install libvirt libraries and tools
-  package:
-    state: present
-    name:
-      - python3-lxml
-      - qemu-kvm
-      # - qemu-system
-      - qemu-utils
-      - python3-libvirt
-      - libvirt-daemon-system
-      - libvirt-clients
-      - virtinst
-  # TODO: checkout "ovirt" instead of "virt-manager"
-      - virt-manager
-  # XXX: UEFI support for VMs
-      - ovmf
-  # XXX: evaluate purpose
-      # - libguestfs-tools
-      # - genisoimage
-  register: libvirt_software_install
+- name: install packages
+  vars:
+    libvirt_backported_install: "{{
+      (libvirt.host.backport | default(false))
+      and (libvirt_host_packages[ansible_facts['distribution']].backports is defined)
+    }}"
+  block:
+    - debug:
+        var: libvirt_backported_install
+
+    - name: install backported packages
+      when: libvirt_backported_install
+      apt:
+        name: "{{ libvirt_host_packages[ansible_facts['distribution']].backports }}"
+        state: latest
+        autoremove: true
+        default_release: "{{ ansible_facts['distribution_release'] }}-backports"
+      register: libvirt_backport_packages
+
+    - name: install stable packages
+      apt:
+        name: "{{
+          libvirt_host_packages[ansible_facts['distribution']].stable +
+          (libvirt_host_packages[ansible_facts['distribution']].backports if libvirt_backported_install else [])
+        }}"
+        state: latest
+        autoremove: true
+      register: libvirt_stable_packages
 
 - name: restart libvirtd
-  when: libvirt_software_install.changed
+  when: libvirt_stable_packages.changed or libvirt_backport_packages.changed
   service:
     name: libvirtd
     state: restarted
