@@ -1,0 +1,28 @@
+---
+## -------------------- ##
+## Configures qemu.conf ##
+## -------------------- ##
+
+
+- name: "backup & restore {{ qemu_cfg_path }}"
+  include_role:
+    name: backup_restore
+  vars:
+    br_target: "{{ qemu_cfg_path }}"
+
+- loop:
+    - [ '#user =', 'user = "{{ libvirt.host.qemu_user | mandatory }}"' ]
+    - [ '#group =', 'group = "{{ libvirt.host.qemu_group | mandatory }}"' ]
+  loop_control:
+    loop_var: qemu_cfg_var
+  lineinfile:
+    path: "{{ qemu_cfg_path }}"
+    regexp: "{{ qemu_cfg_var[0] }}"
+    line: "{{ qemu_cfg_var[1] }}"
+    state: present
+
+- name: restart libvirtd
+  service:
+    name: libvirtd
+    state: restarted
+    enabled: true

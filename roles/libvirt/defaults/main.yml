@@ -29,3 +29,8 @@ libvirt_host_packages:
     # - libguestfs-tools
     # - genisoimage
     # ovirt (instead of virt-manager)
+
+qemu_hook_path: /etc/libvirt/hooks/qemu
+qemu_isolated_guests_path: /etc/libvirt/hooks/isolated_guests.txt
+libvirtd_cfg_path: /etc/libvirt/libvirtd.conf
+qemu_cfg_path: /etc/libvirt/qemu.conf

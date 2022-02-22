@@ -18,8 +18,14 @@
 - name: install software, configure virtualized resources, permissions
   become: true
   block:
-    - name: install software
-      include_tasks: host_install_software.yml
+    - name: install & configure software
+      loop:
+        - host_install_software.yml
+        - config_libvirt.yml
+        - config_qemu.yml
+      loop_control:
+        loop_var: libvirt_build_proc
+      include_tasks: "{{ libvirt_build_proc }}"
 
     - name: define LIBVIRT_DEFAULT_URI in all environments
       when: libvirt.host.default_uri is defined

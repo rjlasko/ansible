@@ -1,0 +1,30 @@
+---
+## ------------------------ ##
+## Configures libvirtd.conf ##
+## ------------------------ ##
+
+
+- name: "backup & restore {{ libvirtd_cfg_path }}"
+  include_role:
+    name: backup_restore
+  vars:
+    br_target: "{{ libvirtd_cfg_path }}"
+
+- loop:
+    - [ '.*unix_sock_group', 'unix_sock_group = "libvirt"' ]
+    - [ '.*unix_sock_rw_perms', 'unix_sock_rw_perms = "0770"' ]
+    - [ '.*log_filters', 'log_filters="1:qemu"' ]
+    - [ '.*log_outputs', 'log_outputs="1:file:/var/log/libvirt/libvirtd.log"' ]
+  loop_control:
+    loop_var: libvirt_cfg_var
+  lineinfile:
+    path: "{{ libvirtd_cfg_path }}"
+    regexp: "{{ libvirt_cfg_var[0] }}"
+    line: "{{ libvirt_cfg_var[1] }}"
+    state: present
+
+- name: restart libvirtd
+  service:
+    name: libvirtd
+    state: restarted
+    enabled: true
