@@ -15,8 +15,8 @@
     state: directory
     mode: u=rwx,g=rwx,o-rwx
     recurse: false
-    owner: libvirt-qemu
-    group: libvirt-qemu
+    owner: "{{ libvirt.host.qemu_user | mandatory }}"
+    group: "{{ libvirt.host.qemu_group | mandatory }}"
 
 - name: undefine pre-existing pool
   when: >

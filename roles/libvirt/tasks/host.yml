@@ -40,16 +40,16 @@
       when: libvirt.host.bridge is defined
       include_tasks: network_bridge.yml
 
-    # FIXME: seems to miss adding the group to 'libvirt_qemu'
-    - name: grant user permissions to run Virtual Machine Manager
-      loop: "{{ libvirt.host.users | default([]) }}"
-      loop_control:
-        loop_var: libvirt_user
-      user:
-        name: "{{ libvirt_user }}"
-        groups: libvirt,libvirt-qemu
-        append: true
-        create_home: false
+    # # FIXME: seems to miss adding the group to 'libvirt_qemu'
+    # - name: grant user permissions to run Virtual Machine Manager
+    #   loop: "{{ libvirt.host.users | default([]) }}"
+    #   loop_control:
+    #     loop_var: libvirt_user
+    #   user:
+    #     name: "{{ libvirt_user }}"
+    #     groups: libvirt,libvirt-qemu
+    #     append: true
+    #     create_home: false
 
     - name: manage storage pools
       loop: "{{ libvirt.host.pools | default([]) }}"
@@ -59,9 +59,9 @@
       vars:
         libvirt_pool: "{{ libvirt_pool_item }}"
 
-    - name: grant user 'libvirt-qemu' read-write access to libvirt pools
-      user:
-        name: libvirt-qemu
-        groups: libvirt
-        append: true
-        create_home: false
+    # - name: grant user 'libvirt-qemu' read-write access to libvirt pools
+    #   user:
+    #     name: libvirt-qemu
+    #     groups: libvirt
+    #     append: true
+    #     create_home: false

@@ -4,12 +4,8 @@
 ## ------------- ##
 
 - become: true
-  vars:
-    qemu_hook_path: /etc/libvirt/hooks/qemu
-    # qemu_hook_path: /tmp/x
-    qemu_isolated_guests_path: /etc/libvirt/hooks/isolated_guests.txt
   block:
-    - when: libvirt.isolate is not defined
+    - when: libvirt.isolate is not defined or (libvirt.isolate | length) == 0
       block:
         - with_items:
             - "{{ qemu_hook_path }}"
@@ -19,7 +15,7 @@
             state: absent
           register: libvirt_isolate_update
 
-    - when: libvirt.isolate is defined
+    - when: libvirt.isolate is defined and (libvirt.isolate | length) > 0
       block:
         - name: install python3 pip
           package:
