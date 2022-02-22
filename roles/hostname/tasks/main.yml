@@ -3,20 +3,23 @@
 ## Set the hostname ##
 ## ---------------- ##
 
+- set_fact:
+    hostname:
+      new: "{{ hostname.new | default(inventory_hostname )}}"
+      old: "{{ ansible_hostname }}"
+
 - name: change hostname if the new name is different than the current
-  vars:
-    hostname_new: "{{ new_hostname | default(inventory_hostname )}}"
-  when: new_hostname != ansible_hostname
+  when: hostname.new != hostname.old
   block:
     - name: change the hostname
       hostname:
-        name: "{{ hostname_new }}"
+        name: "{{ hostname.new }}"
 
     - name: change the hostname in the /etc/hosts
       replace:
         path: /etc/hosts
-        regexp: '(?i){{ ansible_hostname }}'
-        replace: "{{ hostname_new }}"
+        regexp: "{{ hostname.old }}"
+        replace: "{{ hostname.new }}"
 
     - name: reboot
       reboot:
