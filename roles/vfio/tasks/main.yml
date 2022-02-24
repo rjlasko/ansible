@@ -3,8 +3,17 @@
 ## VFIO setup for device passthrough ##
 ## --------------------------------- ##
 
-- name: update grub for VFIO
-  include_tasks: grub.yml
+- name: verify host hardware supports iommu
+  command: grep -E '^flags.*(svm|vmx)' /proc/cpuinfo
+
+# see: https://wiki.archlinux.org/title/Kernel_parameters#GRUB
+- name: update bootloader linux command line parameters for VFIO
+  vars:
+    grub_filepath: /etc/default/grub
+    grub_cmdline: GRUB_CMDLINE_LINUX_DEFAULT
+    kernelstub_cfgpath: /etc/kernelstub/configuration
+    kernelstub_cfg_backup: /etc/default/kernelstub.configuration.BAK
+  include_tasks: "{{ vfio_cmdline_updater[vfio_bootloaders[ansible_facts['distribution']]] }}"
 
 - name: device discovery
   include_tasks: discovery.yml

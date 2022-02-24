@@ -1,0 +1,16 @@
+vfio_bootloaders:
+  Debian: grub
+  Ubuntu: grub
+  Pop!_OS: kernelstub
+
+vfio_cmdline_updater:
+  grub: grub.yml
+  kernelstub: kernelstub.yml
+
+vfio_arch_cmdline:
+  GenuineIntel:
+    intel_iommu: 'on'
+    iommu: pt
+  AuthenticAMD:
+    amd_iommu: 'on'
+    iommu: pt

@@ -1,0 +1,68 @@
+---
+## ------------------------------------------------ ##
+## Setup kernel options via kernelstub boot manager ##
+## ------------------------------------------------ ##
+
+- name: verify kernelstub is the boot manager
+  stat:
+    path: "{{ kernelstub_cfgpath }}"
+  register: kernelstub_cfg
+  failed_when: not kernelstub_cfg.stat.exists
+
+- name: check if original boot options were previously backed up
+  stat:
+    path: "{{ kernelstub_cfg_backup }}"
+  register: kstub_bkp
+
+- name: backup original kernelstub configuration
+  when: not kstub_bkp.stat.exists
+  copy:
+    dest: "{{ kernelstub_cfg_backup }}"
+    src: "{{ kernelstub_cfgpath }}"
+    remote_src: true
+    mode: u=r,go-rwx
+    owner: root
+    group: root
+
+- name: read original configuration
+  command: "cat {{ kernelstub_cfg_backup }}"
+  register: kstub_cfg_dump
+
+- name: load original kernel boot options
+  vars:
+    kernel_boot_options: "{{ (kstub_cfg_dump.stdout | from_json).user.kernel_options }}"
+  when: kstub_bkp.stat.exists
+  command: "kernelstub -o \"{{ kernel_boot_options | join(' ') }}\""
+
+- name: build map of kernel cmdline options
+  loop: "{{ (kstub_cfg_dump.stdout | from_json).user.kernel_options }}"
+  loop_control:
+    loop_var: kernel_option
+  vars:
+    kopt: "{{ kernel_option.split('=') }}"
+  set_fact:
+    option_map: "{{ (option_map | default({})) | combine({kopt[0] : kopt[1] if (kopt | length > 1) else None}, recursive=True) }}"
+
+- name: delete changed kernel options
+  loop: "{{ vfio_arch_cmdline[ansible_facts.processor[1]] | combine(vfio.cmdline_extra | default({})) | dict2items }}"
+  loop_control:
+    loop_var: param
+  when: >
+    param.key in option_map
+    and option_map[param.key] != (param.value | default(None))
+  command: "kernelstub --delete-options \"{{ param.key }}{{ ('=' + option_map[param.key] | string) if option_map[param.key] else '' }}\""
+
+- name: add new or changed kernel options
+  loop: "{{ vfio_arch_cmdline[ansible_facts.processor[1]] | combine(vfio.cmdline_extra | default({})) | dict2items }}"
+  loop_control:
+    loop_var: param
+  when: >
+    param.key not in option_map
+    or (
+      param.key in option_map
+      and option_map[param.key] != (param.value | default(None))
+    )
+  command: "kernelstub --add-options \"{{ param.key }}{{ ('=' + param.value | string) if param.value else '' }}\""
+
+- reboot:
+    reboot_timeout: 600
