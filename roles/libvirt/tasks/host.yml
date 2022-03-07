@@ -23,6 +23,7 @@
         - host_install_software.yml
         - config_libvirt.yml
         - config_qemu.yml
+        - init_qemu_hooks.yml
       loop_control:
         loop_var: libvirt_build_proc
       include_tasks: "{{ libvirt_build_proc }}"
@@ -40,17 +41,6 @@
       when: libvirt.host.bridge is defined
       include_tasks: network_bridge.yml
 
-    # # FIXME: seems to miss adding the group to 'libvirt_qemu'
-    # - name: grant user permissions to run Virtual Machine Manager
-    #   loop: "{{ libvirt.host.users | default([]) }}"
-    #   loop_control:
-    #     loop_var: libvirt_user
-    #   user:
-    #     name: "{{ libvirt_user }}"
-    #     groups: libvirt,libvirt-qemu
-    #     append: true
-    #     create_home: false
-
     - name: manage storage pools
       loop: "{{ libvirt.host.pools | default([]) }}"
       loop_control:
@@ -58,10 +48,3 @@
       include_tasks: manage_pool.yml
       vars:
         libvirt_pool: "{{ libvirt_pool_item }}"
-
-    # - name: grant user 'libvirt-qemu' read-write access to libvirt pools
-    #   user:
-    #     name: libvirt-qemu
-    #     groups: libvirt
-    #     append: true
-    #     create_home: false

@@ -5,7 +5,6 @@ libvirt_host_packages:
       - qemu-utils
       - libvirt-daemon-system
       - libvirt-clients
-
     stable:
       - python3-lxml
       - python3-libvirt
@@ -30,7 +29,11 @@ libvirt_host_packages:
     # - genisoimage
     # ovirt (instead of virt-manager)
 
-qemu_hook_path: /etc/libvirt/hooks/qemu
-qemu_isolated_guests_path: /etc/libvirt/hooks/isolated_guests.txt
 libvirtd_cfg_path: /etc/libvirt/libvirtd.conf
 qemu_cfg_path: /etc/libvirt/qemu.conf
+
+libvirt_hooks_path: /etc/libvirt/hooks
+qemu_hooks_path: "{{ libvirt_hooks_path }}/qemu.d"
+qemu_guest_hook_path: "{{ qemu_hooks_path }}/01_guest_hooks.sh"
+qemu_isolate_hook_path: "{{ qemu_hooks_path }}/02_isolation_hook.sh"
+qemu_isolated_guests_path: "{{ libvirt_hooks_path }}/isolated_guests.txt"

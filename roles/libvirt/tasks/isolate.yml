@@ -6,14 +6,9 @@
 - become: true
   block:
     - when: libvirt.isolate is not defined or (libvirt.isolate | length) == 0
-      block:
-        - with_items:
-            - "{{ qemu_hook_path }}"
-            - "{{ qemu_isolated_guests_path }}"
-          file:
-            path: "{{ item }}"
-            state: absent
-          register: libvirt_isolate_update
+      file:
+        path: "{{ qemu_isolated_guests_path }}"
+        state: absent
 
     - when: libvirt.isolate is defined and (libvirt.isolate | length) > 0
       block:
@@ -31,7 +26,7 @@
         - name: apply vfio-isolate from template
           template:
             src: isolate.sh.j2
-            dest: "{{ qemu_hook_path }}"
+            dest: "{{ qemu_isolate_hook_path }}"
             mode: ug=rx,o=r
           vars:
             libvirt_isolate:
@@ -39,7 +34,6 @@
               host_cpus: "{{ range(0, ansible_facts.processor_vcpus) | difference(libvirt.isolate.cpuset) | asNative(proc_cpuinfo.stdout_lines) }}"
               max_cpu_id: "{{ ansible_facts.processor_vcpus - 1 }}"
               isolated_guests_filepath: "{{ qemu_isolated_guests_path }}"
-          register: libvirt_isolate_update
 
         - name: create file with VMs to isolate from host
           copy:
@@ -48,7 +42,6 @@
             mode: a=r
 
     - name: restart libvirtd
-      when: libvirt_isolate_update.changed
       service:
         name: libvirtd
         state: restarted
