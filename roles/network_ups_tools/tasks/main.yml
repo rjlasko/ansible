@@ -43,10 +43,10 @@
     line: "MODE={{ nut.mode }}"
 
 - when: nut.mode == "standalone"
-  import_tasks: server.yml
+  include_tasks: server.yml
 
 - when: nut.mode == "netclient" or nut.mode == "standalone"
-  import_tasks: monitor.yml
+  include_tasks: monitor.yml
 
 - name: check ups connection
   command: "upsc {{ nut_monitor.name }}"
