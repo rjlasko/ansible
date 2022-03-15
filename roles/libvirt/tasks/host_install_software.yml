@@ -35,10 +35,3 @@
         state: latest
         autoremove: true
       register: libvirt_stable_packages
-
-- name: restart libvirtd
-  when: libvirt_stable_packages.changed or libvirt_backport_packages.changed
-  service:
-    name: libvirtd
-    state: restarted
-    enabled: true

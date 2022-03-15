@@ -28,6 +28,16 @@
         loop_var: libvirt_build_proc
       include_tasks: "{{ libvirt_build_proc }}"
 
+    - name: restart libvirtd
+      service:
+        name: libvirtd
+        state: restarted
+        enabled: true
+      register: libvirtd_service
+      until: libvirtd_service.status.ActiveState == "active"
+      retries: 15
+      delay: 2
+
     - name: define LIBVIRT_DEFAULT_URI in all environments
       when: libvirt.host.default_uri is defined
       include_role:

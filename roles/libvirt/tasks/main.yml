@@ -7,6 +7,8 @@
   when: libvirt.host is defined
   include_tasks: host.yml
 
+# XXX: isolation is supplied for all guests simultaneously,
+# which is why it isn't tied to the host or guest
 - name: setup isolation
   include_tasks: isolate.yml
 

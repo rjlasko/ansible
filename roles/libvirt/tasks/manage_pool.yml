@@ -13,10 +13,10 @@
   file:
     path: "{{ libvirt_pool.path | mandatory }}"
     state: directory
-    mode: u=rwx,g=rwx,o-rwx
-    recurse: false
-    owner: "{{ libvirt.host.qemu_user | mandatory }}"
-    group: "{{ libvirt.host.qemu_group | mandatory }}"
+    mode: u=rwX,g=rwX,o-rwx
+    recurse: true
+    owner: "{{ libvirt_user }}"
+    group: "{{ libvirt_group }}"
 
 - name: undefine pre-existing pool
   when: >

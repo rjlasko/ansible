@@ -24,6 +24,7 @@ libvirt_host_packages:
       - virt-manager
       - ovmf
 
+
   # evaluate_at_a_later_date:
     # - libguestfs-tools
     # - genisoimage
@@ -31,6 +32,8 @@ libvirt_host_packages:
 
 libvirtd_cfg_path: /etc/libvirt/libvirtd.conf
 qemu_cfg_path: /etc/libvirt/qemu.conf
+libvirt_user: root
+libvirt_group: libvirt
 
 libvirt_hooks_path: /etc/libvirt/hooks
 qemu_hooks_path: "{{ libvirt_hooks_path }}/qemu.d"
