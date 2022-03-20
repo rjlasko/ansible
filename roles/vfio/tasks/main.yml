@@ -15,11 +15,33 @@
     kernelstub_cfg_backup: /etc/default/kernelstub.configuration.BAK
   include_tasks: "{{ vfio_cmdline_updater[vfio_bootloaders[ansible_facts['distribution']]] }}"
 
-- name: device discovery
-  include_tasks: discovery.yml
+- name: reset any initramfs changes from prior installs
+  include_tasks: initramfs_reset.yml
 
-- name: setup initramfs
-  include_tasks: initramfs.yml
+- name: install scripts supporting dynamic GPU passthrough
+  when: vfio.devices is not defined
+  loop: "{{ vfio_dynamic_gpu_scripts }}"
+  loop_control:
+    loop_var: vfio_dynamic_gpu_script
+  copy:
+    src: "{{ vfio_dynamic_gpu_script.src }}"
+    dest: "{{ vfio_dynamic_gpu_script.dest }}"
+    mode: "{{ vfio_dynamic_gpu_script.mode }}"
+    owner: root
+    group: root
+
+- name: configure static IOMMU passthrough
+  when: vfio.devices is defined
+  block:
+    - name: device discovery
+      include_tasks: discovery.yml
+
+    - name: setup initramfs
+      include_tasks: initramfs.yml
+
+    # the other GPU should still be bound to the host driver
+    - name: update Xorg to use the active (secondary) GPU
+      include_tasks: xorg.yml
 
 # - fail:
 #     msg: boo
