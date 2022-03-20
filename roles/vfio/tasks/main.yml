@@ -3,14 +3,45 @@
 ## VFIO setup for device passthrough ##
 ## --------------------------------- ##
 
-- name: update grub for VFIO
-  include_tasks: grub.yml
+- name: verify host hardware supports iommu
+  command: grep -E '^flags.*(svm|vmx)' /proc/cpuinfo
 
-- name: device discovery
-  include_tasks: discovery.yml
+# see: https://wiki.archlinux.org/title/Kernel_parameters#GRUB
+- name: update bootloader linux command line parameters for VFIO
+  vars:
+    grub_filepath: /etc/default/grub
+    grub_cmdline: GRUB_CMDLINE_LINUX_DEFAULT
+    kernelstub_cfgpath: /etc/kernelstub/configuration
+    kernelstub_cfg_backup: /etc/default/kernelstub.configuration.BAK
+  include_tasks: "{{ vfio_cmdline_updater[vfio_bootloaders[ansible_facts['distribution']]] }}"
 
-- name: setup initramfs
-  include_tasks: initramfs.yml
+- name: reset any initramfs changes from prior installs
+  include_tasks: initramfs_reset.yml
+
+- name: install scripts supporting dynamic GPU passthrough
+  when: vfio.devices is not defined
+  loop: "{{ vfio_dynamic_gpu_scripts }}"
+  loop_control:
+    loop_var: vfio_dynamic_gpu_script
+  copy:
+    src: "{{ vfio_dynamic_gpu_script.src }}"
+    dest: "{{ vfio_dynamic_gpu_script.dest }}"
+    mode: "{{ vfio_dynamic_gpu_script.mode }}"
+    owner: root
+    group: root
+
+- name: configure static IOMMU passthrough
+  when: vfio.devices is defined
+  block:
+    - name: device discovery
+      include_tasks: discovery.yml
+
+    - name: setup initramfs
+      include_tasks: initramfs.yml
+
+    # the other GPU should still be bound to the host driver
+    - name: update Xorg to use the active (secondary) GPU
+      include_tasks: xorg.yml
 
 # - fail:
 #     msg: boo

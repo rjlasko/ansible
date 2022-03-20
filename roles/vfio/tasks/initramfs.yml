@@ -1,10 +1,7 @@
 ---
-## ----------------------------------- ##
-## Apply VFIO-pci driver by PCI bus ID ##
-## ----------------------------------- ##
-
-- set_fact:
-    initramfs_path: /etc/initramfs-tools
+## ------------------------------------------------------------ ##
+## Use initramfs to apply VFIO-pci driver by PCI bus ID on boot ##
+## ------------------------------------------------------------ ##
 
 - name: check if initramfs exists
   stat:
@@ -12,6 +9,7 @@
   register: initramfs_path_exists
   failed_when: not initramfs_path_exists.stat.exists
 
+# XXX: vfio_pci_ids is accumulated in discovery.yml via multiple calls to discover_device.yml
 - loop: "{{ vfio_pci_ids }}"
   loop_control:
     loop_var: vfio_pci_id
@@ -22,26 +20,21 @@
     vfio_initramfs_pci_ids_formatted: "{{ ' '.join(vfio_initramfs_pci_ids) }}"
 
 - template:
-    src: vfio.sh.j2
-    dest: "{{ initramfs_path }}/scripts/init-top/vfio.sh"
+    src: vfio_pci.sh.j2
+    dest: "{{ vfio_pci_rebind_path }}"
     mode: u+rx,go-rwx
     owner: root
     group: root
 
-- name: "backup & restore {{ initramfs_path }}/modules"
-  include_role:
-    name: backup_restore
-  vars:
-    br_target: "{{ initramfs_path }}/modules"
-
-- name: "add kernel modules to {{ initramfs_path }}/modules"
+- name: "add vfio_pci kernel module to initramfs"
   lineinfile:
-    path: "{{ initramfs_path }}/modules"
+    path: "{{ initramfs_modules_path }}"
     line: 'vfio_pci'
     state: present
 
 - name: update initramfs with new kernel boot parameters
   command: update-initramfs -u
 
+# need to reboot to ensure those devices are ready for the VM upon start
 - reboot:
     reboot_timeout: 600

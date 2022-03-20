@@ -23,7 +23,7 @@ ISOLATED_GUESTS_FILE={{ libvirt_isolate.isolated_guests_filepath }}
 ACTIVE_GUESTS_FILE="/var/run/libvirt/qemu/active_guests.txt"
 UNDOFILE="/var/run/libvirt/qemu/vfio-isolate-undo.bin"
 
-INDICATED_GUEST="${1:?Missing 1st argument, INDICATED_GUEST}"
+GUEST_NAME="${1:?Missing 1st argument, GUEST_NAME}"
 HOOK_NAME="${2:?Missing 2nd argument, HOOK_NAME}"
 
 
@@ -57,7 +57,7 @@ function enable_isolation () {
 }
 
 function hasActiveIsolatedGuest() {
-	local ACTIVE_GUESTS=($(grep -v "${INDICATED_GUEST}" "${ACTIVE_GUESTS_FILE}" | sort | uniq | xargs))
+	local ACTIVE_GUESTS=($(grep -v "${GUEST_NAME}" "${ACTIVE_GUESTS_FILE}" | sort | uniq | xargs))
 	for i in "${ACTIVE_GUESTS[@]}" ; do
 		if grep $i ${ISOLATED_GUESTS_FILE} 1>/dev/null 2>/dev/null ; then
 			return 0
@@ -67,18 +67,19 @@ function hasActiveIsolatedGuest() {
 }
 
 function isIsolatedGuest() {
-	if grep ${INDICATED_GUEST} ${ISOLATED_GUESTS_FILE} 1>/dev/null 2>/dev/null ; then
+	if grep ${GUEST_NAME} ${ISOLATED_GUESTS_FILE} 1>/dev/null 2>/dev/null ; then
 		return 0
 	fi
 	return 1
 }
 
+# XXX: flock ensures atomic edits to file
 function indicatedGuestActivated() {
-	flock "${ACTIVE_GUESTS_FILE}" -c "grep ${INDICATED_GUEST} ${ACTIVE_GUESTS_FILE} || echo ${INDICATED_GUEST} >> ${ACTIVE_GUESTS_FILE}"
+	flock "${ACTIVE_GUESTS_FILE}" -c "grep ${GUEST_NAME} ${ACTIVE_GUESTS_FILE} || echo ${GUEST_NAME} >> ${ACTIVE_GUESTS_FILE}"
 }
 
 function indicatedGuestDeactivated() {
-	flock "${ACTIVE_GUESTS_FILE}" -c "sed -i '/${INDICATED_GUEST}/d' ${ACTIVE_GUESTS_FILE}"
+	flock "${ACTIVE_GUESTS_FILE}" -c "sed -i '/${GUEST_NAME}/d' ${ACTIVE_GUESTS_FILE}"
 }
 
 # Make sure that this file is present, if not previously created

@@ -3,6 +3,9 @@
 ## This script will setup NUT server for its own physically connected UPS ##
 ## ---------------------------------------------------------------------- ##
 
+- name: shutdown UPS driver
+  command: upsdrvctl stop
+
 - name: ups.conf
   template:
     src: ups.conf.j2
@@ -16,9 +19,8 @@
 # file handle based upon the manufacturer & model information accessed by the device driver.
 # https://askubuntu.com/questions/113994/trouble-starting-network-ups-tools-with-a-eaton-3s-ups
 
-- name: Reboot to properly load UPS driver
-  reboot:
-    reboot_timeout: 600
+- name: restart UPS driver
+  command: upsdrvctl start
 
 - name: upsd.conf
   template:
@@ -41,9 +43,17 @@
     name: nut-driver
     state: restarted
     enabled: yes
+  register: nut_driver_service
+  until: nut_driver_service.status.ActiveState == "active"
+  retries: 15
+  delay: 2
 
 - name: restart nut-server
   service:
     name: nut-server
     state: restarted
     enabled: yes
+  register: nut_server_service
+  until: nut_server_service.status.ActiveState == "active"
+  retries: 15
+  delay: 2

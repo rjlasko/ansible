@@ -1,6 +1,12 @@
 #!/bin/sh
 # {{ ansible_managed }}
 
+# XXX: this script will replace the drivers bound to the given devices with the
+# vfio-pci driver, so that libvirt/QEMU can later pass those devices to a
+# specified VM.  When a VM is started & stopped, QEMU will unbind+rebind those
+# devices to & from the host & VM.  In this way, only the targeted devices are
+# bound to just the VM or (dummy) vfio-pci drivers.
+
 PREREQ=""
 
 prereqs()

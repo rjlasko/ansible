@@ -1,0 +1,19 @@
+---
+## ---------------------------------------- ##
+## Remove VFIO-pci boot-time driver binding ##
+## ---------------------------------------- ##
+
+- name: "Remove {{ vfio_pci_rebind_path }}"
+  file:
+    path: "{{ vfio_pci_rebind_path }}"
+    state: absent
+  register: remove_vfio_pci_rebind
+
+- name: "backup & restore {{ initramfs_modules_path }}"
+  include_role:
+    name: backup_restore
+  vars:
+    br_target: "{{ initramfs_modules_path }}"
+
+- name: update initramfs with new kernel boot parameters
+  command: update-initramfs -u

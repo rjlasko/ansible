@@ -10,9 +10,10 @@
   vars:
     br_target: "{{ qemu_cfg_path }}"
 
-- loop:
-    - [ '#user =', 'user = "{{ libvirt.host.qemu_user | mandatory }}"' ]
-    - [ '#group =', 'group = "{{ libvirt.host.qemu_group | mandatory }}"' ]
+- name: "apply configurations for {{ qemu_cfg_path }}"
+  loop:
+    - [ '#user =', 'user = "{{ libvirt_user }}"' ]
+    - [ '#group =', 'group = "{{ libvirt_group }}"' ]
   loop_control:
     loop_var: qemu_cfg_var
   lineinfile:
@@ -20,9 +21,3 @@
     regexp: "{{ qemu_cfg_var[0] }}"
     line: "{{ qemu_cfg_var[1] }}"
     state: present
-
-- name: restart libvirtd
-  service:
-    name: libvirtd
-    state: restarted
-    enabled: true

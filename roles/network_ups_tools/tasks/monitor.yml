@@ -36,3 +36,7 @@
     name: nut-monitor
     state: restarted
     enabled: true
+  register: nut_monitor_service
+  until: nut_monitor_service.status.ActiveState == "active"
+  retries: 15
+  delay: 2
