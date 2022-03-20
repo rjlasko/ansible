@@ -34,3 +34,16 @@
     group: "{{ fd_transfer.group | default(omit) }}"
     force: "{{ fd_transfer.force | default(omit) }}"
     mode: "{{ fd_transfer.mode | default('u=r,g-rwx,o-rwx') }}"
+
+- name: copy files
+  loop: "{{ file_drop.copies | default([]) }}"
+  loop_control:
+    loop_var: fd_copy
+  template:
+    remote_src: "{{ fd_copy.remote_src | default(omit) }}"
+    src: "{{ fd_copy.src }}"
+    dest: "{{ fd_copy.dest }}"
+    owner: "{{ fd_copy.owner | default(omit) }}"
+    group: "{{ fd_copy.group | default(omit) }}"
+    force: "{{ fd_copy.force | default(omit) }}"
+    mode: "{{ fd_copy.mode | default('u=r,g-rwx,o-rwx') }}"
