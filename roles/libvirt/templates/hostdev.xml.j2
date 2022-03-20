@@ -2,4 +2,7 @@
   <source>
     <address domain='0x0000' bus='{{ libvirt_hostdev.bus }}' slot='{{ libvirt_hostdev.slot }}' function='{{ libvirt_hostdev.function }}' />
   </source>
+{% if libvirt_hostdev.rom is defined %}
+  <rom file='{{ libvirt_hostdev.rom }}'/>
+{% endif %}
 </hostdev>

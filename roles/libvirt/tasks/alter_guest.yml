@@ -28,12 +28,12 @@
 
 - name: attach host devices
   when: libvirt.vm.alter_domain.hostdevs is defined
-  loop: "{{ libvirt.vm.alter_domain.hostdevs }}"
+  loop: "{{ libvirt.vm.alter_domain.hostdevs | dict2items }}"
   loop_control:
     loop_var: alter_domain_hostdev
   include_tasks: attach_hostdev.yml
   vars:
-    libvirt_hostdev: "{{ alter_domain_hostdev }}"
+    libvirt_hostdev: "{{ alter_domain_hostdev.value }}"
 
 - name: alter VM by XPath
   when: libvirt.vm.alter_domain.xpaths is defined
