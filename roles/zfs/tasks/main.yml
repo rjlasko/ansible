@@ -3,6 +3,11 @@
 ## Installs ZFS, configures ZED, and imports given pools ##
 ## ------------------------------------------------------- ##
 
+- name: fail on unsupported distributions
+  when: ansible_facts['distribution'] not in zfs_supported_distros
+  fail:
+    msg: "Only supports distributions: {{ zfs_supported_distros | string }}"
+
 # https://github.com/zfsonlinux/zfs/wiki/Debian
 
 # Debian
@@ -26,8 +31,11 @@
 - name: module info
   debug: msg="{{ zfs_module_info.stdout_lines }}"
 
-- name: setup ZFS snapshots
-  include_tasks: setup_snapshot.yml
+# XXX: this installs a cron script and maybe more
+- name: install ZFS automatic snapshots
+  package:
+    name: zfs-auto-snapshot
+    state: present
 
 - name: run configured zfs tasks
   when: zfs is defined

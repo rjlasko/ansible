@@ -3,12 +3,6 @@
 ## Installs ZFS on Linux ##
 ## --------------------- ##
 
-
-- name: fail on unsupported distributions
-  when: ansible_facts['distribution'] not in zfs_supported_distros
-  fail:
-    msg: "Only supports distributions: {{ zfs_supported_distros | string }}"
-
 - name: detect if kernel module is available to be loaded
   find:
     path: "/lib/modules/{{ ansible_facts['kernel'] }}"
