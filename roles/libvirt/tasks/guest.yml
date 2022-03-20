@@ -33,6 +33,9 @@
       when: libvirt.vm.create_mode == 'restore'
       include_tasks: restore_guest.yml
 
+    - name: install hooks for VM
+      include_tasks: guest_hooks.yml
+
     - name: alter VM machine definition
       when: libvirt.vm.alter_domain is defined
       include_tasks: alter_guest.yml

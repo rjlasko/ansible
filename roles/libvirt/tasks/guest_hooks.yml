@@ -1,0 +1,34 @@
+---
+## --------------------------------- ##
+## Setup hooks declared for VM guest  ##
+## --------------------------------- ##
+
+- name: shutdown VM
+  include_tasks: shutdown_guest.yml
+
+- name: clear pre-existing hooks
+  become: true
+  file:
+    state: absent
+    path: "{{ qemu_hooks_path }}/{{ libvirt.vm.name }}"
+
+- when: libvirt.vm.hooks is defined
+  become: true
+  block:
+    - name: "create hooks directory for VM {{ libvirt.vm.name }}"
+      file:
+        state: directory
+        path: "{{ qemu_hooks_path }}/{{ libvirt.vm.name }}"
+        mode: ug=rx,o-rwx
+        owner: root
+        group: root
+
+    - loop: "{{ libvirt.vm.hooks | default([]) }}"
+      loop_control:
+        loop_var: libvirt_vm_hook
+      template:
+        src: "{{ libvirt_vm_hook.src }}"
+        dest: "{{ qemu_hooks_path }}/{{ libvirt.vm.name }}/{{ libvirt_vm_hook.name }}"
+        mode: u=rx,go-rwx
+        owner: root
+        group: root

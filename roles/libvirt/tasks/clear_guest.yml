@@ -36,3 +36,9 @@
   loop_control:
     loop_var: libvirt_del_vol
   shell: "virsh vol-delete --pool default {{ libvirt_del_vol }}"
+
+- name: clear any previously existing hooks
+  become: true
+  file:
+    state: absent
+    path: "{{ qemu_hooks_path }}/{{ libvirt.vm.name }}"
