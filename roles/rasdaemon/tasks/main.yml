@@ -9,10 +9,9 @@
 #     `journalctl -f -u rasdaemon`
 #     `ras-mc-ctl --errors`
 
-- package:
-    name:
-      - rasdaemon
-      - patch
+- name: install rasdaemon
+  package:
+    name: rasdaemon
     state: present
 
 # XXX: there is a known issue with the 0.6.6 version of rasdaemon currently
@@ -21,7 +20,7 @@
 # following thread.
 # https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=973053
 - name: detect broken Debian installation
-  when: ansible_distribution == 'Debian'
+  when: ansible_distribution in ['Debian', 'Ubuntu', 'Pop!_OS']
   block:
     - name: Gather the package facts
       ansible.builtin.package_facts:
@@ -32,16 +31,21 @@
       fail:
         msg: Found more than one version of rasdaemon installed!
 
-    - name: find location of ras-mc-ctl
-      command: which ras-mc-ctl
-      register: ras_mc_ctl_path
-
     - name: detect broken Debian installation version
       when: >
         ansible_facts.packages['rasdaemon'][0].version is version('0.6.6', '>=')
         and
         ansible_facts.packages['rasdaemon'][0].version is version('0.6.7', '<')
       block:
+        - name: install patch
+          package:
+            name: patch
+            state: present
+
+        - name: find location of ras-mc-ctl
+          command: which ras-mc-ctl
+          register: ras_mc_ctl_path
+
         - name: backup & restore ras-mc-ctl executable
           include_role:
             name: backup_restore
