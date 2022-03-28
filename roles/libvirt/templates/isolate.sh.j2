@@ -46,14 +46,14 @@ function enable_isolation () {
 	vfio-isolate \
 		-u "${UNDOFILE}" \
 		drop-caches \
-		cpuset-modify --cpus C$HCPUS /system.slice \
-		cpuset-modify --cpus C$HCPUS /user.slice \
+		cpuset-modify --cpus C${HCPUS} /system.slice \
+		cpuset-modify --cpus C${HCPUS} /user.slice \
 		compact-memory \
-		irq-affinity mask C$MCPUS
+		irq-affinity mask C${MCPUS}
 
-		# cpu-governor performance $MMCPUS \
+		# cpu-governor performance C${MCPUS} \
 
-	taskset -pc $HCPUS 2  # kthreadd only on host cores
+	taskset -pc ${HCPUS} 2  # kthreadd only on host cores
 }
 
 function hasActiveIsolatedGuest() {
