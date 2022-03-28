@@ -7,3 +7,6 @@
 [submodule "roles/maven"]
 	path = roles/maven
 	url = git@github.com:rjlasko/ansible-role-maven.git
+[submodule "roles/sourcetree"]
+	path = roles/sourcetree
+	url = git@github.com:rjlasko/ansible-role-sourcetree.git
