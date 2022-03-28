@@ -1,0 +1,10 @@
+---
+## ------------------------------ ##
+## Install phoenix window manager ##
+## ------------------------------ ##
+
+
+- name: install Phoenix with brew
+  homebrew_cask:
+    name: phoenix
+    state: present
