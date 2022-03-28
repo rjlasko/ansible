@@ -16,3 +16,6 @@
 [submodule "roles/poetry"]
 	path = roles/poetry
 	url = git@github.com:rjlasko/ansible-role-poetry.git
+[submodule "roles/java"]
+	path = roles/java
+	url = git@github.com:rjlasko/ansible-role-java.git
