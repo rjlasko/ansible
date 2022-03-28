@@ -13,3 +13,6 @@
 [submodule "roles/ssh-utils"]
 	path = roles/ssh-utils
 	url = git@github.com:rjlasko/ansible-role-ssh-utils.git
+[submodule "roles/poetry"]
+	path = roles/poetry
+	url = git@github.com:rjlasko/ansible-role-poetry.git
