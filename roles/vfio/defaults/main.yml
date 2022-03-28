@@ -1,26 +1,3 @@
-vfio_bootloaders:
-  Debian: grub
-  Ubuntu: grub
-  Pop!_OS: kernelstub
-
-vfio_cmdline_updater:
-  grub: grub.yml
-  kernelstub: kernelstub.yml
-
-vfio_arch_cmdline:
-  AuthenticAMD:
-    amd_iommu: 'on'
-    iommu: pt
-    # inhibit host OS from locking the GPU to the EFI frame buffer upon boot
-    # see: https://passthroughpo.st/explaining-csm-efifboff-setting-boot-gpu-manually/
-    video: efifb:off
-  GenuineIntel:
-    intel_iommu: 'on'
-    iommu: pt
-    # inhibit host OS from locking the GPU to the EFI frame buffer upon boot
-    # see: https://passthroughpo.st/explaining-csm-efifboff-setting-boot-gpu-manually/
-    video: efifb:off
-
 vfio_dynamic_gpu_scripts:
   - src: host-nosleep@.service
     dest: /etc/systemd/system/host-nosleep@.service

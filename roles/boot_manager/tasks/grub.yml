@@ -1,0 +1,34 @@
+---
+## ------------------------------------------ ##
+## Setup kernel options via GRUB boot manager ##
+## ------------------------------------------ ##
+
+- name: verify GRUB is the boot manager
+  stat:
+    path: "{{ grub_filepath }}"
+  register: grub_file
+  failed_when: not grub_file.stat.exists
+
+- name: "backup & restore {{ grub_filepath }}"
+  include_role:
+    name: backup_restore
+  vars:
+    br_target: "{{ grub_filepath }}"
+
+# FIXME
+- name: FAIL because this hasn't been checked. Remove this task once done.
+  fail:
+    msg: "FAIL because this needs to be reimplemented."
+
+# - name: "add kernel parameters to {{ grub_filepath }}"
+#   vars:
+#     cmdline_args: "{{ (vfio_arch_cmdline[ansible_facts.processor[1]] + (vfio.cmdline_extra | default([]))) | join(' ') }}"
+#   lineinfile:
+#     path: "{{ grub_filepath }}"
+#     regexp: '.*(GRUB_CMDLINE_LINUX_DEFAULT=".*)(")'
+#     line: '\1 {{ cmdline_args }}\2'
+#     backrefs: true
+#     state: present
+#
+# - name: update grub with new kernel boot parameters
+#   command: update-grub

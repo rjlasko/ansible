@@ -1,0 +1,11 @@
+---
+## --------------------------- ##
+## Configures the boot manager ##
+## --------------------------- ##
+
+# see: https://wiki.archlinux.org/title/Kernel_parameters#GRUB
+- name: update bootloader linux command line parameters for VFIO
+  include_tasks: "{{ bootloader_updater[bootloader_osmap[ansible_facts['distribution']]] }}"
+
+- reboot:
+    reboot_timeout: 600

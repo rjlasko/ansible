@@ -44,12 +44,19 @@
     option_map: "{{ (option_map | default({})) | combine({kopt[0] : kopt[1] if (kopt | length > 1) else None}, recursive=True) }}"
 
 - name: delete changed kernel options
-  loop: "{{ vfio_arch_cmdline[ansible_facts.processor[1]] | combine(vfio.cmdline_extra | default({})) | dict2items }}"
+  loop: "{{ (boot_manager.cmdline.present | default({})) | dict2items }}"
   loop_control:
     loop_var: param
   when: >
     param.key in option_map
     and option_map[param.key] != (param.value | default(None))
+  command: "kernelstub --delete-options \"{{ param.key }}{{ ('=' + option_map[param.key] | string) if option_map[param.key] else '' }}\""
+
+- name: delete dropped kernel options
+  loop: "{{ boot_manager.cmdline.absent | default([]]) }}"
+  loop_control:
+    loop_var: param
+  when: param in option_map
   command: "kernelstub --delete-options \"{{ param.key }}{{ ('=' + option_map[param.key] | string) if option_map[param.key] else '' }}\""
 
 - name: add new or changed kernel options
@@ -63,6 +70,3 @@
       and option_map[param.key] != (param.value | default(None))
     )
   command: "kernelstub --add-options \"{{ param.key }}{{ ('=' + param.value | string) if param.value else '' }}\""
-
-- reboot:
-    reboot_timeout: 600
