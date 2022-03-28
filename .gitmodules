@@ -1,3 +1,6 @@
 [submodule "roles/python"]
 	path = roles/python
 	url = git@github.com:rjlasko/ansible-role-python.git
+[submodule "roles/pipx"]
+	path = roles/pipx
+	url = git@github.com:rjlasko/ansible-role-pipx.git
