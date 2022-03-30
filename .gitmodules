@@ -19,3 +19,6 @@
 [submodule "roles/java"]
 	path = roles/java
 	url = git@github.com:rjlasko/ansible-role-java.git
+[submodule "roles/aws-utils"]
+	path = roles/aws-utils
+	url = git@github.com:rjlasko/ansible-role-aws-utils.git
