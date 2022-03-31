@@ -23,4 +23,4 @@ jobs:
       uses: ansible-community/ansible-lint-action@v6.0.2
       with:
         # Arguments to be passed to the ansible-lint.
-        args: "" # optional, default is .
+        args: "--project-dir /home/runner/work/ansible/ansible/" # optional, default is .
