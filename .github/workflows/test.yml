@@ -20,7 +20,7 @@ jobs:
     - name: Ansible Lint
       # You may pin to the exact commit or the version.
       # uses: ansible-community/ansible-lint-action@ba54de22a6edeea3aa385cd8c5f20ec1f960a30b
-      uses: ansible-community/ansible-lint-action@v6.0.2
+      uses: ansible-community/ansible-lint-action@v4.1.0.post0
       with:
         # Arguments to be passed to the ansible-lint.
         args: "--project-dir /home/runner/work/ansible/ansible/" # optional, default is .
