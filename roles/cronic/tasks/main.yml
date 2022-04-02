@@ -6,8 +6,8 @@
 # install cronic to cleanup cron outputs for mailing errors
 # requires 'bash'
 - name: install cronic
-  get_url:
+  ansible.builtin.get_url:
     url: https://habilis.net/cronic/cronic
     dest: /usr/bin/cronic
     mode: a=rx
-    force: yes
+    force: true

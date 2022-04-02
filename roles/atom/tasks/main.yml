@@ -4,15 +4,15 @@
 ## ------------- ##
 
 - name: install snapd
-  package:
+  ansible.builtin.package:
     name: snapd
 
 - name: install snap core
-  snap:
+  community.general.snap:
     name: core
 
 - name: install atom
-  snap:
+  community.general.snap:
     name: atom
     channel: "{{ atom.version | default(omit) }}"
     classic: "{{ atom.classic | default(omit) }}"

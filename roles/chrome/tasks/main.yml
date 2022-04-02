@@ -6,7 +6,7 @@
 
 - name: detect 'apt' package manager
   when: ansible_facts['pkg_mgr'] != 'apt'
-  fail:
+  ansible.builtin.fail:
     msg: currently only supports APT package manager installation
 
 # APT installation: there are a couple of ways to do this
@@ -15,20 +15,21 @@
 # reference: https://www.google.com/linuxrepositories/
 
 - name: get Google Linux signing key
-  apt_key:
+  ansible.builtin.apt_key:
     url: https://dl.google.com/linux/linux_signing_key.pub
     state: present
 
-- set_fact:
+- name: determine dpkg arch
+  ansible.builtin.set_fact:
     dpkg_arch: "{{ 'amd64' if ansible_architecture == 'x86_64' else ansible_architecture }}"
 
 - name: add Chrome repository
-  apt_repository:
+  ansible.builtin.apt_repository:
     repo: "deb [arch={{ dpkg_arch }}] https://dl.google.com/linux/chrome/deb/ stable main"
     state: present
-    update_cache: yes
+    update_cache: true
 
 - name: install Chrome
-  apt:
+  ansible.builtin.apt:
     name: google-chrome-stable
     state: present

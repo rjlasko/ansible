@@ -4,11 +4,11 @@
 ## ----------------------------- ##
 
 - name: declare filepath of target's backup
-  set_fact:
+  ansible.builtin.set_fact:
     br_backup: "{{ br_target | mandatory }}.BAK"
 
 - name: "stat target: {{ br_target }}"
-  stat:
+  ansible.builtin.stat:
     path: "{{ br_target }}"
   register: stat_target
   failed_when: >
@@ -19,7 +19,7 @@
     )
 
 - name: "stat backup: {{ br_backup }}"
-  stat:
+  ansible.builtin.stat:
     path: "{{ br_backup }}"
   register: stat_backup
   failed_when: >
@@ -31,14 +31,14 @@
 
 - name: "restore backup: {{ br_backup }}"
   when: stat_backup.stat.exists
-  copy:
+  ansible.builtin.copy:
     src: "{{ br_backup }}"
     dest: "{{ br_target }}"
-    remote_src: yes
+    remote_src: true
 
 - name: "backup target: {{ br_target }}"
   when: stat_target.stat.exists and not stat_backup.stat.exists
-  copy:
+  ansible.builtin.copy:
     src: "{{ br_target }}"
     dest: "{{ br_backup }}"
-    remote_src: yes
+    remote_src: true

@@ -5,26 +5,29 @@
 
 - name: clear crontab
   when: crontab.reset | default(false)
-  command: crontab -r
+  ansible.builtin.command: crontab -r
   ignore_errors: true
 
 - name: append to user crontab from file
   when: crontab.file is defined
   block:
     - name: create temporary cron file
-      tempfile:
+      ansible.builtin.tempfile:
         state: directory
       register: crontab_staging_dir
+
     - name: stage provided crontab
-      template:
+      ansible.builtin.template:
         src: "{{ crontab.file }}"
         dest: "{{ crontab_staging_dir.path }}/cron.tab"
-        force: yes
+        force: true
+
     - name: load staged crontab file
-      command: crontab "{{ crontab_staging_dir.path }}/cron.tab"
+      ansible.builtin.command: crontab "{{ crontab_staging_dir.path }}/cron.tab"
+
   always:
     - name: remove staging directory
-      file:
+      ansible.builtin.file:
         path: "{{ crontab_staging_dir.path }}"
         state: absent
 
@@ -33,7 +36,7 @@
   loop: "{{ crontab.entries }}"
   loop_control:
     loop_var: crontab_entry
-  cron:
+  ansible.builtin.cron:
     name: "{{ crontab_entry.name | mandatory }}"
     job: "{{ crontab_entry.job | mandatory }}"
     env: "{{ crontab_entry.env | default(omit) }}"

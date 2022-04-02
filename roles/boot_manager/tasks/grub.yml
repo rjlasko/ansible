@@ -4,20 +4,20 @@
 ## ------------------------------------------ ##
 
 - name: verify GRUB is the boot manager
-  stat:
+  ansible.builtin.stat:
     path: "{{ grub_filepath }}"
   register: grub_file
   failed_when: not grub_file.stat.exists
 
 - name: "backup & restore {{ grub_filepath }}"
-  include_role:
+  ansible.builtin.include_role:
     name: backup_restore
   vars:
     br_target: "{{ grub_filepath }}"
 
 # FIXME
 - name: FAIL because this hasn't been checked. Remove this task once done.
-  fail:
+  ansible.builtin.fail:
     msg: "FAIL because this needs to be reimplemented."
 
 # - name: "add kernel parameters to {{ grub_filepath }}"
