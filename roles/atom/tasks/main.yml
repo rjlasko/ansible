@@ -3,7 +3,7 @@
 ## Installs Atom ##
 ## ------------- ##
 
-- name: install snapd 
+- name: install snapd
   package:
     name: snapd
 
