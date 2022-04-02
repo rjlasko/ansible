@@ -8,7 +8,7 @@ on:
 
 jobs:
 
-  lint:
+  ansible-lint:
     name: Lint
     runs-on: ubuntu-latest
     steps:
@@ -25,3 +25,24 @@ jobs:
       # with:
       #   # Arguments to be passed to the ansible-lint.
       #   args: ". --project-dir /home/runner/work/ansible/ansible/" # optional, default is .
+
+  yaml-lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the codebase.
+        uses: actions/checkout@v2
+        with:
+          path: ansible_collections/geerlingguy/mac
+
+      - name: Set up Python 3.
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.x'
+
+      - name: Install test dependencies.
+        run: pip3 install yamllint ansible-core ansible-lint
+
+      - name: Lint code.
+        run: |
+          yamllint .
