@@ -5,7 +5,7 @@
 
 - name: enable fstrim.timer for mounts defined in /etc/fstab
   # XXX: ZFS pools & volumes are safe because they are not found in /etc/fstab
-  service:
+  ansible.builtin.service:
     name: fstrim.timer
     enabled: true
     state: restarted

@@ -4,14 +4,14 @@
 ## ----------------------- ##
 
 - name: check if git is accessible via path
-  shell: 'type git'
+  ansible.builtin.shell: 'type git'
   ignore_errors: true
   register: git_exists
 
 - name: system install git
   when: git_exists.rc != 0
   become: true
-  package:
+  ansible.builtin.package:
     name: git
     state: present
 
@@ -19,7 +19,7 @@
   loop: "{{ git.global | default({}) | dict2items }}"
   loop_control:
     loop_var: git_global_config_item
-  include_tasks: git_config.yml
+  ansible.builtin.include_tasks: git_config.yml
   vars:
     git_config: "{{ git_global_config_item | combine({'scope': 'global'}) }}"
 
@@ -27,10 +27,10 @@
   loop: "{{ git.pushes | default([]) }}"
   loop_control:
     loop_var: git_push
-  include_tasks: git_push.yml
+  ansible.builtin.include_tasks: git_push.yml
 
 - name: clone repositories
   loop: "{{ git.clones | default([]) }}"
   loop_control:
     loop_var: git_clone
-  include_tasks: git_clone.yml
+  ansible.builtin.include_tasks: git_clone.yml

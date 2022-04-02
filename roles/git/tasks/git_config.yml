@@ -4,7 +4,7 @@
 ## -------------------------- ##
 
 - name: apply global configurations
-  git_config:
+  community.general.git_config:
     name: "{{ git_config.key }}"
     value: "{{ git_config.value }}"
     scope: "{{ git_config.scope }}"

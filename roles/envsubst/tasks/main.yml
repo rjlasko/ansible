@@ -5,34 +5,35 @@
 
 - name: install envsubst
   become: true
-  package:
+  ansible.builtin.package:
     name: gettext-base
     state: present
 
 - name: peform envsubst in temp directory
   block:
     - name: create directory to stage template
-      tempfile:
+      ansible.builtin.tempfile:
       register: envsubst_tempfile
 
     - name: copy template to host tmp directory
-      copy:
+      ansible.builtin.copy:
         dest: "{{ envsubst_tempfile.path }}"
         remote_src: "{{ envsubst.remote_src | default(omit) }}"
         src: "{{ envsubst.src | default(omit) }}"
 
     - name: envsubst the file to final destination
-      shell: "envsubst < {{ envsubst_tempfile.path }} > {{ envsubst.dest | mandatory }}"
+      ansible.builtin.shell: "envsubst < {{ envsubst_tempfile.path }} > {{ envsubst.dest | mandatory }}"
       environment: "{{ envsubst.env_vars }}"
 
     - name: file permissions
-      file:
+      fansible.builtin.ile:
         path: "{{ envsubst.dest | mandatory }}"
         group: "{{ envsubst.group | default(omit) }}"
         mode: "{{ envsubst.mode | default(omit) }}"
         owner: "{{ envsubst.owner | default(omit) }}"
+
   always:
     - name: remove tempfile
-      file:
+      ansible.builtin.file:
         path: "{{ envsubst_tempfile.path }}"
         state: absent

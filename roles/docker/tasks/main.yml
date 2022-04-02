@@ -59,14 +59,24 @@
     # install the latest officially released version of docker-compose
     # must strictly follow v1.2.3 or 1.2.3, no extra prefix or suffix allowed
     - name: query for latest officially released docker-compose version
-      ansible.builtin.shell: set -o pipefail && git ls-remote --exit-code --tags https://github.com/docker/compose.git | cut -d'/' -f3 | grep -E '^v?([0-9]+)\.([0-9]+)\.([0-9]+)$' | awk '{print $1 " " $1}' | sed 's#^[a-z]*##g' | sort --version-sort -k 1 | tail -n1 | awk '{print $2}' | sed 's:.*/::'
+      ansible.builtin.shell: >
+        set -o pipefail
+        && git ls-remote --exit-code --tags https://github.com/docker/compose.git
+        | cut -d'/' -f3
+        | grep -E '^v?([0-9]+)\.([0-9]+)\.([0-9]+)$'
+        | awk '{print $1 " " $1}'
+        | sed 's#^[a-z]*##g'
+        | sort --version-sort -k 1
+        | tail -n1
+        | awk '{print $2}'
+        | sed 's:.*/::'
       args:
         executable: bash
       register: docker_compose_repo_version
 
     - name: install docker-compose from GitHub
       vars:
-        docker_compose_url: "https://github.com/docker/compose/releases/download/{{ docker_compose_repo_version.stdout }}/docker-compose-{{ ansible_facts['system'] }}-{{ ansible_facts['architecture'] }}"
+        docker_compose_url: "https://github.com/docker/compose/releases/download/{{ docker_compose_repo_version.stdout }}/docker-compose-{{ ansible_facts['system'] | lower }}-{{ ansible_facts['architecture'] }}"
       ansible.builtin.get_url:
         url: "{{ docker_compose_url }}"
         checksum: "sha256:{{ docker_compose_url }}.sha256"
@@ -88,8 +98,8 @@
       ansible.builtin.pip:
         name: docker-compose
 
-# grant user permissions to run Docker
-- loop: "{{ docker_users | default([]) }}"
+- name: grant user permissions to run Docker
+  loop: "{{ docker_users | default([]) }}"
   ansible.builtin.user:
     name: "{{ item }}"
     groups: docker

@@ -4,12 +4,12 @@
 ## ----------------------- ##
 
 - name: create user space directory
-  file:
+  ansible.builtin.file:
     state: directory
     path: "{{ git_clone.dest | dirname | mandatory }}"
 
 - name: clone the repo
-  git:
+  ansible.builtin.git:
     repo: "{{ git_clone.src | mandatory }}"
     dest: "{{ git_clone.dest | mandatory }}"
     accept_hostkey: true
@@ -20,6 +20,6 @@
   loop: "{{ git_clone.config | default({}) | dict2items }}"
   loop_control:
     loop_var: git_local_config_item
-  include_tasks: git_config.yml
+  ansible.builtin.include_tasks: git_config.yml
   vars:
     git_config: "{{ git_local_config_item | combine({'scope': 'local', 'repo': git_clone.dest}) }}"

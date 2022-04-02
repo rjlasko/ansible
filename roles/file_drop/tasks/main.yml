@@ -8,13 +8,13 @@
   loop: "{{ file_drop.empty | default([]) }}"
   loop_control:
     loop_var: fd_empty
-  shell: rm -rf {{ fd_empty }}/.[!.]* {{ fd_empty }}/*
+  ansible.builtin.shell: rm -rf {{ fd_empty }}/.[!.]* {{ fd_empty }}/*
 
 - name: create files/directories/links
   loop: "{{ file_drop.files | default([]) }}"
   loop_control:
     loop_var: fd_file
-  file:
+  ansible.builtin.file:
     path: "{{ fd_file.path | mandatory }}"
     state: "{{ fd_file.state | mandatory }}"
     src: "{{ fd_file.src | default(omit) }}"
@@ -27,7 +27,7 @@
   loop: "{{ file_drop.transfers | default([]) }}"
   loop_control:
     loop_var: fd_transfer
-  template:
+  ansible.builtin.template:
     src: "{{ fd_transfer.src }}"
     dest: "{{ fd_transfer.dest }}"
     owner: "{{ fd_transfer.owner | default(omit) }}"
@@ -39,7 +39,7 @@
   loop: "{{ file_drop.copies | default([]) }}"
   loop_control:
     loop_var: fd_copy
-  template:
+  ansible.builtin.template:
     remote_src: "{{ fd_copy.remote_src | default(omit) }}"
     src: "{{ fd_copy.src }}"
     dest: "{{ fd_copy.dest }}"

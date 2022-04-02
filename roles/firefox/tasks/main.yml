@@ -4,6 +4,6 @@
 ## ----------------------- ##
 
 - name: install Firefox
-  package:
+  ansible.builtin.package:
     name: firefox
     state: present
