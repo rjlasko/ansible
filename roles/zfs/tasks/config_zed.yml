@@ -5,11 +5,11 @@
 
 # https://wiki.archlinux.org/index.php/ZFS#Monitoring_/_Mailing_on_Events
 
-- set_fact:
+- ansible.builtin.set_fact:
     zed_rc_path: /etc/zfs/zed.d/zed.rc
 
 - name: "backup & restore {{ zed_rc_path }}"
-  include_role:
+  ansible.builtin.include_role:
     name: backup_restore
   vars:
     br_target: "{{ zed_rc_path }}"
@@ -17,40 +17,40 @@
 # TODO? is “ZED_NOTIFY_INTERVAL_SECS” normally uncommented & properly set?
 
 - name: zed email address
-  lineinfile:
+  ansible.builtin.lineinfile:
     dest: "{{ zed_rc_path }}"
     state: present
     regexp: '^#?ZED_EMAIL_ADDR'
     line: "ZED_EMAIL_ADDR=\"{{ zfs.email }}\""
 
 - name: zed email program
-  lineinfile:
+  ansible.builtin.lineinfile:
     dest: "{{ zed_rc_path }}"
     state: present
     regexp: '^#?ZED_EMAIL_PROG'
     line: 'ZED_EMAIL_PROG="mail"'
 
 - name: zed verbose
-  lineinfile:
+  ansible.builtin.lineinfile:
     dest: "{{ zed_rc_path }}"
     state: present
     regexp: '^#?ZED_NOTIFY_VERBOSE'
     line: 'ZED_NOTIFY_VERBOSE=1'
 
 - name: zed email options
-  lineinfile:
+  ansible.builtin.lineinfile:
     dest: "{{ zed_rc_path }}"
     state: present
     regexp: '^#?ZED_EMAIL_OPTS'
     line: "ZED_EMAIL_OPTS=\"-s '@SUBJECT@' @ADDRESS@\""
 
 - name: set permissions
-  file:
+  ansible.builtin.file:
     path: "{{ zed_rc_path }}"
     mode: u=r
 
 - name: restart ZED (Debian)
-  service:
+  ansible.builtin.service:
     name: zed
     state: restarted
     enabled: true
@@ -59,7 +59,7 @@
 
 - name: restart ZFS-ZED (Ubuntu 20.10)
   when: not zed_service.changed
-  service:
+  ansible.builtin.service:
     name: zfs-zed
     state: restarted
     enabled: true
@@ -68,5 +68,5 @@
 
 - name: detect failure to restart ZED daemon
   when: not zed_service.changed and not zfs_zed_service.changed
-  fail:
+  ansible.builtin.fail:
     msg: could not restart ZED daemon

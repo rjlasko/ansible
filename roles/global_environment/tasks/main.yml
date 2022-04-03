@@ -12,10 +12,10 @@
       loop: "{{ global_env_vars | mandatory }}"
       loop_control:
         loop_var: global_env_var
-      lineinfile:
+      ansible.builtin.lineinfile:
         create: true
         path: "/etc/environment"
-        regexp: "^#?{{ global_env_var.0 }}" 
+        regexp: "^#?{{ global_env_var.0 }}"
         line: "{{ global_env_var.0 }}={{ global_env_var.1 }}"
         owner: root
         group: root

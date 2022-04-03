@@ -66,11 +66,11 @@
   register: current_branch
 
 - name: Remote checkout current_branch
-  command: "git checkout {{ current_branch.stdout }}"
+  ansible.builtin.command: "git checkout {{ current_branch.stdout }}"
   args:
     chdir: "{{ git_push.dest }}"
 
 - name: reset repo
-  command: "git reset --hard"
+  ansible.builtin.command: "git reset --hard"
   args:
     chdir: "{{ git_push.dest }}"

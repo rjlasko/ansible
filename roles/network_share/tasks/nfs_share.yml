@@ -4,7 +4,7 @@
 ## --------------------------------- ##
 
 - name: bind mount under nfs root directory
-  mount:
+  ansible.posix.mount:
     src: "{{ nfs_share.src }}"
     path: "/srv/nfs/{{ nfs_share.name }}"
     fstype: none
@@ -12,7 +12,7 @@
     state: mounted
 
 - name: create share with options
-  lineinfile:
+  ansible.builtin.lineinfile:
     path: /etc/exports
     state: present
     regexp: "^/srv/nfs/{{ nfs_share.name }}"

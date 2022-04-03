@@ -4,7 +4,7 @@
 ## ----------------- ##
 
 - name: "detect VM state before attempt restart: {{ libvirt.vm.name }}"
-  virt:
+  community.libvirt.virt:
     command: status
     name: "{{ libvirt.vm.name }}"
   register: libvirt_vm_status
@@ -14,7 +14,7 @@
     libvirt_vm_status.status != 'running'
     and
     libvirt_vm_status.status != 'shutdown'
-  fail:
+  ansible.builtin.fail:
     msg: "Cannot shutdown {{ libvirt.vm.name }} from state: {{ libvirt_vm_status.status }}"
 
 - name: shutdown from running state
@@ -22,17 +22,17 @@
   block:
     - name: Pause for manual indication if specified
       when: libvirt.vm.check_manual | default(false)
-      pause:
+      ansible.builtin.pause:
         prompt: "Continue when ready for shutdown"
 
     - name: shutdown VM
-      virt:
+      community.libvirt.virt:
         # FIXME: consider using ACPI to shutdown the guest cleanly
         command: shutdown
         name: "{{ libvirt.vm.name }}"
 
     - name: "waiting for shutdown: {{ libvirt.vm.name }}"
-      virt:
+      community.libvirt.virt:
         command: status
         name: "{{ libvirt.vm.name }}"
       register: libvirt_vm_status

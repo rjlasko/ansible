@@ -4,45 +4,45 @@
 ## ------------------------------------------------ ##
 
 - name: install snapd
-  package:
+  ansible.builtin.package:
     name: snapd
 
 - name: install snap core
-  snap:
+  community.general.snap:
     name: core
 
 # XXX: simplest way to void a prior LXD installation's configuration
 - name: uninstall prior LXD
-  command: snap remove lxd --purge
+  ansible.builtin.command: snap remove lxd --purge
 
 - name: clear preseed storage_pools
   loop: "{{ lxd.host.preseed.storage_pools | default([]) }}"
   loop_control:
     loop_var: lxd_storage_pool
-  include_tasks: reset_storage.yml
+  ansible.builtin.include_tasks: reset_storage.yml
 
 - name: install LXD
-  snap:
+  community.general.snap:
     name: lxd
 
 - name: check LXD executable accessible by Ansible
-  command: which lxd
+  ansible.builtin.command: which lxd
   ignore_errors: true
   register: which_lxd
 
 - name: install LXD wrapper
   when: which_lxd is failed
   block:
-    - set_fact:
+    - ansible.builtin.set_fact:
         lxd_path: /snap/bin/lxd
 
-    - stat:
+    - ansible.builtin.stat:
         path: "{{ lxd_path }}"
         get_checksum: false
       register: lxd_stat
       failed_when: not lxd_stat.stat.exists
 
-    - template:
+    - ansible.builtin.template:
         src: wrapper.sh.j2
         dest: /usr/bin/lxd
         owner: root
@@ -53,23 +53,23 @@
         snap_app_path: "{{ lxd_path }}"
 
 - name: check LXC executable accessible by Ansible
-  command: which lxc
+  ansible.builtin.command: which lxc
   ignore_errors: true
   register: which_lxc
 
 - name: install LXD wrapper
   when: which_lxc is failed
   block:
-    - set_fact:
+    - ansible.builtin.set_fact:
         lxc_path: /snap/bin/lxc
 
-    - stat:
+    - ansible.builtin.stat:
         path: "{{ lxc_path }}"
         get_checksum: false
       register: lxc_stat
       failed_when: not lxc_stat.stat.exists
 
-    - template:
+    - ansible.builtin.template:
         src: wrapper.sh.j2
         dest: /usr/bin/lxc
         owner: root
@@ -81,11 +81,11 @@
 
 - name: init LXD without preseed
   when: not lxd.host.preseed is defined
-  command: lxd init --auto
+  ansible.builtin.command: lxd init --auto
 
 - name: init LXD from preseed
   when: lxd.host.preseed is defined
-  command: "lxd init --preseed < "
+  ansible.builtin.command: "lxd init --preseed < "
   args:
     stdin: "{{ lxd.host.preseed }}"
 
@@ -93,7 +93,7 @@
   loop: "{{ lxd.host.extra_profiles | default([]) }}"
   loop_control:
     loop_var: lxd_profile
-  lxd_profile:
+  community.general.lxd_profile:
     name: "{{ lxd_profile.name | mandatory }}"
     description: "{{ lxd_profile.description | default(omit) }}"
     state: "{{ lxd_profile.state | default(omit) }}"

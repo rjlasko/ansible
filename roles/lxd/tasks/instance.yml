@@ -5,7 +5,7 @@
 
 - name: check invalid create mode
   when: lxd.instance.create_mode | mandatory not in ['skip', 'build']
-  fail:
+  ansible.builtin.fail:
     msg: "invalid lxd.instance.create_mode: {{ lxd.instance.create_mode }}"
 
 - name: handle create instance
@@ -25,11 +25,11 @@
         ignore_volatile_options: false
 
     - name: define custom instance configuration 'lxd_custom_config'
-      include_tasks: instance_config.yml
+      ansible.builtin.include_tasks: instance_config.yml
 
     - name: merge and override instance base config with custom config
       when: lxd.instance.config is defined
-      set_fact:
+      ansible.builtin.set_fact:
         lxd_custom_config: "{{ ( lxd.instance.config ) | combine(lxd_custom_config | default({}), recursive=True) }}"
 
     - name: create & (re)start instance
@@ -53,6 +53,6 @@
         timeout: 600
 
 - name: "wait for {{ lxd.instance.name }} to respond with SSHd"
-  wait_for:
+  ansible.builtin.wait_for:
     host: "{{ lxd.instance.dns_address | mandatory }}"
     port: 22

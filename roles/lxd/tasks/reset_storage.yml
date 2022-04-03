@@ -7,7 +7,7 @@
   when: lxd_storage_pool.driver == 'zfs'
   block:
     - name: "delete ZFS dataset: {{ lxd_storage_pool.driver }}"
-      include_role:
+      ansible.builtin.include_role:
         name: zfs
         tasks_from: destroy_dataset
       vars:

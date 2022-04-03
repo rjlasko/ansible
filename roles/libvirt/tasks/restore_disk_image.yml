@@ -4,7 +4,7 @@
 ## --------------------------- ##
 
 - name: find original type of image file
-  xml:
+  community.general.xml:
     xmlstring: "{{ libvirt_vm_xml }}"
     xpath: "/domain/devices/disk[@device='disk' and @type='file' and ./source/@file='{{ libvirt_vm_vol }}']/driver"
     content: 'attribute'
@@ -13,19 +13,19 @@
 
 - name: verify only one disk driver found
   when: libvirt_disk_driver.matches | length > 1
-  fail:
+  ansible.builtin.fail:
     msg: got more matches than expected
 
-- set_fact:
+- ansible.builtin.set_fact:
     libvirt_image_type: "{{ libvirt_disk_driver.matches[0].driver.type }}"
 
 - name: RAW images get full preallocation
   when: libvirt_image_type == 'raw'
-  set_fact:
+  ansible.builtin.set_fact:
     libvirt_image_type: "{{ libvirt_image_type }} -S 0"
 
 - name: "restore VM disk image as '{{ libvirt_image_type }}' type"
   become: true
-  command: qemu-img convert -O {{ libvirt_image_type }} {{ libvirt.vm.backup_dir }}/{{ libvirt_vm_vol | basename | splitext | first}}.qcow2 {{ libvirt_vm_vol }}
+  ansible.builtin.command: qemu-img convert -O {{ libvirt_image_type }} {{ libvirt.vm.backup_dir }}/{{ libvirt_vm_vol | basename | splitext | first}}.qcow2 {{ libvirt_vm_vol }}
 
 # FIXME? does this file need proper owner/group? libvirt-qemu?

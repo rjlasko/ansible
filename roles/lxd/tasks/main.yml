@@ -7,7 +7,7 @@
 
 - name: install LXD to the host
   when: lxd.host is defined
-  include_tasks: host.yml
+  ansible.builtin.include_tasks: host.yml
 
 # XXX: externally add user to 'lxd' group
 # TODO: where is the default backing storage located? ZFS dataset?
@@ -15,7 +15,7 @@
 
 - name: setup target as lxd instance
   when: lxd.instance is defined
-  include_tasks: instance.yml
+  ansible.builtin.include_tasks: instance.yml
 
 
 

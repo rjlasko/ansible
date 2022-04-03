@@ -5,4 +5,4 @@
 
 - name: "Write the host key for {{ ssh_known_host }} to ~/.ssh/known_hosts"
   # shell: "ssh-keyscan -H {{ ssh_known_host }} | sed 's/[^ ]* /{{ ssh_known_host }} /' >> ~/.ssh/known_hosts"
-  shell: "ssh-keyscan -H {{ ssh_known_host }} >> ~/.ssh/known_hosts"
+  ansible.builtin.shell: "ssh-keyscan -H {{ ssh_known_host }} >> ~/.ssh/known_hosts"

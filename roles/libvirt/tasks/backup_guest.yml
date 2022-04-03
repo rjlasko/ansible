@@ -4,28 +4,28 @@
 ## --------------- ##
 
 - name: shutdown VM
-  include_tasks: shutdown_guest.yml
+  ansible.builtin.include_tasks: shutdown_guest.yml
 
 - name: clear existing backup directory
-  file:
+  ansible.builtin.file:
     path: "{{ libvirt.vm.backup_dir }}"
     state: absent
 
 - name: remake backup directory
-  file:
+  ansible.builtin.file:
     path: "{{ libvirt.vm.backup_dir }}"
     state: directory
     mode: u=rwx,g=rx,o-rwx
 
 - name: backup XML
-  shell: virsh dumpxml {{ libvirt.vm.name }} > {{ libvirt.vm.backup_dir }}/domain.xml
+  ansible.builtin.shell: virsh dumpxml {{ libvirt.vm.name }} > {{ libvirt.vm.backup_dir }}/domain.xml
 
 - name: list VM block devices
-  shell: virsh domblklist {{ libvirt.vm.name }} | tail -n+3 | awk '{print $2}'
+  ansible.builtin.shell: virsh domblklist {{ libvirt.vm.name }} | tail -n+3 | awk '{print $2}'
   register: libvirt_vm_domblklist_vols
 
 - name: list volumes
-  shell: virsh vol-list --pool default | tail -n+3 | sed '/^[[:space:]]*$/d' | awk '{print $2}'
+  ansible.builtin.shell: virsh vol-list --pool default | tail -n+3 | sed '/^[[:space:]]*$/d' | awk '{print $2}'
   register: libvirt_existing_vols
 
 - name: backup VM associated volumes
@@ -34,4 +34,4 @@
     loop_var: libvirt_vm_vol
   when: libvirt_vm_vol in libvirt_existing_vols.stdout_lines
   become: true
-  command: qemu-img convert -O qcow2 {{ libvirt_vm_vol }} {{ libvirt.vm.backup_dir }}/{{ libvirt_vm_vol | basename | splitext | first }}.qcow2
+  ansible.builtin.command: qemu-img convert -O qcow2 {{ libvirt_vm_vol }} {{ libvirt.vm.backup_dir }}/{{ libvirt_vm_vol | basename | splitext | first }}.qcow2

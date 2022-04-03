@@ -3,14 +3,14 @@
 ## Alter the topology and cpu affinity for a VM ##
 ## -------------------------------------------- ##
 
-- command: cat /proc/cpuinfo
+- ansible.builtin.command: cat /proc/cpuinfo
   register: proc_cpuinfo
 
 - name: configure vcpu
   when: libvirt_cpumem.cpus is defined
   block:
     - name: alter topology by XPath
-      include_tasks: alter_domain_xpaths.yml
+      ansible.builtin.include_tasks: alter_domain_xpaths.yml
       vars:
         alter_domain_xpaths:
           - xpath: /domain/vcpu
@@ -38,7 +38,7 @@
       loop_control:
         loop_var: vcpupin_cpuset
         index_var: vcpupin_idx
-      command: "virsh vcpupin {{ libvirt.vm.name }} {{ vcpupin_idx }} {{ vcpupin_cpuset }} --config"
+      ansible.builtin.command: "virsh vcpupin {{ libvirt.vm.name }} {{ vcpupin_idx }} {{ vcpupin_cpuset }} --config"
 
 - name: configure iothread pinning
   when: libvirt_cpumem.io_cpus is defined
@@ -47,17 +47,17 @@
       loop: "{{ libvirt_cpumem.io_cpus }}"
       loop_control:
         index_var: iothread_idx
-      command: "virsh iothreadadd {{ libvirt.vm.name }} {{ iothread_idx + 1 }} --config"
+      ansible.builtin.command: "virsh iothreadadd {{ libvirt.vm.name }} {{ iothread_idx + 1 }} --config"
 
     - name: pin iothread
       loop: "{{ libvirt_cpumem.io_cpus | asNative(proc_cpuinfo.stdout_lines) | sort | unique }}"
       loop_control:
         loop_var: iothread_cpuset
         index_var: iothread_idx
-      command: "virsh iothreadpin {{ libvirt.vm.name }} {{ iothread_idx + 1 }} {{ iothread_cpuset }} --config"
+      ansible.builtin.command: "virsh iothreadpin {{ libvirt.vm.name }} {{ iothread_idx + 1 }} {{ iothread_cpuset }} --config"
 
 - name: configure emulator emulator
   when: libvirt_cpumem.emulator_cpus is defined
   block:
     - name: pin emulator
-      command: "virsh emulatorpin {{ libvirt.vm.name }} {{ libvirt_cpumem.emulator_cpus | asNative(proc_cpuinfo.stdout_lines) | sort | unique | join(',') }} --config"
+      ansible.builtin.command: "virsh emulatorpin {{ libvirt.vm.name }} {{ libvirt_cpumem.emulator_cpus | asNative(proc_cpuinfo.stdout_lines) | sort | unique | join(',') }} --config"

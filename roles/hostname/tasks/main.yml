@@ -3,7 +3,7 @@
 ## Set the hostname ##
 ## ---------------- ##
 
-- set_fact:
+- ansible.builtin.set_fact:
     hostname:
       new: "{{ hostname.new | default(inventory_hostname )}}"
       old: "{{ ansible_hostname }}"
@@ -12,15 +12,15 @@
   when: hostname.new != hostname.old
   block:
     - name: change the hostname
-      hostname:
+      ansible.builtin.hostname:
         name: "{{ hostname.new }}"
 
     - name: change the hostname in the /etc/hosts
-      replace:
+      ansible.builtin.replace:
         path: /etc/hosts
         regexp: "{{ hostname.old }}"
         replace: "{{ hostname.new }}"
 
     - name: reboot
-      reboot:
+      ansible.builtin.reboot:
         reboot_timeout: 600

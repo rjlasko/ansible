@@ -6,28 +6,28 @@
 # TODO: rename module to simple_storage
 
 - name: gather stated fstypes and rebuild targets
-  set_fact:
+  ansible.builtin.set_fact:
     simple_disks_fstypes: "{{ simple_disks | map(attribute='partitions') | flatten | selectattr('fstype', 'defined') | map(attribute='fstype') | unique | list }}"
     simple_disks_rebuilds: "{{ simple_disks | selectattr('rebuild', 'defined') | map(attribute='rebuild') | unique | list }}"
 
 - name: install support for XFS
   when: '"xfs" in simple_disks_fstypes'
-  package:
+  ansible.builtin.package:
     name: xfsprogs
 
 - name: install support for parted
   when: simple_disks_rebuilds is any
-  package:
+  ansible.builtin.package:
     name: parted
 
 - name: dismount disks being updated or rebuilt
   loop: "{{ simple_disks | default([]) }}"
   loop_control:
     loop_var: simple_disk
-  include_tasks: dismount_disk_partitions.yml
+  ansible.builtin.include_tasks: dismount_disk_partitions.yml
 
 - name: update ansible_facts for mounts
-  setup:
+  ansible.builtin.setup:
     gather_subset:
       - mounts
 
@@ -37,9 +37,9 @@
   loop: "{{ simple_disks | default([]) }}"
   loop_control:
     loop_var: simple_disk
-  include_tasks: build_disk.yml
+  ansible.builtin.include_tasks: build_disk.yml
 
 - name: update ansible_facts for mounts
-  setup:
+  ansible.builtin.setup:
     gather_subset:
       - mounts

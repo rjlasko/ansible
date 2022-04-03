@@ -26,10 +26,10 @@
         - init_qemu_hooks.yml
       loop_control:
         loop_var: libvirt_build_proc
-      include_tasks: "{{ libvirt_build_proc }}"
+      ansible.builtin.include_tasks: "{{ libvirt_build_proc }}"
 
     - name: restart libvirtd
-      service:
+      ansible.builtin.service:
         name: libvirtd
         state: restarted
         enabled: true
@@ -40,7 +40,7 @@
 
     - name: define LIBVIRT_DEFAULT_URI in all environments
       when: libvirt.host.default_uri is defined
-      include_role:
+      ansible.builtin.include_role:
         name: global_environment
       vars:
         global_env_vars:
@@ -49,12 +49,12 @@
 
     - name: install network bridge
       when: libvirt.host.bridge is defined
-      include_tasks: network_bridge.yml
+      ansible.builtin.include_tasks: network_bridge.yml
 
     - name: manage storage pools
       loop: "{{ libvirt.host.pools | default([]) }}"
       loop_control:
         loop_var: libvirt_pool_item
-      include_tasks: manage_pool.yml
+      ansible.builtin.include_tasks: manage_pool.yml
       vars:
         libvirt_pool: "{{ libvirt_pool_item }}"

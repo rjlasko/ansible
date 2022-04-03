@@ -10,7 +10,7 @@
 #     `ras-mc-ctl --errors`
 
 - name: install rasdaemon
-  package:
+  ansible.builtin.package:
     name: rasdaemon
     state: present
 
@@ -28,7 +28,7 @@
 
     - name: find rasdaemon version
       when: ansible_facts.packages['rasdaemon'] | length != 1
-      fail:
+      ansible.builtin.fail:
         msg: Found more than one version of rasdaemon installed!
 
     - name: detect broken Debian installation version
@@ -38,16 +38,16 @@
         ansible_facts.packages['rasdaemon'][0].version is version('0.6.7', '<')
       block:
         - name: install patch
-          package:
+          ansible.builtin.package:
             name: patch
             state: present
 
         - name: find location of ras-mc-ctl
-          command: which ras-mc-ctl
+          ansible.builtin.command: which ras-mc-ctl
           register: ras_mc_ctl_path
 
         - name: backup & restore ras-mc-ctl executable
-          include_role:
+          ansible.builtin.include_role:
             name: backup_restore
           vars:
             br_target: "{{ ras_mc_ctl_path.stdout }}"
@@ -59,7 +59,7 @@
 
 
 - name: Restart and enable the rasdaemon service
-  service:
+  ansible.builtin.service:
     name: rasdaemon
     state: restarted
     enabled: true

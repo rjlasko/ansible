@@ -4,21 +4,21 @@
 ## ---------------------- ##
 
 - name: install nvidia-detect
-  package:
+  ansible.builtin.package:
     name: nvidia-detect
     state: present
 
 - name: detect nvidia recommended driver packages
-  shell: nvidia-detect | awk '/recommended to install/{getline; print}' | awk '{$1=$1};1' | sort | uniq
+  ansible.builtin.shell: nvidia-detect | awk '/recommended to install/{getline; print}' | awk '{$1=$1};1' | sort | uniq
   register: nvidia_driver_list
 
 - name: install nvidia recommended drivers
-  package:
+  ansible.builtin.package:
     name: "{{ nvidia_driver_list.stdout_lines }}"
     state: present
   register: nvidia_driver_install
 
 - name: reboot to load new drivers
   when: nvidia_driver_install.changed
-  reboot:
+  ansible.builtin.reboot:
     reboot_timeout: 60

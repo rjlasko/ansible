@@ -4,10 +4,10 @@
 ## ---------------------------------------------------------------------- ##
 
 - name: shutdown UPS driver
-  command: upsdrvctl stop
+  ansible.builtin.command: upsdrvctl stop
 
 - name: ups.conf
-  template:
+  ansible.builtin.template:
     src: ups.conf.j2
     dest: "{{ nut_config_path }}/ups.conf"
     owner: root
@@ -20,10 +20,10 @@
 # https://askubuntu.com/questions/113994/trouble-starting-network-ups-tools-with-a-eaton-3s-ups
 
 - name: restart UPS driver
-  command: upsdrvctl start
+  ansible.builtin.command: upsdrvctl start
 
 - name: upsd.conf
-  template:
+  ansible.builtin.template:
     src: upsd.conf.j2
     dest: "{{ nut_config_path }}/upsd.conf"
     owner: root
@@ -31,7 +31,7 @@
     mode: u=rw,g=r,o-rwx
 
 - name: upsd.users
-  template:
+  ansible.builtin.template:
     src: upsd.users.j2
     dest: "{{ nut_config_path }}/upsd.users"
     owner: root
@@ -39,7 +39,7 @@
     mode: u=rw,g=r,o-rwx
 
 - name: restart nut-driver
-  service:
+  ansible.builtin.service:
     name: nut-driver
     state: restarted
     enabled: yes
@@ -49,7 +49,7 @@
   delay: 2
 
 - name: restart nut-server
-  service:
+  ansible.builtin.service:
     name: nut-server
     state: restarted
     enabled: yes

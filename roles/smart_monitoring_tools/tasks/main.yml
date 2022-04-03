@@ -7,12 +7,12 @@
 # https://help.ubuntu.com/community/Smartmontools#Advanced:_Running_as_Smartmontools_as_a_Daemon
 # https://wiki.archlinux.org/index.php/S.M.A.R.T.
 
-- package:
+- ansible.builtin.package:
     name: smartmontools
     state: present
 
 - name:
-  include_role:
+  ansible.builtin.include_role:
     name: backup_restore
   vars:
     br_target: /etc/smartd.conf
@@ -29,11 +29,11 @@
 # "-M test" - send test email for each device on SMART daemon restart
 # "-s (S/../(02|10|18|26)/./03|L/../28/./03)" - short @ 3am (2nd,10th,18th,26th of the month), long @ 3am (28th of the month)
 
-- set_fact:
+- ansible.builtin.set_fact:
     smartd_params: "-a -d sat -S on -o off -R 190 -R 194 -R 231 -W 4,40,45 -m {{ smartmontools_email | mandatory }} -s (S/../(02|10|18|26)/./03|L/../28/./03)"
 
 - name: common smartd scheduling
-  lineinfile:
+  ansible.builtin.lineinfile:
     dest: /etc/smartd.conf
     state: present
     regexp: '^DEVICESCAN'
@@ -44,18 +44,18 @@
   loop: "{{ smartd_sat_devices | default([]) }}"
   loop_control:
     loop_var: device_path
-  lineinfile:
+  ansible.builtin.lineinfile:
     dest: /etc/smartd.conf
     state: present
     insertbefore: BOF
     line: "{{ device_path }} {{ smartd_params }}"
 
 - name: find location of environment file
-  shell: systemctl cat smartd | grep -i EnvironmentFile | sed -n -e 's/^.*=-//p'
+  ansible.builtin.shell: systemctl cat smartd | grep -i EnvironmentFile | sed -n -e 's/^.*=-//p'
   register: smartd_env_file
 
 - name: find if environment file exists
-  stat:
+  ansible.builtin.stat:
     path: "{{ smartd_env_file.stdout }}"
   register: stat_envfile
 
@@ -63,7 +63,7 @@
   # as it is removed in newer versions
 - name: configure startup
   when: stat_envfile.stat.exists
-  lineinfile:
+  ansible.builtin.lineinfile:
     dest: "{{ smartd_env_file.stdout }}"
     state: present
     # backrefs=true will prevent adding if no regexp match
@@ -77,7 +77,7 @@
 
 # XXX: this works for Debian
 - name: restart smartd
-  service:
+  ansible.builtin.service:
     name: smartd
     state: restarted
     enabled: true
@@ -87,7 +87,7 @@
 # XXX: this works for Ubuntu 20.10
 - name: restart smartmontools
   when: not smartd_service.changed
-  service:
+  ansible.builtin.service:
     name: smartmontools
     state: restarted
     enabled: true
@@ -96,12 +96,12 @@
 
 - name: detect failure to restart SMART daemon
   when: not smartd_service.changed and not smartmontools_service.changed
-  fail:
+  ansible.builtin.fail:
     msg: could not restart SMART daemon
 
 # FIXME: better way than 'pause' to wait for smartmontools daemon to come back up
 # XXX: we do this because we think that we've had problems with certain tasks
 # immediately following the restart of this daemon, probably after install
 - name: wait for smartmontools to restart
-  pause:
+  ansible.builtin.pause:
     seconds: 10

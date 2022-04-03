@@ -15,12 +15,12 @@
     libvirt_xpath.defer == 'initial'
   block:
     - name: get XML of current VM definition
-      virt:
+      community.libvirt.virt:
         command: get_xml
         name: "{{ libvirt.vm.name }}"
       register: current_domain_xml
 
-    - set_fact:
+    - ansible.builtin.set_fact:
         selected_domain_xml: "{{ current_domain_xml.get_xml }}"
 
 - name: use deferred domain XML
@@ -29,10 +29,10 @@
     libvirt_xpath.defer != 'initial'
   block:
     - name: get contents of deferred XML
-      command: cat {{ libvirt_defered_xml }}
+      ansible.builtin.command: cat {{ libvirt_defered_xml }}
       register: deferred_domain_xml
 
-    - set_fact:
+    - ansible.builtin.set_fact:
         selected_domain_xml: "{{ deferred_domain_xml.stdout }}"
 
 # - name: print selected_domain_xml
@@ -40,7 +40,7 @@
 #     var: selected_domain_xml
 
 - name: alter XML by XPath "{{ libvirt_xpath.xpath }}"
-  xml:
+  community.general.xml:
     xmlstring: "{{ selected_domain_xml }}"
     xpath: "{{ libvirt_xpath.xpath }}"
     add_children: "{{ libvirt_xpath.add_children | default(omit) }}"
@@ -58,7 +58,7 @@
   when: >
     libvirt_xpath.defer is defined and
     libvirt_xpath.defer != 'apply'
-  copy:
+  ansible.builtin.copy:
     content: "{{ altered_domain_xml.xmlstring }}"
     dest: "{{ libvirt_defered_xml }}"
     force: true
@@ -69,12 +69,12 @@
     libvirt_xpath.defer == 'apply'
   block:
     - name: define domain XML
-      virt:
+      community.libvirt.virt:
         command: define
         xml: "{{ altered_domain_xml.xmlstring }}"
 
     - name: remove deferral XML
       when: libvirt_defered_xml is defined
-      file:
+      ansible.builtin.file:
         path: "{{ libvirt_defered_xml }}"
         state: absent

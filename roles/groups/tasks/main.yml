@@ -4,6 +4,6 @@
 ## -------------------------------------- ##
 
 - loop: "{{ user_groups | dict2items }}"
-  group:
+  ansible.builtin.group:
     name: "{{ item.key | mandatory }}"
     gid: "{{ item.value | mandatory }}"

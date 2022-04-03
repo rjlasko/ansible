@@ -4,16 +4,16 @@
 ## ------------------------------------- ##
 
 - name: shutdown VM
-  include_tasks: shutdown_guest.yml
+  ansible.builtin.include_tasks: shutdown_guest.yml
 
 - name: apply CPU and Memory definitions
   when: libvirt.vm.alter_domain.cpu_mem is defined
   block:
     - name: alter cpu topology and affinity
-      include_tasks: alter_cpus.yml
+      ansible.builtin.include_tasks: alter_cpus.yml
 
     - name: alter memory configuration
-      include_tasks: alter_memory.yml
+      ansible.builtin.include_tasks: alter_memory.yml
   vars:
     libvirt_cpumem: "{{ libvirt.vm.alter_domain.cpu_mem }}"
 
@@ -22,7 +22,7 @@
   loop: "{{ libvirt.vm.alter_domain.disks }}"
   loop_control:
     loop_var: alter_domain_disk
-  include_tasks: attach_disk.yml
+  ansible.builtin.include_tasks: attach_disk.yml
   vars:
     libvirt_disk: "{{ alter_domain_disk }}"
 
@@ -31,13 +31,13 @@
   loop: "{{ libvirt.vm.alter_domain.hostdevs | dict2items }}"
   loop_control:
     loop_var: alter_domain_hostdev
-  include_tasks: attach_hostdev.yml
+  ansible.builtin.include_tasks: attach_hostdev.yml
   vars:
     libvirt_hostdev: "{{ alter_domain_hostdev.value }}"
 
 - name: alter VM by XPath
   when: libvirt.vm.alter_domain.xpaths is defined
-  include_tasks: alter_domain_xpaths.yml
+  ansible.builtin.include_tasks: alter_domain_xpaths.yml
   vars:
     alter_domain_xpaths: "{{ libvirt.vm.alter_domain.xpaths }}"
 

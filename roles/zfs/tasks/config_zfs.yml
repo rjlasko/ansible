@@ -4,11 +4,12 @@
 ## ------------------------ ##
 
 
-- set_fact:
+- name: declare ZFS configuration path
+  ansible.builtin.set_fact:
     zfs_conf_path: "/etc/modprobe.d/zfs.conf"
 
 - name: delete prior config
-  file:
+  ansible.builtin.file:
     path: "{{ zfs_conf_path }}"
     state: absent
 
@@ -16,7 +17,7 @@
   loop: "{{ zfs.conf | default({}) | dict2items }}"
   loop_control:
     loop_var: zfs_conf_item
-  lineinfile:
+  ansible.builtin.lineinfile:
     path: "{{ zfs_conf_path }}"
     create: true
     line: "options zfs {{ zfs_conf_item.key }}={{ zfs_conf_item.value }}"

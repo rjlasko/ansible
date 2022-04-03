@@ -6,25 +6,25 @@
 - become: true
   block:
     - when: libvirt.isolate is not defined or (libvirt.isolate | length) == 0
-      file:
+      ansible.builtin.file:
         path: "{{ qemu_isolated_guests_path }}"
         state: absent
 
     - when: libvirt.isolate is defined and (libvirt.isolate | length) > 0
       block:
         - name: install python3 pip
-          package:
+          ansible.builtin.package:
             name: python3-pip
 
         - name: install vfio-isolate library
-          pip:
+          ansible.builtin.pip:
             name: vfio-isolate
 
-        - command: cat /proc/cpuinfo
+        - ansible.builtin.command: cat /proc/cpuinfo
           register: proc_cpuinfo
 
         - name: apply vfio-isolate from template
-          template:
+          ansible.builtin.template:
             src: isolate.sh.j2
             dest: "{{ qemu_isolate_hook_path }}"
             mode: ug=rx,o=r
@@ -36,13 +36,13 @@
               isolated_guests_filepath: "{{ qemu_isolated_guests_path }}"
 
         - name: create file with VMs to isolate from host
-          copy:
+          ansible.builtin.copy:
             dest: "{{ qemu_isolated_guests_path }}"
             content: "{{ libvirt.isolate.names | sort | unique | join('\n') }}\n"
             mode: a=r
 
     - name: restart libvirtd
-      service:
+      ansible.builtin.service:
         name: libvirtd
         state: restarted
         enabled: true

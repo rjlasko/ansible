@@ -6,6 +6,6 @@
 # XXX: https://kb.iu.edu/d/acdd
 
 - name: create ~/.hushlogin
-  file:
+  ansible.builtin.file:
     path: ~/.hushlogin
     state: touch

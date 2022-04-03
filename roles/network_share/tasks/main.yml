@@ -7,8 +7,8 @@
   block:
     - name: install and configure SAMBA server
       when: net_share.samba is defined
-      include_tasks: samba.yml
+      ansible.builtin.include_tasks: samba.yml
 
     - name: install and configure NFS server
       when: net_share.nfs is defined
-      include_tasks: nfs.yml
+      ansible.builtin.include_tasks: nfs.yml

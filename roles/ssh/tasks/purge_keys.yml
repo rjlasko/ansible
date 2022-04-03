@@ -4,7 +4,7 @@
 ## -------------------------------------- ##
 
 - name: find existing keys
-  find:
+  ansible.builtin.find:
     paths: ~/.ssh
     # more effective to avoid known files that are not keys, than to target keys
     excludes: 'known_hosts*,authorized_keys*,*.properties,config,credentials'
@@ -16,6 +16,6 @@
   loop: "{{ file_glob_results.files | default([]) }}"
   loop_control:
     loop_var: key_file
-  file:
+  ansible.builtin.file:
     path: "{{ key_file.path }}"
     state: absent

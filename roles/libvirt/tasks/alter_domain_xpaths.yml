@@ -6,7 +6,7 @@
 - name: alter domain xml by xpaths
   block:
     - name: create temporary deferred domain XML
-      tempfile:
+      ansible.builtin.tempfile:
         state: file
         suffix: deferred.xml
       register: temp_xml
@@ -15,13 +15,13 @@
       loop: "{{ alter_domain_xpaths }}"
       loop_control:
         loop_var: alter_domain_xpath
-      include_tasks: alter_domain_xpath.yml
+      ansible.builtin.include_tasks: alter_domain_xpath.yml
       vars:
         libvirt_xpath: "{{ alter_domain_xpath }}"
         libvirt_defered_xml: "{{ temp_xml.path }}"
 
   always:
     - name: remove deferred domain XML
-      file:
+      ansible.builtin.file:
         path: "{{ temp_xml.path }}"
         state: absent

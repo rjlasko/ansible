@@ -5,7 +5,7 @@
 
 # Handle active like-named VMs
 - name: list VMs
-  virt:
+  community.libvirt.virt:
     command: list_vms
   register: libvirt_existing_vms
 
@@ -16,17 +16,17 @@
     libvirt.vm.name in libvirt_existing_vms.list_vms
   block:
     - name: shutdown VM
-      include_tasks: shutdown_guest.yml
+      ansible.builtin.include_tasks: shutdown_guest.yml
 
     # XXX: the "nvram" option was introduced to delete VMs using UEFI
     - name: "undefine VM: {{ libvirt.vm.name }}"
-      command: virsh undefine --nvram {{ libvirt.vm.name }}
+      ansible.builtin.command: virsh undefine --nvram {{ libvirt.vm.name }}
 
 # FIXME: for some reason, sometimes this doesn't find everything
 # XXX: maybe it never does.  Does the QEMU URI have something to do with it? Is that properly set for this call?
 # Handle like-named VM volume
 - name: list volumes
-  shell: virsh vol-list --pool default | tail -n+3 | grep {{ libvirt.vm.name }} | awk '{print $1}'
+  ansible.builtin.shell: virsh vol-list --pool default | tail -n+3 | grep {{ libvirt.vm.name }} | awk '{print $1}'
   register: libvirt_existing_vols
 
 # FIXME: for some reason, sometimes this doesn't delete everything
@@ -35,10 +35,10 @@
   loop: "{{ libvirt_existing_vols.stdout_lines }}"
   loop_control:
     loop_var: libvirt_del_vol
-  shell: "virsh vol-delete --pool default {{ libvirt_del_vol }}"
+  ansible.builtin.shell: "virsh vol-delete --pool default {{ libvirt_del_vol }}"
 
 - name: clear any previously existing hooks
   become: true
-  file:
+  ansible.builtin.file:
     state: absent
     path: "{{ qemu_hooks_path }}/{{ libvirt.vm.name }}"

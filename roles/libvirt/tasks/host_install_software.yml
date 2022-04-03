@@ -4,7 +4,7 @@
 ## -------------------------------------------------- ##
 
 - when: ansible_facts['distribution'] not in libvirt_host_packages
-  fail:
+  ansible.builtin.fail:
     msg: "libvirt role not tested for {{ ansible_facts['distribution'] }}"
 
 - name: install packages
@@ -14,12 +14,12 @@
       and (libvirt_host_packages[ansible_facts['distribution']].backports is defined)
     }}"
   block:
-    - debug:
+    - ansible.builtin.debug:
         var: libvirt_backported_install
 
     - name: install backported packages
       when: libvirt_backported_install
-      apt:
+      ansible.builtin.apt:
         name: "{{ libvirt_host_packages[ansible_facts['distribution']].backports }}"
         state: latest
         autoremove: true
@@ -27,7 +27,7 @@
       register: libvirt_backport_packages
 
     - name: install stable packages
-      apt:
+      ansible.builtin.apt:
         name: "{{
           libvirt_host_packages[ansible_facts['distribution']].stable +
           (libvirt_host_packages[ansible_facts['distribution']].backports if libvirt_backported_install else [])

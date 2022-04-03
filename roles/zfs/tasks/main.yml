@@ -5,7 +5,7 @@
 
 - name: fail on unsupported distributions
   when: ansible_facts['distribution'] not in zfs_supported_distros
-  fail:
+  ansible.builtin.fail:
     msg: "Only supports distributions: {{ zfs_supported_distros | string }}"
 
 # https://github.com/zfsonlinux/zfs/wiki/Debian
@@ -22,18 +22,18 @@
 # https://docs.ansible.com/ansible/latest/modules/zfs_module.html
 
 - name: install zfs
-  include_tasks: install_zfs.yml
+  ansible.builtin.include_tasks: install_zfs.yml
 
 - name: get zfs kernel module info
-  shell: modinfo zfs | grep -v parm
+  ansible.builtin.shell: modinfo zfs | grep -v parm
   register: zfs_module_info
 
 - name: module info
-  debug: msg="{{ zfs_module_info.stdout_lines }}"
+  ansible.builtin.debug: msg="{{ zfs_module_info.stdout_lines }}"
 
 # XXX: this installs a cron script and maybe more
 - name: install ZFS automatic snapshots
-  package:
+  ansible.builtin.package:
     name: zfs-auto-snapshot
     state: present
 
@@ -42,11 +42,11 @@
   block:
     - name: configure ZFS
       when: zfs.conf is defined
-      include_tasks: config_zfs.yml
+      ansible.builtin.include_tasks: config_zfs.yml
 
     - name: configure ZED
       when: zfs.email is defined
-      include_tasks: config_zed.yml
+      ansible.builtin.include_tasks: config_zed.yml
 
     - name: import ZFS pools
       when: zfs.pools is defined
@@ -55,11 +55,12 @@
           loop: "{{ zfs.pools }}"
           loop_control:
             loop_var: zfs_pool
-          include_tasks: import_zpool.yml
+          ansible.builtin.include_tasks: import_zpool.yml
 
 - name: list all zfs datasets
-  command: zfs list
+  ansible.builtin.command: zfs list
   register: zfs_dataset_listing
 
-- debug:
+- name: show ZFS datasets
+  ansible.builtin.debug:
     var: zfs_dataset_listing.stdout_lines

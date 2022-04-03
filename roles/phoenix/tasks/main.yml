@@ -5,6 +5,6 @@
 
 
 - name: install Phoenix with brew
-  homebrew_cask:
+  community.general.homebrew_cask:
     name: phoenix
     state: present

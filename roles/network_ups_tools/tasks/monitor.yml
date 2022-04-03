@@ -8,14 +8,14 @@
 
 
 - name: add 'nut' user to 'mail' group
-  user:
+  ansible.builtin.user:
     name: nut
     groups: mail
     append: true
     create_home: false
 
 - name: NOTIFYCMD script
-  template:
+  ansible.builtin.template:
     src: notify.sh.j2
     dest: "{{ nut_config_path }}/notify.sh"
     owner: root
@@ -24,7 +24,7 @@
     mode: u=rw,g=rx,o-rwx
 
 - name: upsmon.conf
-  template:
+  ansible.builtin.template:
     src: upsmon.conf.j2
     dest: "{{ nut_config_path }}/upsmon.conf"
     owner: root
@@ -32,7 +32,7 @@
     mode: u=rw,g=r,o-rwx
 
 - name: restart nut-monitor
-  service:
+  ansible.builtin.service:
     name: nut-monitor
     state: restarted
     enabled: true

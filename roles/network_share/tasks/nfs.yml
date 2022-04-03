@@ -4,7 +4,7 @@
 ## --------------------- ##
 
 - name: install NFS packages
-  package:
+  ansible.builtin.package:
     name: "{{ nfs_packages }}"
     state: present
   vars:
@@ -17,7 +17,7 @@
 # see: https://help.ubuntu.com/community/NFSv4Howto
 # see: https://wiki.archlinux.org/index.php/NFS#Server
 - name: create NFS share root
-  file:
+  ansible.builtin.file:
     path: /srv/nfs
     state: directory
     # the parent of any shared directory also needs the following permissions
@@ -29,34 +29,34 @@
 - name: clear pre-existing NFS exports
   block:
     - name: backup & restore /etc/exports
-      include_role:
+      ansible.builtin.include_role:
         name: backup_restore
       vars:
         br_target: /etc/exports
 
     - name: turn off cleared NFS exports
-      command: "exportfs -r"
+      ansible.builtin.command: "exportfs -r"
 
 - name: remove pre-existing bind mounts in NFS root (/srv/nfs)
   block:
     - name: find pre-existing bind mounts in NFS root (/srv/nfs)
-      shell: cat /etc/fstab | grep '/srv/nfs' | awk '{print $2}'
+      ansible.builtin.shell: cat /etc/fstab | grep '/srv/nfs' | awk '{print $2}'
       register: preexisting_bind_mounts
 
     - name: remove bind mounts in NFS root (/srv/nfs)
       loop: "{{ preexisting_bind_mounts.stdout_lines }}"
       loop_control:
         loop_var: bind_mount_point
-      mount:
+      ansible.posix.mount:
         path: "{{ bind_mount_point }}"
         state: absent
 
     # XXX: note that we just unmounted everything here defined in /etc/fstab
     - name: clear out all mount points
-      command: find /srv/nfs -mindepth 1 -type d -empty -delete
+      ansible.builtin.command: find /srv/nfs -mindepth 1 -type d -empty -delete
 
     - name: fail if leftovers in NFS root (/srv/nfs)
-      command: find /srv/nfs -mindepth 1
+      ansible.builtin.command: find /srv/nfs -mindepth 1
       register: nfs_root_leftovers
       failed_when: nfs_root_leftovers.stdout != ""
 
@@ -66,13 +66,13 @@
       loop: "{{ net_share.nfs }}"
       loop_control:
         loop_var: nfs_share
-      include_tasks: nfs_share.yml
+      ansible.builtin.include_tasks: nfs_share.yml
 
     - name: export udpated NFS shares
-      command: "exportfs -r"
+      ansible.builtin.command: "exportfs -r"
 
 - name: restart NFS service
-  service:
+  ansible.builtin.service:
     name: nfs-server
     state: restarted
     enabled: true

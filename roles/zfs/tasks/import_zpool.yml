@@ -7,14 +7,14 @@
 # https://github.com/ansible/ansible/pull/43690
 
 - name: get current zpools
-  shell: zpool list | awk '{print $1}' | tail -n+2
+  ansible.builtin.shell: zpool list | awk '{print $1}' | tail -n+2
   register: initial_zpool_listing
 
 # XXX: consider.... for any zpool previously existing, unimport, and then reimport
 
 - name: import zpool
   when: initial_zpool_listing.stdout is not search(zfs_pool)
-  command: "zpool import -d /dev/disk/by-id -f {{ zfs_pool }}"
+  ansible.builtin.command: "zpool import -d /dev/disk/by-id -f {{ zfs_pool }}"
 
 # XXX: Debian doesn't appear to need this trigger
 - name: trigger zpool import service
@@ -23,12 +23,7 @@
     ansible_facts['distribution'] == 'Pop!_OS'
   block:
     - name: automatically zpool import using cachefile
-      service:
+      ansible.builtin.service:
         name: zfs-import-cache
         state: restarted
         enabled: true
-    # - name: automatically zpool import scan without cachefile
-    #   service:
-    #     name: zfs-import-scan
-    #     state: restarted
-    #     enabled: true

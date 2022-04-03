@@ -4,17 +4,17 @@
 ## ------------------------------------- ##
 
 - name: install tmpreaper
-  package:
+  ansible.builtin.package:
     name: tmpreaper
 
 - name: backup & restore /etc/tmpreaper.conf
-  include_role:
+  ansible.builtin.include_role:
     name: backup_restore
   vars:
     br_target: /etc/tmpreaper.conf
 
 - name: disable cron warning
-  ini_file:
+  community.general.ini_file:
     path: /etc/tmpreaper.conf
     section: null
     option: SHOWWARNING

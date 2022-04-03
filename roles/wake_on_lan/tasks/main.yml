@@ -8,24 +8,24 @@
   when: >
     ansible_facts['distribution'] != 'Ubuntu' and
     ansible_facts['distribution'] != 'Pop!_OS'
-  fail:
+  ansible.builtin.fail:
     msg: "Only tested on Ubuntu distributions"
 
 - name: install software from package manager
-  package:
+  ansible.builtin.package:
     name: ethtool
     state: present
 
 - name: find best (default) physical interface to respond to wake on lan
-  shell: find /sys/class/net -type l -not -lname '*virtual*' -exec basename {} \; | sort | head -n1
+  ansible.builtin.shell: find /sys/class/net -type l -not -lname '*virtual*' -exec basename {} \; | sort | head -n1
   register: default_device
 
 - name: choose WoL device
-  set_fact:
+  ansible.builtin.set_fact:
     selected_wol_device: "{{ wol_device | default(default_device.stdout | mandatory) }}"
 
 - name: add systemd WoL service for {{ best_interface_result.stdout }}
-  template:
+  ansible.builtin.template:
     src: wol.service.j2
     dest: /etc/systemd/system/wol.service
     owner: root
@@ -35,7 +35,7 @@
     source_interface: "{{ selected_wol_device }}"
 
 - name: Make systemd aware of new service & restart
-  systemd:
+  ansible.builtin.systemd:
     name: wol
     daemon_reload: true
     enabled: true

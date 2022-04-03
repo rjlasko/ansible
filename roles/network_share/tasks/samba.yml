@@ -6,7 +6,7 @@
 # TODO: need cronjob to backup samba passwords and secrets
 
 - name: install SAMBA packages
-  package:
+  ansible.builtin.package:
     name: "{{ samba_packages }}"
     state: present
   vars:
@@ -22,14 +22,14 @@
   when: net_share.samba.config is defined
   block:
     - name: find smbd CONFIGFILE
-      shell: smbd -b | grep CONFIGFILE | cut -d ":" -f 2 | xargs
+      ansible.builtin.shell: smbd -b | grep CONFIGFILE | cut -d ":" -f 2 | xargs
       register: config_file
 
-    - set_fact:
+    - ansible.builtin.set_fact:
         samba_config_file: "{{ config_file.stdout }}"
 
     - name: backup & restore "{{ samba_config_file }}"
-      include_role:
+      ansible.builtin.include_role:
         name: backup_restore
       vars:
         br_target: "{{ samba_config_file }}"
@@ -38,10 +38,10 @@
       loop: "{{ net_share.samba.config | default([]) }}"
       loop_control:
         loop_var: samba_config
-      include_tasks: samba_config.yml
+      ansible.builtin.include_tasks: samba_config.yml
 
     - name: restart SAMBA service
-      service:
+      ansible.builtin.service:
         name: smbd
         state: restarted
         enabled: true
@@ -50,7 +50,7 @@
   when: net_share.samba.restore_private is defined
   block:
     - name: verify "{{ net_share.samba.restore_private }}/passdb.tdb" exists
-      stat:
+      ansible.builtin.stat:
         path: "{{ net_share.samba.restore_private }}/passdb.tdb"
       register: passdb_tdb
       failed_when: >
@@ -58,7 +58,7 @@
         passdb_tdb.stat.isreg == 'False'
 
     - name: verify "{{ net_share.samba.restore_private }}/secrets.tdb" exists
-      stat:
+      ansible.builtin.stat:
         path: "{{ net_share.samba.restore_private }}/secrets.tdb"
       register: secrets_tdb
       failed_when: >
@@ -66,11 +66,11 @@
         secrets_tdb.stat.isreg == 'False'
 
     - name: find smbd PRIVATE_DIR
-      shell: smbd -b | grep PRIVATE_DIR | cut -d ":" -f 2 | xargs
+      ansible.builtin.shell: smbd -b | grep PRIVATE_DIR | cut -d ":" -f 2 | xargs
       register: private_dir
 
     - name: restore passdb.tdb
-      copy:
+      ansible.builtin.copy:
         src: "{{ net_share.samba.restore_private }}/passdb.tdb"
         remote_src: true
         dest: "{{ private_dir.stdout }}/passdb.tdb"
@@ -79,7 +79,7 @@
         mode: u=rw,g-rwx,o-rwx
 
     - name: restore secrets.tdb
-      copy:
+      ansible.builtin.copy:
         src: "{{ net_share.samba.restore_private }}/secrets.tdb"
         remote_src: true
         dest: "{{ private_dir.stdout }}/secrets.tdb"
@@ -88,7 +88,7 @@
         mode: u=rw,g-rwx,o-rwx
 
     - name: restart SAMBA service
-      service:
+      ansible.builtin.service:
         name: smbd
         state: restarted
         enabled: true

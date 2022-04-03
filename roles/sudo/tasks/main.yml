@@ -5,13 +5,13 @@
 # TODO: add to "admin" groups when needed on OSx/BSD
 # https://stackoverflow.com/questions/33359404/ansible-best-practice-for-maintaining-list-of-sudoers
 
-- package:
+- ansible.builtin.package:
     name: sudo
     state: present
 
 # determine default group with sudo privileges
 - name: get all groups
-  shell: getent group | awk -F":" '{print $1}'
+  ansible.builtin.shell: getent group | awk -F":" '{print $1}'
   register: getent_groups
 
 - name: find default sudoers group
@@ -21,11 +21,11 @@
   with_items:
     - sudo
     - wheel
-  set_fact:
+  ansible.builtin.set_fact:
     default_sudoers_group: "{{ item }}"
 
 - name: add custom sudoer file
-  lineinfile:
+  ansible.builtin.lineinfile:
     path: /etc/sudoers.d/wheel-sudoer
     state: present
     create: true

@@ -4,7 +4,7 @@
 ## --------------------- ##
 
 - name: detect if kernel module is available to be loaded
-  find:
+  ansible.builtin.find:
     path: "/lib/modules/{{ ansible_facts['kernel'] }}"
     file_type: directory
     recurse: true
@@ -13,12 +13,13 @@
 
 - when: (zfs_detect_modules.files | length) == 0
   block:
-    - when: ansible_facts['distribution'] not in zfs_dkms_plus_dependencies
-      fail:
+    - name: validate distribution support for DKMS installation
+      when: ansible_facts['distribution'] not in zfs_dkms_plus_dependencies
+      ansible.builtin.fail:
         msg: "ZFS DKMS dependencies for {{ ansible_facts['distribution'] }} have not been defined!"
 
     - name: add build dependencies
-      package:
+      ansible.builtin.package:
         name: "{{ zfs_dkms_plus_dependencies[ansible_facts['distribution']] }}"
         state: present
 
@@ -28,18 +29,18 @@
       # will fail if there is an issue.
       # We have observed this behavior in Debian, and accept it
       ignore_errors: "{{ ansible_facts['distribution'] == 'Debian' }}"
-      package:
+      ansible.builtin.package:
         name:
           - zfs-dkms
         state: present
 
 
 - name: load ZFS module into the kernel
-  modprobe:
+  community.general.modprobe:
     name: zfs
     state: present
 
 - name: install zfsutils-linux
-  package:
+  ansible.builtin.package:
     name: zfsutils-linux
     state: present

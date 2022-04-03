@@ -4,14 +4,14 @@
 ## ---------------------------------------- ##
 
 - name: ensure key directory exists
-  file:
+  ansible.builtin.file:
     path: ~/.ssh
     state: directory
     mode: u=rwx,go-rwx
 
 - name: handle public key
   when: ssh_key_def.source.public is defined
-  template:
+  ansible.builtin.template:
     src: key.pub.j2
     dest: "~/.ssh/{{ ssh_key_name | mandatory }}.pub"
     mode: u=rw,g=r,o=r
@@ -19,7 +19,7 @@
 
 - name: handle private key
   when: ssh_key_def.source.private is defined
-  copy:
+  ansible.builtin.copy:
     src: "{{ ssh_key_def.source.private }}"
     dest: "~/.ssh/{{ ssh_key_name }}"
     mode: u=rw,go-rwx

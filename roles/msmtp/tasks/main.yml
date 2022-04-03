@@ -7,18 +7,18 @@
 
 #
 - name: check if 'mailx' is accessible via path
-  shell: 'type mailx'
+  ansible.builtin.shell: 'type mailx'
   ignore_errors: true
   register: mailx_exists
 
 # ensure that mailx is installed, as cron will need it
 - name: system install 'mailx'
   when: mailx_exists.rc != 0
-  package:
+  ansible.builtin.package:
     name: mailutils
     state: present
 
-- package:
+- ansible.builtin.package:
     name: "{{ msmtp_packages }}"
     state: present
   vars:
@@ -28,7 +28,7 @@
       - ca-certificates
 
 - name: create system msmtp config file
-  template:
+  ansible.builtin.template:
     src: msmtprc.j2
     dest: /etc/msmtprc
     owner: root
@@ -37,20 +37,20 @@
     force: yes
 
 - name: detect if /etc/aliases exists
-  stat:
+  ansible.builtin.stat:
     path: /etc/aliases
   register: aliases_exists
 
 - name: update config if /etc/aliases exists
   when: aliases_exists.stat.exists
-  lineinfile:
+  ansible.builtin.lineinfile:
     dest: /etc/msmtprc
     regexp: "^.*aliases"
     line: "aliases /etc/aliases"
 
 - name: update config if /etc/aliases exists
   when: aliases_exists.stat.exists == False
-  lineinfile:
+  ansible.builtin.lineinfile:
     dest: /etc/msmtprc
     regexp: "^.*aliases"
     line: "#aliases"

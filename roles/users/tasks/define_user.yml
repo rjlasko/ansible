@@ -5,7 +5,7 @@
 
 - name: define user group if given
   when: user_def.group is defined
-  group:
+  ansible.builtin.group:
     name: "{{ user_def.group.name | mandatory }}"
     gid: "{{ user_def.group.id | default(omit) }}"
 
@@ -16,7 +16,7 @@
     user_def.groups is defined or
     user_def.shell is defined or
     user_def.create_home is defined
-  user:
+  ansible.builtin.user:
     name: "{{ user_def.name }}"
     uid: "{{ user_def.uid | default(omit) }}"
     group: "{{ user_def.group.name | default(omit) }}"
@@ -27,20 +27,20 @@
 
 - name: set user password
   when: user_def.password is defined
-  user:
+  ansible.builtin.user:
     name: "{{ user_def.name }}"
     password: "{{ user_def.password | password_hash('sha512') }}"
 
 - name: add as sudoer
   when: user_def.sudoer | default(false)
-  user:
+  ansible.builtin.user:
     name: "{{ user_def.name }}"
     groups: "{{ default_sudoers_group }}"
     append: true
 
 - name: update email
   when: user_def.email is defined
-  lineinfile:
+  ansible.builtin.lineinfile:
     dest: /etc/aliases
     create: true
     regexp: "^{{ user_def.name }}"

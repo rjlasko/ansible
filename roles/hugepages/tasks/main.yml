@@ -12,14 +12,14 @@
 
 
 - name: get current huge page size
-  shell: grep Hugepagesize /proc/meminfo | cut -d ":" -f 2 | xargs
+  ansible.builtin.shell: grep Hugepagesize /proc/meminfo | cut -d ":" -f 2 | xargs
   register: hugepagesize_shell
 
 # TODO: currently does not change the hugepage size
 # TODO: How do I find out how many "huge" pages that my CPU can support?
 # XXX: https://wiki.debian.org/Hugepages#Multiple_huge_page_size_support
 - name: verify hugepages size set correctly
-  assert:
+  ansible.builtin.assert:
     that:
       - "{{ hugepagesize_shell.stdout | human_to_bytes }} == {{ hugepages.size | mandatory | human_to_bytes }}"
       - "{{ hugepages.size | human_to_bytes }} != 0"
@@ -32,22 +32,21 @@
   when: hugepages.group is defined
   block:
     # TODO: not yet needed, so implementation not tested
-    - fail:
+    - ansible.builtin.fail:
         msg: implementation not complete
 
     - name: calculate mem for user-locking
-      set_fact:
+      ansible.builtin.set_fact:
         total_hugepages_kb: "{{ (hugepages.total | human_to_bytes / 1024 | round(0, 'ceil') | int }}"
         lock_limit_buffer_kb: 64
 
-
     - name: get the GID for the given group name
-      command: id {{ hugepages.group }} -g
+      ansible.builtin.command: id {{ hugepages.group }} -g
       register: hugepages_gid
 
     # XXX: https://wiki.debian.org/Hugepages#Hugepage_enabled_applications
     - name: set the GID for programs that access the mount via shared memory
-      lineinfile:
+      ansible.builtin.lineinfile:
         dest: /etc/sysctl.conf
         state: present
         regexp: '^#?vm.hugetlb_shm_group'
@@ -58,14 +57,14 @@
     # XXX: https://linuxhint.com/linux_ulimit_command/
 
     - name: set soft limit
-      lineinfile:
+      ansible.builtin.lineinfile:
         dest: /etc/security/limits.conf
         state: present
         regexp: # FIXME
         line: "@{{ hugepages.group }} soft memlock {{ (total_hugepages_kb + lock_limit_buffer_kb) }}"
 
     - name: set hard limit
-      lineinfile:
+      ansible.builtin.lineinfile:
         dest: /etc/security/limits.conf
         state: present
         regexp: # FIXME
@@ -74,11 +73,11 @@
 # It is required that the total hugepage size to reserve is specified
 # we divide this number by the hugepagesize, ceiling'd, and set as appropriate
 - name: calculate number of huge pages to preallocate at boot
-  set_fact:
+  ansible.builtin.set_fact:
     num_hugepages: "{{ (hugepages.total | mandatory | human_to_bytes / hugepages.size | human_to_bytes) | round(0, 'ceil') | int }}"
 
 - name: set the number of huge pages to preallocate at boot
-  lineinfile:
+  ansible.builtin.lineinfile:
     dest: /etc/sysctl.conf
     state: present
     regexp: '^#?vm.nr_hugepages'
@@ -87,7 +86,7 @@
 # XXX: http://vfiogaming.blogspot.com/2017/08/guide-how-to-enable-huge-pages-to.html
 - name: disable transparent huge pages
   when: (hugepages.transparent | default(false)) == false
-  copy:
+  ansible.builtin.copy:
     src: "{{ role_path }}/files/disable-thp.service"
     dest: /etc/systemd/system/disable-thp.service
     owner: root
@@ -96,21 +95,21 @@
 
 - name: enable transparent huge pages
   when: (hugepages.transparent | default(false)) == true
-  file:
+  ansible.builtin.file:
     path: /etc/systemd/system/disable-thp.service
     state: absent
 
 # XXX: https://wiki.debian.org/systemd/Services
 - name: force systemd to find and load all new services
-  systemd:
+  ansible.builtin.systemd:
     daemon_reload: true
 
 - name: enable and start disable-thp service
   when: (hugepages.transparent | default(false)) == false
-  systemd:
+  ansible.builtin.systemd:
     name: disable-thp
     enabled: true
     state: restarted
 
-- reboot:
+- ansible.builtin.reboot:
     reboot_timeout: 600

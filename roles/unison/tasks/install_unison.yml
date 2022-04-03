@@ -6,7 +6,7 @@
 # XXX: if we were installing to Alpine linux, we would also need the following dependencies:
 # build-time: musl-dev
 # runtime: openssh
-- package:
+- ansible.builtin.package:
     name:
       - curl
       - gcc
@@ -15,16 +15,17 @@
     state: present
 
 - name: mktemp dir
-  tempfile:
+  ansible.builtin.tempfile:
     state: directory
     suffix: unison
   register: work_base_dir
 
-- set_fact:
+- ansible.builtin.set_fact:
     work_src_dir: "{{ work_base_dir.path }}/src"
     ocaml_minor_version: "{{ unison.versions.ocaml | regex_replace('^([0-9])\\.([0-9]*).*', '\\1.\\2') }}"
     ocaml_install_dir: "{{ work_base_dir.path }}/ocaml"
-- set_fact:
+
+- ansible.builtin.set_fact:
     ocaml_extract_dir: "{{ work_src_dir }}/ocaml"
     ocaml_src_dir: "{{ work_src_dir }}/ocaml/ocaml-{{ unison.versions.ocaml }}"
     unison_extract_dir: "{{ work_src_dir }}/unison"
@@ -36,7 +37,7 @@
     - "{{ unison_extract_dir }}"
   loop_control:
     loop_var: make_target_dir
-  file:
+  ansible.builtin.file:
     path: "{{ make_target_dir }}"
     state: directory
 
@@ -45,13 +46,13 @@
 #########
 
 - name: download OCaml
-  unarchive:
+  ansible.builtin.unarchive:
     remote_src: true
     src: "http://caml.inria.fr/pub/distrib/ocaml-{{ ocaml_minor_version }}/ocaml-{{ unison.versions.ocaml }}.tar.gz"
     dest: "{{ ocaml_extract_dir }}"
 
 - name: configure OCaml build
-  command:
+  ansible.builtin.command:
     argv:
       - ./configure
       - "-prefix"
@@ -67,7 +68,7 @@
     chdir: "{{ ocaml_src_dir }}"
 
 - name: make + install OCaml
-  command: make world.opt install
+  ansible.builtin.command: make world.opt install
   args:
     chdir: "{{ ocaml_src_dir }}"
 
@@ -76,7 +77,7 @@
 ##########
 
 - name: download Unison
-  unarchive:
+  ansible.builtin.unarchive:
     remote_src: true
     src: "http://www.seas.upenn.edu/~bcpierce/unison/download/releases/unison-{{ unison.versions.unison }}/unison-{{ unison.versions.unison }}.tar.gz"
     dest: "{{ unison_extract_dir }}"
@@ -89,7 +90,7 @@
 #make UISTYLE=text THREADS=true STATIC=true
 
 - name: make + install Unison
-  command: make UISTYLE=text THREADS=true
+  ansible.builtin.command: make UISTYLE=text THREADS=true
   args:
     chdir: "{{ unison_src_dir }}"
   environment:
@@ -99,7 +100,7 @@
 # Install Unison #
 ##################
 
-- copy:
+- ansible.builtin.copy:
     remote_src: true
     src: "{{ unison_src_dir }}/unison"
     dest: "/usr/local/bin/"

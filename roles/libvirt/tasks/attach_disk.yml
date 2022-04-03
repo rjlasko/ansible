@@ -4,16 +4,16 @@
 ## -------------------------------------------------------- ##
 
 - name: build attach-disk base command
-  set_fact:
+  ansible.builtin.set_fact:
     virt_attach: "virsh attach-disk {{ libvirt.vm.name | mandatory }} {{ libvirt_disk.host.path }} {{ libvirt_disk.guest.dev | mandatory }}"
 
 - name: add target_bus to base command
   when: libvirt_disk.guest.bus is defined
-  set_fact:
+  ansible.builtin.set_fact:
     virt_attach: "{{ virt_attach }} --targetbus {{ libvirt_disk.guest.bus }}"
 
 - name: stat the path to determine if it is a device or file, or even exists
-  stat:
+  ansible.builtin.stat:
     path: "{{ libvirt_disk.host.path | mandatory }}"
     follow: true
     get_checksum: false
@@ -28,7 +28,7 @@
   block:
     - name: delete old image
       when: libvirt_disk.host.rebuild | default(false)
-      file:
+      ansible.builtin.file:
         path: "{{ libvirt_disk.host.path }}"
         state: absent
       register: libvirt_image_path_delete
@@ -38,36 +38,36 @@
         not libvirt_disk_path_stat.stat.exists
         or
         libvirt_image_path_delete.changed
-      include_tasks: build_disk_image.yml
+      ansible.builtin.include_tasks: build_disk_image.yml
       vars:
         libvirt_image: "{{ libvirt_disk.host }}"
 
     - name: attach as file 'type' (aka 'subdriver')
-      set_fact:
+      ansible.builtin.set_fact:
         virt_attach: "{{ virt_attach }} --driver qemu --subdriver {{ libvirt_disk.host.path.split('.') | last }}"
 
 - name: add iothread to base command
   when: libvirt_disk.guest.iothread is defined
-  set_fact:
+  ansible.builtin.set_fact:
     virt_attach: "{{ virt_attach }} --iothread {{ libvirt_disk.guest.iothread }}"
 
 - name: add cache to base comand
   when: libvirt_disk.guest.cache is defined
-  set_fact:
+  ansible.builtin.set_fact:
     virt_attach: "{{ virt_attach }} --cache {{ libvirt_disk.guest.cache }}"
 
 - name: add io to base command
   when: libvirt_disk.guest.io is defined
-  set_fact:
+  ansible.builtin.set_fact:
     virt_attach: "{{ virt_attach }} --io {{ libvirt_disk.guest.io }}"
 
 - name: add serial to base command
   when: libvirt_disk.guest.serial is defined
-  set_fact:
+  ansible.builtin.set_fact:
     virt_attach: "{{ virt_attach }} --serial {{ libvirt_disk.guest.serial }}"
 
 - name: "attach disk to {{ libvirt.vm.name }}"
-  command: "{{ virt_attach }} --config"
+  ansible.builtin.command: "{{ virt_attach }} --config"
 
 # XXX: The following can only be done (currently) from within libvirt's XML model
 
@@ -81,7 +81,7 @@
     libvirt_disk.guest.logical_block_size is defined
     and
     libvirt_disk.guest.physical_block_size is defined
-  include_tasks: alter_domain_xpath.yml
+  ansible.builtin.include_tasks: alter_domain_xpath.yml
   vars:
     libvirt_xpath:
       # backticks get resolved as single quotes surrounding the nested & resolved variable name

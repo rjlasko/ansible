@@ -4,7 +4,7 @@
 ## ------------------------------------------------ ##
 
 - name: install xfce4 and supporting packages
-  package:
+  ansible.builtin.package:
     name:
       - xfce4
       - xfce4-goodies

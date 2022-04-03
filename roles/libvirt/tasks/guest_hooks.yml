@@ -4,11 +4,11 @@
 ## --------------------------------- ##
 
 - name: shutdown VM
-  include_tasks: shutdown_guest.yml
+  ansible.builtin.include_tasks: shutdown_guest.yml
 
 - name: clear pre-existing hooks
   become: true
-  file:
+  ansible.builtin.file:
     state: absent
     path: "{{ qemu_hooks_path }}/{{ libvirt.vm.name }}"
 
@@ -16,7 +16,7 @@
   become: true
   block:
     - name: "create hooks directory for VM {{ libvirt.vm.name }}"
-      file:
+      ansible.builtin.file:
         state: directory
         path: "{{ qemu_hooks_path }}/{{ libvirt.vm.name }}"
         mode: ug=rx,o-rwx
@@ -26,7 +26,7 @@
     - loop: "{{ libvirt.vm.hooks | default([]) }}"
       loop_control:
         loop_var: libvirt_vm_hook
-      template:
+      ansible.builtin.template:
         src: "{{ libvirt_vm_hook.src }}"
         dest: "{{ qemu_hooks_path }}/{{ libvirt.vm.name }}/{{ libvirt_vm_hook.name }}"
         mode: u=rx,go-rwx

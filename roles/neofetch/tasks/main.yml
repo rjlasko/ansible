@@ -4,39 +4,41 @@
 ## ------------------- ##
 
 - name: check if neofetch is accessible via path
-  shell: 'type neofetch'
+  ansible.builtin.shell: 'type neofetch'
   ignore_errors: true
   register: neofetch_exists
 
 - name: system install neofetch
   when: neofetch_exists.rc != 0
   become: true
-  package:
+  ansible.builtin.package:
     name: neofetch
     state: present
   ignore_errors: true
   register: neofetch_package
 
 - name: check if neofetch is accessible via path
-  shell: 'type neofetch'
+  ansible.builtin.shell: 'type neofetch'
   ignore_errors: true
   register: neofetch_in_path
 
 - name: user install neofetch
   when: neofetch_in_path.rc != 0
   block:
-    - file:
+    - ansible.builtin.file:
         path: ~/bin
         state: directory
         mode: u=rwx
+
     - name: check if neofetch is where we will want to put it
-      stat:
+      ansible.builtin.stat:
           path: ~/bin/neofetch
       register: neofetch_in_target
+
     - name: get from github
       when: neofetch_in_target.stat.exists == False
-      get_url:
+      ansible.builtin.get_url:
         url: https://raw.githubusercontent.com/dylanaraps/neofetch/master/neofetch
         dest: ~/bin/neofetch
         mode: u=rx
-        force: yes
+        force: true

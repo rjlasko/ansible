@@ -7,7 +7,7 @@
   loop: "{{ samba_config.options }}"
   loop_control:
     loop_var: samba_config_option
-  ini_file:
+  community.general.ini_file:
     path: "{{ samba_config_file }}"
     section: "{{ samba_config.section }}"
     option: "{{ samba_config_option[0] }}"

@@ -4,13 +4,13 @@
 ## ----------------------------- ##
 
 - name: get listing of defined pools
-  virt_pool:
+  community.libvirt.virt_pool:
     command: info
   register: libvirt_pool_info
 
 - name: create and/or set permissions pool directory read-write by libvirt users
   become: true
-  file:
+  ansible.builtin.file:
     path: "{{ libvirt_pool.path | mandatory }}"
     state: directory
     mode: u=rwX,g=rwX,o-rwx
@@ -23,7 +23,7 @@
     libvirt_pool.name in libvirt_pool_info.pools
     and
     libvirt_pool.path != libvirt_pool_info.pools[libvirt_pool.name].path
-  virt_pool:
+  community.libvirt.virt_pool:
     name: "{{ libvirt_pool.name | mandatory }}"
     command: undefine
     state: absent
@@ -35,15 +35,15 @@
     libvirt_pool.name not in libvirt_pool_info.pools
     or
     undefine_pool.changed
-  command: "virsh pool-define-as {{ libvirt_pool.name }} dir - - - - {{ libvirt_pool.path }}"
+  ansible.builtin.command: "virsh pool-define-as {{ libvirt_pool.name }} dir - - - - {{ libvirt_pool.path }}"
 
 - name: start pool
-  virt_pool:
+  community.libvirt.virt_pool:
     name: "{{ libvirt_pool.name }}"
     command: start
     state: active
 
 - name: autostart pool
-  virt_pool:
+  community.libvirt.virt_pool:
     name: "{{ libvirt_pool.name }}"
     autostart: true

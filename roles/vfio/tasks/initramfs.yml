@@ -4,7 +4,7 @@
 ## ------------------------------------------------------------ ##
 
 - name: check if initramfs exists
-  stat:
+  ansible.builtin.stat:
     path: "{{ initramfs_path }}"
   register: initramfs_path_exists
   failed_when: not initramfs_path_exists.stat.exists
@@ -13,13 +13,13 @@
 - loop: "{{ vfio_pci_ids }}"
   loop_control:
     loop_var: vfio_pci_id
-  set_fact:
+  ansible.builtin.set_fact:
     vfio_initramfs_pci_ids: "{{ vfio_initramfs_pci_ids | default([]) + [':'.join(['0000', vfio_pci_id]) ] }}"
 
-- set_fact:
+- ansible.builtin.set_fact:
     vfio_initramfs_pci_ids_formatted: "{{ ' '.join(vfio_initramfs_pci_ids) }}"
 
-- template:
+- ansible.builtin.template:
     src: vfio_pci.sh.j2
     dest: "{{ vfio_pci_rebind_path }}"
     mode: u+rx,go-rwx
@@ -27,14 +27,14 @@
     group: root
 
 - name: "add vfio_pci kernel module to initramfs"
-  lineinfile:
+  ansible.builtin.lineinfile:
     path: "{{ initramfs_modules_path }}"
     line: 'vfio_pci'
     state: present
 
 - name: update initramfs with new kernel boot parameters
-  command: update-initramfs -u
+  ansible.builtin.command: update-initramfs -u
 
 # need to reboot to ensure those devices are ready for the VM upon start
-- reboot:
+- ansible.builtin.reboot:
     reboot_timeout: 600

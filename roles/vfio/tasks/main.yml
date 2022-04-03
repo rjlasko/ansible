@@ -4,17 +4,17 @@
 ## --------------------------------- ##
 
 - name: verify host hardware supports iommu
-  command: grep -E '^flags.*(svm|vmx)' /proc/cpuinfo
+  ansible.builtin.command: grep -E '^flags.*(svm|vmx)' /proc/cpuinfo
 
 - name: reset any initramfs changes from prior installs
-  include_tasks: initramfs_reset.yml
+  ansible.builtin.include_tasks: initramfs_reset.yml
 
 - name: install scripts supporting dynamic GPU passthrough
   when: vfio.devices is not defined
   loop: "{{ vfio_dynamic_gpu_scripts }}"
   loop_control:
     loop_var: vfio_dynamic_gpu_script
-  copy:
+  ansible.builtin.copy:
     src: "{{ vfio_dynamic_gpu_script.src }}"
     dest: "{{ vfio_dynamic_gpu_script.dest }}"
     mode: "{{ vfio_dynamic_gpu_script.mode }}"
@@ -25,14 +25,14 @@
   when: vfio.devices is defined
   block:
     - name: device discovery
-      include_tasks: discovery.yml
+      ansible.builtin.include_tasks: discovery.yml
 
     - name: setup initramfs
-      include_tasks: initramfs.yml
+      ansible.builtin.include_tasks: initramfs.yml
 
     # the other GPU should still be bound to the host driver
     - name: update Xorg to use the active (secondary) GPU
-      include_tasks: xorg.yml
+      ansible.builtin.include_tasks: xorg.yml
 
 # - fail:
 #     msg: boo

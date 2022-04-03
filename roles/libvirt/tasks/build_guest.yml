@@ -4,7 +4,7 @@
 ## --------------------- ##
 
 - name: build virt-install arguments
-  set_fact:
+  ansible.builtin.set_fact:
     virt_install_cmd: virt-install
     virt_install_name: "--name={{ libvirt.vm.name | mandatory }}"
     virt_install_given_args: "{{ libvirt.vm.virt_install.args | mandatory }}"
@@ -13,13 +13,13 @@
   when: libvirt.vm.virt_install.preseed is defined
   block:
     - name: create temporary staging directory
-      tempfile:
+      ansible.builtin.tempfile:
         state: directory
         suffix: preseed
       register: vm_staging_dir
 
     - name: generate preseed file from template
-      template:
+      ansible.builtin.template:
         src: "{{ libvirt.vm.virt_install.preseed.template | mandatory }}"
         dest: "{{ vm_staging_dir.path }}/preseed.cfg"
         force: yes
@@ -27,19 +27,19 @@
         preseed: "{{ libvirt.vm.virt_install.preseed }}"
 
     - name: build preseeded install command arguments
-      set_fact:
+      ansible.builtin.set_fact:
         virt_install_iso_location: "--location={{ libvirt.vm.virt_install.iso | mandatory}}"
         virt_install_initrd_inject: "--initrd-inject={{ vm_staging_dir.path }}/preseed.cfg"
 
     - name: create VM
       # run as root to be able to load ISO's via --location
       become: true
-      command:
+      ansible.builtin.command:
         argv: "{{ [virt_install_cmd] + [virt_install_name] + virt_install_given_args + [virt_install_iso_location] + [virt_install_initrd_inject] }}"
 
   always:
     - name: remove preseed staging directory
-      file:
+      ansible.builtin.file:
         path: "{{ vm_staging_dir.path }}"
         state: absent
 
@@ -47,11 +47,12 @@
   when: libvirt.vm.virt_install.preseed is not defined
   block:
     - name: build non-preseed install command arguments
-      set_fact:
+      ansible.builtin.set_fact:
         virt_install_iso_cdrom: "--cdrom={{ libvirt.vm.virt_install.iso | mandatory}}"
+
     - name: create VM
-      command:
+      ansible.builtin.command:
         argv: "{{ [virt_install_cmd] + [virt_install_name] + virt_install_given_args + [virt_install_iso_cdrom] }}"
 
 - name: "conclude build with {{ libvirt.vm.name }} in running state"
-  include_tasks: start_guest.yml
+  ansible.builtin.include_tasks: start_guest.yml

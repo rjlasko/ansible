@@ -4,7 +4,7 @@
 ## -------------------------------------------------------- ##
 
 - name: create mount point
-  file:
+  ansible.builtin.file:
     path: "{{ mount.path | mandatory }}"
     state: directory
     owner: "{{ mount.owner | default(omit) }}"
@@ -12,7 +12,7 @@
     mode: "{{ mount.mode | default(omit) }}"
 
 - name: mount filesystem
-  mount:
+  ansible.posix.mount:
     fstype: nfs
     src: "{{ mount.src | mandatory }}"
     path: "{{ mount.path | mandatory }}"

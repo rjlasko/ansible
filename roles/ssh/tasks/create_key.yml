@@ -4,7 +4,7 @@
 ## -------------------------------------------- ##
 
 - name: "Create ssh keys"
-  user:
+  ansible.builtin.user:
     name: "{{ ssh_key_user | mandatory }}"
     generate_ssh_key: yes
     ssh_key_file: "~/.ssh/{{ ssh_key_name | mandatory }}"

@@ -5,12 +5,12 @@
 
 - name: install Debian repos
   when: ansible_facts['distribution'] == 'Debian'
-  include_tasks: debian_repos.yml
+  ansible.builtin.include_tasks: debian_repos.yml
 
 - name: update 'apt' packages
   when: ansible_facts['pkg_mgr'] == 'apt'
   become: true
-  apt:
+  ansible.builtin.apt:
     autoclean: true
     autoremove: true
     update_cache: true
@@ -19,6 +19,6 @@
 - name: update 'pacman' packages
   when: ansible_facts['pkg_mgr'] == 'pacman'
   become: true
-  pacman:
+  community.general.pacman:
     update_cache: true
     upgrade: true

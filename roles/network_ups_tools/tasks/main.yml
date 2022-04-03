@@ -13,44 +13,45 @@
 
 
 - when: nut.mode != "standalone" and nut.mode != "netclient"
-  fail:
+  ansible.builtin.fail:
     msg: "Only supports 'standalone' and 'netclient' modes of operation."
 
-- set_fact:
+- ansible.builtin.set_fact:
     nut_default_password: "{{ 9999999999999999999999 | random | to_uuid }}"
 
 - when: nut.mode == "standalone"
-  set_fact:
+  ansible.builtin.set_fact:
     nut_monitor:
       name: "{{ nut.upsname | mandatory }}"
       mode: "master"
 
 - when: nut.mode == "netclient"
-  set_fact:
+  ansible.builtin.set_fact:
     nut_monitor:
       name: "{{ nut.upsname | mandatory }}@{{ nut.server | mandatory }}"
       mode: "slave"
 
-- package:
+- ansible.builtin.package:
     name: nut
     state: present
 
 - name: nut.conf
-  lineinfile:
+  ansible.builtin.lineinfile:
     dest: "{{ nut_config_path }}/nut.conf"
     state: present
     regexp: '^MODE'
     line: "MODE={{ nut.mode }}"
 
 - when: nut.mode == "standalone"
-  include_tasks: server.yml
+  ansible.builtin.include_tasks: server.yml
 
 - when: nut.mode == "netclient" or nut.mode == "standalone"
-  include_tasks: monitor.yml
+  ansible.builtin.include_tasks: monitor.yml
 
 - name: check ups connection
-  command: "upsc {{ nut_monitor.name }}"
+  ansible.builtin.command: "upsc {{ nut_monitor.name }}"
   register: upsc_out
 
 - name: display ups info
-  debug: msg="{{ upsc_out.stdout_lines }}"
+  ansible.builtin.debug:
+    msg: "{{ upsc_out.stdout_lines }}"

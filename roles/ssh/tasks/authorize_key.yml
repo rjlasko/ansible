@@ -4,11 +4,11 @@
 ## ---------------------------------------------- ##
 
 - name: extract SSH key comment and use as key ID
-  shell: "echo {{ authorized_key | mandatory }} | awk '{print $NF}'"
+  ansible.builtin.shell: "echo {{ authorized_key | mandatory }} | awk '{print $NF}'"
   register: key_comment
 
 - name: write authorized public key
-  lineinfile:
+  ansible.builtin.lineinfile:
     path: "~/.ssh/authorized_keys"
     create: true
     mode: u=rw,go-rwx

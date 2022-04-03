@@ -5,13 +5,13 @@
 
 
 - name: identify all mounts by UUID
-  set_fact:
+  ansible.builtin.set_fact:
     mounts_by_uuid: "{{ mounts_by_uuid | default({}) | combine({ item.uuid: item }) }}"
   with_items:
     - "{{ ansible_facts.mounts }}"
 
 - name: "find legacy device name for device: {{ simple_disk.dev }}"
-  set_fact:
+  ansible.builtin.set_fact:
     selected_legacy_devices: "{{ ansible_facts.device_links.ids | dict2items | selectattr('value', 'issuperset', [simple_disk.dev]) | map(attribute='key') }}"
   failed_when: (selected_legacy_devices | length) != 1
 
@@ -19,7 +19,7 @@
 # if rebuild, then all partitions on the parent device get dismounted, no matter what they are
 - name: device rebuild -> get all partitions and mountpoints to format
   when: simple_disk.rebuild | default(false)
-  set_fact:
+  ansible.builtin.set_fact:
     selected_partition_uuids: "{{ ansible_facts.devices[selected_legacy_devices[0]].partitions | dict2items | map(attribute='value') | map(attribute='uuid') }}"
     dismount_paths: "{{ simple_disk.partitions | selectattr('mount', 'defined') | map(attribute='mount') }}"
 
@@ -33,7 +33,7 @@
     (simple_disk.partitions | selectattr('format', 'defined') | map(attribute='format') is any)
   block:
     - name: build partition ID to UUID map
-      set_fact:
+      ansible.builtin.set_fact:
         partition_id_uuid_map: "{{ partition_id_uuid_map | default({}) | combine({ item.value.links.ids[0]: item.value.uuid }) }}"
       with_items:
         - "{{ ansible_facts.devices | dict2items | map(attribute='value') | map(attribute='partitions') | combine | dict2items }}"
@@ -44,7 +44,7 @@
         loop_var: simple_disk_partition
         index_var: simple_disk_partition_ix
       when: simple_disk_partition.format | default(false)
-      set_fact:
+      ansible.builtin.set_fact:
         dismount_paths: "{{ dismount_paths | default([]) + [simple_disk_partition.mount] }}"
         selected_partition_uuids: "{{ selected_partition_uuids | default([]) + [partition_id_uuid_map[selected_partition_id]] }}"
       vars:
@@ -55,13 +55,13 @@
   loop_control:
     loop_var: selected_partition_uuid
   when: selected_partition_uuid in mounts_by_uuid
-  set_fact:
+  ansible.builtin.set_fact:
     dismount_paths: "{{ dismount_paths | default([]) + [ mounts_by_uuid[selected_partition_uuid].mount ] | sort | unique | list }}"
 
 - name: dismount partitions being rebuilt or formatted
   loop: "{{ dismount_paths | default([]) }}"
   loop_control:
     loop_var: dismount_path
-  mount:
+  ansible.posix.mount:
     path: "{{ dismount_path }}"
     state: absent

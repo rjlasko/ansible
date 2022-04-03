@@ -9,13 +9,13 @@
   become: true
   block:
     - name: install vagrant
-      package:
+      ansible.builtin.package:
         name: vagrant-libvirt
         state: present
 
     - name: define VAGRANT_HOME in all environments
       when: vagrant.home is defined
-      include_role:
+      ansible.builtin.include_role:
         name: global_environment
       vars:
         global_env_vars:
@@ -24,7 +24,7 @@
 
     - name: define VAGRANT_DEFAULT_PROVIDER in all environments
       when: vagrant.provider is defined
-      include_role:
+      ansible.builtin.include_role:
         name: global_environment
       vars:
         global_env_vars:

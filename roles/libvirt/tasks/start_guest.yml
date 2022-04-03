@@ -4,7 +4,7 @@
 ## -------------- ##
 
 - name: "detect VM state before attempt restart: {{ libvirt.vm.name }}"
-  virt:
+  community.libvirt.virt:
     command: status
     name: "{{ libvirt.vm.name }}"
   register: libvirt_vm_status
@@ -14,19 +14,19 @@
     libvirt_vm_status.status != 'running'
     and
     libvirt_vm_status.status != 'shutdown'
-  fail:
+  ansible.builtin.fail:
     msg: "Cannot (re)start {{ libvirt.vm.name }} from state: {{ libvirt_vm_status.status }}"
 
 - name: start from shutdown state
   when: libvirt_vm_status.status == 'shutdown'
   block:
     - name: "start VM: {{ libvirt.vm.name }}"
-      virt:
+      community.libvirt.virt:
         command: start
         name: "{{ libvirt.vm.name }}"
 
     - name: "waiting until restarted: {{ libvirt.vm.name }}"
-      virt:
+      community.libvirt.virt:
         command: status
         name: "{{ libvirt.vm.name }}"
       register: libvirt_vm_status
@@ -37,6 +37,6 @@
 
 - name: "wait for {{ libvirt.vm.name }} to respond with SSHd"
   when: libvirt.vm.check_ssh | default(true)
-  wait_for:
+  ansible.builtin.wait_for:
     host: "{{ libvirt.vm.dns_address | mandatory }}"
     port: 22

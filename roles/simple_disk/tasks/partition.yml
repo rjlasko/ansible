@@ -6,7 +6,7 @@
 
 - name: "Create partition: {{ simple_disk_partition_path | mandatory }}"
   when: simple_disk.rebuild | default(false)
-  parted:
+  community.general.parted:
     device: "{{ simple_disk_device_path | mandatory }}"
     number: "{{ simple_disk_partition_index | mandatory + 1 }}"
     part_start: "{{ simple_disk_partition.start | default(omit) }}"
@@ -24,7 +24,7 @@
       or
       simple_disk_partition.format | default(false)
     )
-  filesystem:
+  community.general.filesystem:
     dev: "{{ simple_disk_device_path }}-part{{ simple_disk_partition_index + 1 }}"
     fstype: "{{ simple_disk_partition.fstype }}"
     force: true
@@ -32,7 +32,7 @@
 - name: "verify {{ simple_disk_partition_path }} has filesystem type: {{ simple_disk_partition.fstype | default('None') }}"
   when: simple_disk_partition.fstype is defined
   become: true
-  command: blkid -o value -s TYPE {{ simple_disk_partition_path }}
+  ansible.builtin.command: blkid -o value -s TYPE {{ simple_disk_partition_path }}
   register: blkid_dev_partition
   # XXX: if this step failed, it is likely that `wipefs` was unable to sufficiently
   # the disk, and mkfs was unable to bind a UUID to the disk, making it not visible
@@ -42,7 +42,7 @@
 
 - name: "Mount {{ simple_disk_partition_path }} to {{ simple_disk_partition.mount }}"
   when: simple_disk_partition.mount is defined
-  mount:
+  ansible.posix.mount:
     src: "{{ simple_disk_partition_path }}"
     path: "{{ simple_disk_partition.mount }}"
     fstype: "{{ simple_disk_partition.fstype }}"

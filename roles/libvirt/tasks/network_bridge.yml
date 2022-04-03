@@ -7,24 +7,24 @@
 # reference: https://www.thegeekdiary.com/how-to-remove-virbr0-and-lxcbr0-interfaces-on-centos-rhel-5-and-rhel-7/
 
 - name: list defined libvirt networks
-  shell: virsh net-list --all | tail -n+3 | awk '{print $1}'
+  ansible.builtin.shell: virsh net-list --all | tail -n+3 | awk '{print $1}'
   register: libvirt_networks
 
 - name: destroy all libvirt network adapters
   loop: "{{ libvirt_networks.stdout_lines }}"
   loop_control:
     loop_var: libvirt_network
-  command: virsh net-destroy {{ libvirt_network }}
+  ansible.builtin.command: virsh net-destroy {{ libvirt_network }}
   ignore_errors: true
 
 - name: disable autostart on all libvirt network adapters
   loop: "{{ libvirt_networks.stdout_lines }}"
   loop_control:
     loop_var: libvirt_network
-  command: virsh net-autostart {{ libvirt_network }} --disable
+  ansible.builtin.command: virsh net-autostart {{ libvirt_network }} --disable
 
 - name: create bridge network config
-  lineinfile:
+  ansible.builtin.lineinfile:
     line: "allow {{ libvirt.host.bridge }}"
     path: /etc/qemu/bridge.conf
     create: true

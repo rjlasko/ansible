@@ -4,16 +4,16 @@
 ## --------------------------- ##
 
 - name: "empty directory contents of {{ libvirt_hooks_path }}"
-  shell: rm -rf {{ libvirt_hooks_path }}/.[!.]* {{ libvirt_hooks_path }}/*
+  ansible.builtin.shell: rm -rf {{ libvirt_hooks_path }}/.[!.]* {{ libvirt_hooks_path }}/*
 
 - name: "create directory: {{ qemu_hooks_path }}"
-  file:
+  ansible.builtin.file:
     path: "{{ qemu_hooks_path }}"
     state: directory
     mode: ug=rx,o-rwx
 
 - name: "create from template: {{ qemu_guest_hook_path }}"
-  copy:
+  ansible.builtin.copy:
     src: qemu_hooks.sh
     dest: "{{ qemu_guest_hook_path }}"
     mode: ug=rx,o-rwx

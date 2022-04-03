@@ -5,12 +5,12 @@
 # https://wiki.archlinux.org/index.php/xrdp
 
 - name: install XRDP
-  package:
+  ansible.builtin.package:
     name: xrdp
 
 # see: https://www.cloudsavvyit.com/3177/how-to-install-a-desktop-environment-on-your-headless-linux-server/
 - name: xrdp user has access to secure the connection
-  user:
+  ansible.builtin.user:
     name: xrdp
     groups: ssl-cert
     append: true
@@ -18,7 +18,7 @@
 
 
 ### backup & restore from configurations
-- set_fact:
+- ansible.builtin.set_fact:
     xrdp_ini_path: /etc/xrdp/xrdp.ini
     xwrapper_cfg_path: /etc/X11/Xwrapper.config
 
@@ -28,7 +28,7 @@
     - "{{ xwrapper_cfg_path }}"
   loop_control:
     loop_var: xrdp_conf_item
-  include_role:
+  ansible.builtin.include_role:
     name: backup_restore
   vars:
     br_target: "{{ xrdp_conf_item }}"
@@ -45,7 +45,7 @@
   block:
     # see: https://github.com/neutrinolabs/xrdp/issues/218
     - name: disable $HOME/thinclient_drives
-      lineinfile:
+      ansible.builtin.lineinfile:
         dest: "{{ xrdp_ini_path }}"
         state: present
         regexp: '^#?;?allow_channels'
@@ -54,7 +54,7 @@
     # allow anybody to start X.
     # Necessary to run XRDP as a terminal server (Xorg).
     - name: configure x11
-      lineinfile:
+      ansible.builtin.lineinfile:
         dest: "{{ xwrapper_cfg_path }}"
         state: present
         regexp: '^allowed_users'
@@ -62,7 +62,7 @@
         line: 'allowed_users=anybody'
 
 - name: restart xrdp
-  service:
+  ansible.builtin.service:
     name: xrdp
     state: restarted
     enabled: true

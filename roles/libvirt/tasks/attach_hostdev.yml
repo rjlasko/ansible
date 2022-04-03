@@ -6,22 +6,22 @@
 - name: attach host device to VM
   block:
     - name: create temporary deferred hostdev XML
-      tempfile:
+      ansible.builtin.tempfile:
         state: file
         suffix: .hostdev.xml
       register: temp_xml
 
     - name: create hostdev XML element from template
-      template:
+      ansible.builtin.template:
         src: hostdev.xml.j2
         dest: "{{ temp_xml.path }}"
         mode: u=rw,go-rwx
 
     - name: "attach device to {{ libvirt.vm.name }}"
-      command: "virsh attach-device {{ libvirt.vm.name }} --file {{ temp_xml.path }} --config"
+      ansible.builtin.command: "virsh attach-device {{ libvirt.vm.name }} --file {{ temp_xml.path }} --config"
 
   always:
     - name: remove deferred domain XML
-      file:
+      ansible.builtin.file:
         path: "{{ temp_xml.path }}"
         state: absent

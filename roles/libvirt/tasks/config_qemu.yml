@@ -5,7 +5,7 @@
 
 
 - name: "backup & restore {{ qemu_cfg_path }}"
-  include_role:
+  ansible.builtin.include_role:
     name: backup_restore
   vars:
     br_target: "{{ qemu_cfg_path }}"
@@ -16,7 +16,7 @@
     - [ '#group =', 'group = "{{ libvirt_group }}"' ]
   loop_control:
     loop_var: qemu_cfg_var
-  lineinfile:
+  ansible.builtin.lineinfile:
     path: "{{ qemu_cfg_path }}"
     regexp: "{{ qemu_cfg_var[0] }}"
     line: "{{ qemu_cfg_var[1] }}"

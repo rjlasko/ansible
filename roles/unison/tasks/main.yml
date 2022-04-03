@@ -3,11 +3,11 @@
 ## Build + install Unison, then setup users ##
 ## ---------------------------------------- ##
 
-- command: which unison
+- ansible.builtin.command: which unison
   ignore_errors: true
   register: detected_filepath
 
-- command: unison -version
+- ansible.builtin.command: unison -version
   ignore_errors: true
   register: detected_version
 
@@ -21,10 +21,10 @@
   block:
     - name: delete prior install
       when: detected_filepath.rc == 0
-      file:
+      ansible.builtin.file:
         path: detected_filepath.stdout
         state: absent
 
     - name: install unison
       when: unison.versions is defined
-      include_tasks: install_unison.yml
+      ansible.builtin.include_tasks: install_unison.yml

@@ -4,7 +4,7 @@
 ## -------------------------------------------- ##
 
 - name: get PCI bus IDs for all device names
-  command: lspci -q
+  ansible.builtin.command: lspci -q
   register: vfio_pci_devices
 
 - name: discover VFIO devices by name
@@ -12,7 +12,7 @@
     - "{{ vfio_pci_devices.stdout_lines }}"
     - "{{ vfio.device.names | default([]) }}"
   when: item.0.find(item.1) != -1
-  include_tasks: discover_device.yml
+  ansible.builtin.include_tasks: discover_device.yml
   vars:
     vfio_pci_device: "{{ item.0 }}"
     vfio_device_name: "{{ item.1 }}"
@@ -21,4 +21,4 @@
   loop: "{{ vfio.device.pci_ids | default([]) }}"
   loop_control:
     loop_var: vfio_pci_id_given
-  include_tasks: discover_device.yml
+  ansible.builtin.include_tasks: discover_device.yml
