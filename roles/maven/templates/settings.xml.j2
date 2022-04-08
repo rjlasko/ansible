@@ -1,0 +1,15 @@
+<settings>
+	<!-- see: https://maven.apache.org/guides/mini/guide-encryption.html-->
+	<servers>
+		<server>
+			<id>central</id>
+			<username>{{ maven_username }}</username>
+			<password>{{ maven_password }}</password>
+		</server>
+		<server>
+			<id>snapshots</id>
+			<username>{{ maven_username }}</username>
+			<password>{{ maven_password }}</password>
+		</server>
+	</servers>
+</settings>

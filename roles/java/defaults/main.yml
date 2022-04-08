@@ -1,0 +1,6 @@
+jenv_reset: true
+java_brew_packages:
+  - oracle-jdk
+  - adoptopenjdk/openjdk/adoptopenjdk8
+  - adoptopenjdk/openjdk/adoptopenjdk11
+jenv_global_versions: 1.8

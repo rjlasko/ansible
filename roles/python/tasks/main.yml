@@ -1,0 +1,39 @@
+---
+## ----------------------------------------------------- ##
+## Installs pyenv to manage and install Python  versions ##
+## ----------------------------------------------------- ##
+
+# XXX: great tutorial see https://wilsonmar.github.io/pyenv/
+
+- when: ansible_facts.os_family != 'Darwin'
+  ansible.builtin.fail:
+    msg: "Only supports MacOS!"
+
+- name: install pyenv
+  community.general.homebrew:
+    name: pyenv
+    state: present
+
+- name: get pyenv root
+  ansible.builtin.command: pyenv root
+  register: pyenv_root
+
+- name: delete pre-existing pyenv config and python installations
+  when: pyenv_reset
+  ansible.builtin.file:
+    path: "{{ pyenv_root.stdout }}"
+    state: absent
+
+- name: find previously installed Python versions
+  ansible.builtin.command: pyenv versions --bare
+  register: python_versions_installed
+
+- name: install Python versions via pyenv
+  loop: "{{ pyenv_python_versions }}"
+  loop_control:
+    loop_var: python_version
+  when: python_version not in python_versions_installed.stdout_lines
+  ansible.builtin.shell: "pyenv install {{ python_version }} && pyenv rehash"
+
+- name: set global Python versions
+  ansible.builtin.command: "pyenv global {{ pyenv_global_versions }}"

@@ -1,0 +1,29 @@
+---
+## -------------------------------------- ##
+## Installs pipx if not already installed ##
+## -------------------------------------- ##
+
+
+- name: detect pipx installation
+  ansible.builtin.command: which pipx
+  register: which_pipx_initial
+  ignore_errors: true
+
+- when: which_pipx_initial.rc == 0
+  ansible.builtin.set_fact:
+    pipx_executable: "{{ which_pipx_initial.stdout }}"
+
+- when: which_pipx_initial.rc != 0
+  block:
+    - name: install pipx
+      community.general.homebrew:
+        name: pipx
+        state: present
+
+    - name: detect pipx installation
+      ansible.builtin.command: which pipx
+      register: which_pipx_retry
+
+    - when: which_pipx_retry.changed
+      ansible.builtin.set_fact:
+        pipx_executable: "{{ which_pipx_retry.stdout }}"

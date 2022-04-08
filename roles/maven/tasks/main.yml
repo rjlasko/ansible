@@ -1,0 +1,25 @@
+---
+## ----------------------------- ##
+## Installs and configures Maven ##
+## ----------------------------- ##
+
+
+- name: install maven
+  community.general.homebrew:
+    name: maven
+    state: present
+    # avoids installing openjdk (which may break)
+    # XXX: requires version of Java already installed
+    install_options: ignore-dependencies
+
+- name: create maven directory
+  ansible.builtin.file:
+    state: directory
+    path: "{{ maven_settings_filepath | dirname }}"
+    mode: u=rwX,go-rwx
+
+- name: install maven settings
+  ansible.builtin.template:
+    src: settings.mirror.xml.j2
+    dest: "{{ maven_settings_filepath }}"
+    mode: u=rw,go-rwx

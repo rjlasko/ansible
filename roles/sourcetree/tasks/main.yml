@@ -1,0 +1,13 @@
+---
+## ----------------------- ##
+## Installs Sourcetree App ##
+## ----------------------- ##
+
+
+- name: install via brew cask
+  community.general.homebrew_cask:
+    name: sourcetree
+    state: present
+
+- name: cleanup unused build dependencies
+  ansible.builtin.command: brew autoremove

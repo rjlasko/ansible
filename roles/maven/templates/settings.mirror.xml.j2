@@ -1,0 +1,39 @@
+<settings
+  xmlns="http://maven.apache.org/SETTINGS/1.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0
+                      https://maven.apache.org/xsd/settings-1.0.0.xsd">
+
+  <!-- Define mirrors to the "central" and "snapshot" repositories to force all
+       operations to be posted to mirror, which is expected to be a
+       caching passthru repository. -->
+  <mirrors>
+    <mirror>
+      <id>mirror-libs-release</id>
+      <name>Mirror of central repos</name>
+      <url>{{ maven_mirror_release_url }}</url>
+      <mirrorOf>central</mirrorOf>
+    </mirror>
+    <mirror>
+      <id>mirror-libs-snapshot</id>
+      <name>Mirror of snapshot repos</name>
+      <url>{{ maven_mirror_snapshot_url }}</url>
+      <mirrorOf>snapshots</mirrorOf>
+    </mirror>
+  </mirrors>
+
+  <!-- Credentials for mirrors above -->
+  <servers>
+    <server>
+      <id>mirror-libs-release</id>
+      <username>{{ maven_username }}</username>
+      <password>{{ maven_password }}</password>
+    </server>
+    <server>
+      <id>mirror-libs-snapshot</id>
+      <username>{{ maven_username }}</username>
+      <password>{{ maven_password }}</password>
+    </server>
+  </servers>
+
+</settings>

@@ -1,0 +1,23 @@
+---
+## ------------------------------- ##
+## Installs the given pip packages ##
+## ------------------------------- ##
+
+
+- name: install packages
+  loop: "{{ pipx_packages | default([]) }}"
+  loop_control:
+    loop_var: pipx_package
+  community.general.pipx:
+    name: "{{ pipx_package }}"
+    state: present
+    executable: "{{ pipx_executable | default(omit) }}"
+
+- name: upgrade packages
+  loop: "{{ pipx_packages | default([]) }}"
+  loop_control:
+    loop_var: pipx_package
+  community.general.pipx:
+    name: "{{ pipx_package }}"
+    state: upgrade
+    executable: "{{ pipx_executable | default(omit) }}"

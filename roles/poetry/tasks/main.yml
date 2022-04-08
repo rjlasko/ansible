@@ -1,0 +1,26 @@
+---
+## ------------------------------------------ ##
+## Installs Poetry package manager for Python ##
+## ------------------------------------------ ##
+
+
+- name: install packages with pipx
+  ansible.builtin.include_role:
+    name: pipx
+  vars:
+    pipx_packages:
+      - poetry
+
+- name: apply poetry global configs
+  loop: "{{ poetry_configs }}"
+  loop_control:
+    loop_var: poetry_config
+  ansible.builtin.command: "poetry config {{ poetry_config }}"
+
+- name: get poetry configs
+  ansible.builtin.command: poetry config --list
+  register: poetry_config_list
+
+- name: list poetry configs
+  ansible.builtin.debug:
+    var: poetry_config_list.stdout

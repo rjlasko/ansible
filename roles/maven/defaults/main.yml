@@ -1,0 +1,5 @@
+maven_username: username
+maven_password: password
+maven_mirror_release_url: https://repo-a/libs-release
+maven_mirror_snapshot_url: https://repo-a/libs-snapshot
+maven_settings_filepath: ~/.m2/settings.xml

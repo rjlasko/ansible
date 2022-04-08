@@ -1,0 +1,20 @@
+---
+## ------------------------- ##
+## Install PIP configuration ##
+## ------------------------- ##
+
+
+- name: create pip config directory
+  ansible.builtin.file:
+    state: directory
+    path: "{{ pip_conf_filepath | dirname }}"
+    mode: u=rwX,o-rwx
+
+- name: install pip config
+  ansible.builtin.template:
+    src: pip.conf.j2
+    dest: "{{ pip_conf_filepath }}"
+    mode: u=rw,o-rwx
+
+- ansible.builtin.set_fact:
+    pip_config_installed: true

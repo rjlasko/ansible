@@ -1,0 +1,15 @@
+---
+## -------------------------------------- ##
+## Installs packages from PyPi using pipx ##
+## -------------------------------------- ##
+
+- name: install pipx
+  when: pipx_executable is not defined
+  ansible.builtin.include_tasks: install_pipx.yml
+
+- name: configure pip
+  when: pip_config_installed is not defined
+  ansible.builtin.include_tasks: configure_pip.yml
+
+- name: install pipx
+  ansible.builtin.include_tasks: install_packages.yml

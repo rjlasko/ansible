@@ -1,0 +1,20 @@
+---
+## ---------------------- ##
+## Installs SSH utilities ##
+## ---------------------- ##
+
+- name: install macFUSE
+  community.general.homebrew_cask:
+    name: macfuse
+    state: present
+
+- name: install SSHFS
+  ansible.builtin.include_tasks: install_sshfs.yml
+
+- name: install sshpass
+  community.general.homebrew:
+    name: esolitos/ipa/sshpass
+    state: present
+# TODO: sshpass
+# see: https://stackoverflow.com/questions/32255660/how-to-install-sshpass-on-mac/62623099#62623099
+# - esolitos/ipa/sshpass
