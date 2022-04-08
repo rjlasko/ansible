@@ -1,0 +1,9 @@
+---
+## ------------------------ ##
+## Installs Docker on MacOS ##
+## ------------------------ ##
+
+- name: install Docker from brew
+  homebrew_cask:
+    name: docker
+    state: present

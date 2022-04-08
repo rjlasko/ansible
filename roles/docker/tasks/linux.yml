@@ -1,0 +1,106 @@
+---
+## ------------------------- ##
+## Installs Docker for Linux ##
+## ------------------------- ##
+
+- name: install curl to retrieve docker installation script
+  ansible.builtin.package:
+    name: curl
+
+- name: Install Docker
+  block:
+    - name: get Docker installation script
+      ansible.builtin.get_url:
+        url: https://get.docker.com
+        dest: /tmp/install_docker.sh
+        mode: u=rwx,g=rx
+        force: true
+
+    - name: Run Docker installation
+      ansible.builtin.command: /tmp/install_docker.sh
+
+  always:
+    - name: remove Docker installation script
+      ansible.builtin.file:
+        path: /tmp/install_docker.sh
+        state: absent
+
+- name: Verify unprivileged Docker container works
+  ansible.builtin.command: "docker run --rm hello-world"
+
+- name: Verify privileged Docker container works
+  ansible.builtin.command: "docker run --privileged --rm hello-world"
+
+- name: get info on Docker installation
+  ansible.builtin.command: "docker info"
+  register: docker_installation_info_out
+
+- name: docker info
+  ansible.builtin.debug:
+    var: docker_installation_info_out.stdout_lines
+
+- name: Restart and enable Docker daemon via systemd
+  ansible.builtin.systemd:
+    name: docker
+    state: restarted
+    enabled: true
+
+- name: Install docker-compose for x86_64
+  when: ansible_facts['architecture'] == 'x86_64'
+  block:
+    - name: install Git to install docker-compose
+      ansible.builtin.package:
+        name: git
+
+    # install the latest officially released version of docker-compose
+    # must strictly follow v1.2.3 or 1.2.3, no extra prefix or suffix allowed
+    - name: query for latest officially released docker-compose version
+      ansible.builtin.shell: >
+        set -o pipefail
+        && git ls-remote --exit-code --tags https://github.com/docker/compose.git
+        | cut -d'/' -f3
+        | grep -E '^v?([0-9]+)\.([0-9]+)\.([0-9]+)$'
+        | awk '{print $1 " " $1}'
+        | sed 's#^[a-z]*##g'
+        | sort --version-sort -k 1
+        | tail -n1
+        | awk '{print $2}'
+        | sed 's:.*/::'
+      args:
+        executable: bash
+      register: docker_compose_repo_version
+
+    - name: install docker-compose from GitHub
+      vars:
+        docker_compose_url: "https://github.com/docker/compose/releases/download/\
+          {{ docker_compose_repo_version.stdout }}\
+          /docker-compose-\
+          {{ ansible_facts['system'] | lower }}-\
+          {{ ansible_facts['architecture'] }}"
+      ansible.builtin.get_url:
+        url: "{{ docker_compose_url }}"
+        checksum: "sha256:{{ docker_compose_url }}.sha256"
+        dest: /usr/local/bin/docker-compose
+        mode: u=rwx,g=rx
+        group: docker
+        force: true
+
+- name: "Install docker-compose for architectures not x86_64"
+  when: ansible_facts['architecture'] != 'x86_64'
+  block:
+    - name: install python3 & dependencies for docker-compose
+      ansible.builtin.package:
+        name:
+          - libffi-dev
+          - python3-pip
+
+    - name: install docker-compose
+      ansible.builtin.pip:
+        name: docker-compose
+
+- name: grant user permissions to run Docker
+  loop: "{{ docker_linux_group_users | default([]) }}"
+  ansible.builtin.user:
+    name: "{{ item }}"
+    groups: docker
+    append: true
