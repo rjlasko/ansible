@@ -1,14 +1,13 @@
 # Ansible - HomeLab & Software Development collection
 
 <div>
-	<div class="flex-container" style="display:flex; flex-direction:row; font-size:24px; padding:10px;">
+	<div style="display:flex; flex-direction:row; font-size:24px; padding:10px;">
 		<img src="https://raw.githubusercontent.com/rjlasko/ansible-roles/master/logo.png" alt="drawing" width="200px" height="200px" align="left" style="padding:8px;"/>
-		<div style="margin: auto;padding:12px;">
+		<div align="center-left" style="margin: auto;padding:12px;">
 			A set of roles and plugins used to build my virtualization & homelab server, as well as professional software development environments.
 		</div>
 	</div>
 </div>
-<div style="white-space:nowrap">
 <br clear="left"/>
 
 ## Roles found in this collection
