@@ -14,9 +14,9 @@
 
 #### Virtualization
 - [`rjlasko.ansible.docker`](https://github.com/rjlasko/ansible/blob/master/roles/docker/README.md)
-- [`rjlasko.ansible.lxd`]()
-- [`rjlasko.ansible.libvirt`]()
 - [`rjlasko.ansible.hugepages`]()
+- [`rjlasko.ansible.libvirt`](https://github.com/rjlasko/ansible/blob/master/roles/libvirt/README.md)
+- [`rjlasko.ansible.lxd`](https://github.com/rjlasko/ansible/blob/master/roles/lxd/README.md)
 - [`rjlasko.ansible.vagrant`]()
 - [`rjlasko.ansible.vfio`]()
 
@@ -24,7 +24,7 @@
 - [`rjlasko.ansible.fstrim`]()
 - [`rjlasko.ansible.simple_disk`]()
 - [`rjlasko.ansible.tmpreaper`]()
-- [`rjlasko.ansible.zfs`]()
+- [`rjlasko.ansible.zfs`](https://github.com/rjlasko/ansible/blob/master/roles/zfs/README.md)
 
 #### Networking
 - [`rjlasko.ansible.mount_nfs`]()
@@ -34,7 +34,7 @@
 - [`rjlasko.ansible.unison`]()
 
 #### Remote Access
-- [`rjlasko.ansible.ssh`]()
+- [`rjlasko.ansible.ssh`](https://github.com/rjlasko/ansible/blob/master/roles/ssh/README.md)
 - [`rjlasko.ansible.ssh_utils`]()
 - [`rjlasko.ansible.wake_on_lan`]()
 - [`rjlasko.ansible.xfce_headless`]()
@@ -44,7 +44,7 @@
 - [`rjlasko.ansible.neofetch`]()
 - [`rjlasko.ansible.network_ups_tools`]()
 - [`rjlasko.ansible.rasdaemon`]()
-- [`rjlasko.ansible.smart_monitoring_tools`]()
+- [`rjlasko.ansible.smart_monitoring_tools`](https://github.com/rjlasko/ansible/blob/master/smart-monitoring-tools/docker/README.md)
 
 #### OS Configuration
 - [`rjlasko.ansible.boot_manager`]()
@@ -61,15 +61,15 @@
 - [`rjlasko.ansible.hush_login`]()
 - [`rjlasko.ansible.initial_login`]()
 - [`rjlasko.ansible.groups`]()
-- [`rjlasko.ansible.users`]()
-- [`rjlasko.ansible.sudo`]()
+- [`rjlasko.ansible.users`](https://github.com/rjlasko/ansible/blob/master/roles/users/README.md)
+- [`rjlasko.ansible.sudo`](https://github.com/rjlasko/ansible/blob/master/roles/sudo/README.md)
 
 #### Software Development
 - [`rjlasko.ansible.git`]()
 - [`rjlasko.ansible.java`]()
 - [`rjlasko.ansible.maven`]()
 - [`rjlasko.ansible.poetry`]()
-- [`rjlasko.ansible.python`]()
+- [`rjlasko.ansible.python`](https://github.com/rjlasko/ansible/blob/master/roles/python/README.md)
 - [`rjlasko.ansible.sourcetree`]()
 
 #### Misc. Applications
