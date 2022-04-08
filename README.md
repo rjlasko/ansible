@@ -1,54 +1,91 @@
-![logo](https://raw.githubusercontent.com/rjlasko/ansible-roles/master/logo.png)
+# Ansible - HomeLab & Software Development collection
 
-# ansible-roles
-Ansible roles used to setup a Debian based Network Attached Storage server.
+<div class="flex-container" style="display:flex; flex-direction:row;">
+	<div>
+		<img src="https://raw.githubusercontent.com/rjlasko/ansible-roles/master/logo.png" alt="drawing" width="500"/>
+	</div>
+	<div style="font-size:24px; padding:32px;">
+		A set of roles and plugins used to build my virtualization & homelab server, as well as professional software development environments.
+	</div>
+</div>
 
-## Features
+## Roles found in this collection
 
-### Storage
-- ZFS on Linux
+#### Virtualization
+- [`rjlasko.ansible.docker`](https://github.com/rjlasko/ansible/blob/master/roles/docker/README.md)
+- [`rjlasko.ansible.lxd`]()
+- [`rjlasko.ansible.libvirt`]()
+- [`rjlasko.ansible.hugepages`]()
+- [`rjlasko.ansible.vagrant`]()
+- [`rjlasko.ansible.vfio`]()
 
-### System monitoring
-- Network UPS Tools
-- SMART Monitoring
-- RASdaemon
-- crontab w/ cronic
+#### Storage & Backup
+- [`rjlasko.ansible.fstrim`]()
+- [`rjlasko.ansible.simple_disk`]()
+- [`rjlasko.ansible.tmpreaper`]()
+- [`rjlasko.ansible.zfs`]()
 
-### Containerization & Virtualization
-- Docker
-- KVM & QEMU
-- libvirt
-- hugepages
+#### Networking
+- [`rjlasko.ansible.mount_nfs`]()
+- [`rjlasko.ansible.msmtp`]()
+- [`rjlasko.ansible.network_bridge`]()
+- [`rjlasko.ansible.network_share`]()
+- [`rjlasko.ansible.unison`]()
 
-### Networking
-- network bridge
-- network share (NFS & SMB)
-- mount NFS
+#### Remote Access
+- [`rjlasko.ansible.ssh`]()
+- [`rjlasko.ansible.ssh_utils`]()
+- [`rjlasko.ansible.wake_on_lan`]()
+- [`rjlasko.ansible.xfce_headless`]()
+- [`rjlasko.ansible.xrdp`]()
 
-### Git
-- clone
-- push
-- config
+#### System monitoring
+- [`rjlasko.ansible.neofetch`]()
+- [`rjlasko.ansible.network_ups_tools`]()
+- [`rjlasko.ansible.rasdaemon`]()
+- [`rjlasko.ansible.smart_monitoring_tools`]()
 
-### SSH
-- create key
-- authorize (given) public key
-- authorize self
+#### OS Configuration
+- [`rjlasko.ansible.boot_manager`]()
+- [`rjlasko.ansible.crontab`]()
+- [`rjlasko.ansible.cronic`]()
+- [`rjlasko.ansible.global_environment`]()
+- [`rjlasko.ansible.hostname`]()
+- [`rjlasko.ansible.nvidia`]()
+- [`rjlasko.ansible.package_upgrades`]()
+- [`rjlasko.ansible.pipx`]()
+- [`rjlasko.ansible.timezone`]()
 
-### User Management
-- groups
-- users
-- sudo
+#### User Management
+- [`rjlasko.ansible.hush_login`]()
+- [`rjlasko.ansible.initial_login`]()
+- [`rjlasko.ansible.groups`]()
+- [`rjlasko.ansible.users`]()
+- [`rjlasko.ansible.sudo`]()
 
-### Other
-- XRDP
-- MSMTP Mail Transfer Agent
-- Unison
-- Neofetch
-- Package Manager Update
-- Vagrant
+#### Software Development
+- [`rjlasko.ansible.git`]()
+- [`rjlasko.ansible.java`]()
+- [`rjlasko.ansible.maven`]()
+- [`rjlasko.ansible.poetry`]()
+- [`rjlasko.ansible.python`]()
+- [`rjlasko.ansible.sourcetree`]()
 
-### Custom
-- (file) Backup & Restore (from-backup)
-- Global Environment Variable
-- envsubst
+#### Misc. Applications
+- [`rjlasko.ansible.atom`]()
+- [`rjlasko.ansible.chrome`]()
+- [`rjlasko.ansible.firefox`]()
+- [`rjlasko.ansible.phoenix`]()
+
+#### Other
+- [`rjlasko.ansible.backup_restore`]()
+- [`rjlasko.ansible.envsubst`]()
+- [`rjlasko.ansible.file_drop`]()
+
+## License
+
+MIT
+
+## Author
+
+This collection was created by [Robert Lasko](http://www.linkedin.com/in/rjlasko).
