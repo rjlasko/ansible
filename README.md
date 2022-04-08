@@ -9,6 +9,7 @@
 	</div>
 </div>
 <div style="white-space:nowrap">
+<br clear="left"/>
 
 ## Roles found in this collection
 
