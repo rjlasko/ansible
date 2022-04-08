@@ -7,8 +7,8 @@
 			A set of roles and plugins used to build my virtualization & homelab server, as well as professional software development environments.
 		</div>
 	</div>
-	<div style="white-space:nowrap"/>
 </div>
+<div style="white-space:nowrap">
 
 ## Roles found in this collection
 
@@ -90,3 +90,5 @@ MIT
 ## Author
 
 This collection was created by [Robert Lasko](http://www.linkedin.com/in/rjlasko).
+
+</div>
