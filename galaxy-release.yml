@@ -1,0 +1,52 @@
+---
+# blah
+
+- hosts: localhost
+  connection: local
+  gather_facts: false
+
+  vars:
+    namespace: rjlasko
+    collection: ansible
+    # Requires github_tag to be set when calling playbook.
+    # release_version: "{{ github_tag.split('/')[-1] }}"
+    release_version: 0.1.0
+
+  pre_tasks:
+    - name: Ensure the ~/.ansible directory exists.
+      file:
+        path: ~/.ansible
+        state: directory
+
+    - shell: 'echo "token: ${ANSIBLE_GALAXY_API_KEY:?}" > ~/.ansible/galaxy_token'
+
+    #
+    # - name: Ensure ANSIBLE_GALAXY_TOKEN is set.
+    #   fail:
+    #     msg: A valid ANSIBLE_GALAXY_API_KEY must be set.
+    #   when: "lookup('env','ANSIBLE_GALAXY_API_KEY') | length == 0"
+    #
+    #
+    # - name: Write the Galaxy token to ~/.ansible/galaxy_token
+    #   copy:
+    #     content: |
+    #       token: {{ lookup('env','ANSIBLE_GALAXY_API_KEY') }}
+    #     dest: ~/.ansible/galaxy_token
+
+  tasks:
+    - name: Ensure the galaxy.yml tag is up to date.
+      lineinfile:
+        path: galaxy.yml
+        regexp: "^version:"
+        line: 'version: "{{ release_version }}"'
+
+    - file:
+        path: "./{{ namespace }}-{{ collection }}-{{ release_version }}.tar.gz"
+        state: absent
+
+    - name: Build the collection.
+      command: ansible-galaxy collection build
+
+    - name: Publish the collection.
+      command: >
+        ansible-galaxy collection publish ./{{ namespace }}-{{ collection }}-{{ release_version }}.tar.gz
