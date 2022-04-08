@@ -5,8 +5,8 @@
 
 # determine default group with sudo privileges
 - name: get all groups
-  shell: getent group | awk -F":" '{print $1}'
-  ansible.builtin.register: getent_groups
+  ansible.builtin.shell: getent group | awk -F":" '{print $1}'
+  register: getent_groups
 
 - name: find default sudoers group
   when: item in getent_groups.stdout_lines
