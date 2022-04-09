@@ -36,7 +36,7 @@ tags: []
 # L(specifiers,https://python-semanticversion.readthedocs.io/en/latest/#requirement-specification). Multiple version
 # range specifiers can be set and are separated by ','
 dependencies:
-  community.general: ">=4.0.0"
+  community.general: ">=4.1.0"
 
 # The URL of the originating SCM repository
 repository: https://github.com/rjlasko/ansible
