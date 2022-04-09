@@ -4,6 +4,6 @@
 ## ------------------------ ##
 
 - name: install Docker from brew
-  homebrew_cask:
+  community.general.homebrew_cask:
     name: docker
     state: present

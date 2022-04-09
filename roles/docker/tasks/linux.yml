@@ -18,6 +18,7 @@
 
     - name: Run Docker installation
       ansible.builtin.command: /tmp/install_docker.sh
+      changed_when: true
 
   always:
     - name: remove Docker installation script
@@ -27,12 +28,15 @@
 
 - name: Verify unprivileged Docker container works
   ansible.builtin.command: "docker run --rm hello-world"
+  changed_when: false
 
 - name: Verify privileged Docker container works
   ansible.builtin.command: "docker run --privileged --rm hello-world"
+  changed_when: false
 
 - name: get info on Docker installation
   ansible.builtin.command: "docker info"
+  changed_when: false
   register: docker_installation_info_out
 
 - name: docker info
@@ -68,6 +72,7 @@
         | sed 's:.*/::'
       args:
         executable: bash
+      changed_when: false
       register: docker_compose_repo_version
 
     - name: install docker-compose from GitHub

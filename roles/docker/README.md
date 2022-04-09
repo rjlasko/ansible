@@ -4,8 +4,8 @@ Installs the latest version of `docker` & `docker-compose`.
 
 ## Requirements
 
-Linux: None
-MacOS: Homebrew must be installed
+- Linux: None
+- MacOS: Homebrew must be installed
 
 ## Role Variables
 
