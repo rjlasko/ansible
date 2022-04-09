@@ -11,7 +11,9 @@
     - name: apply 'config.limits.cpu' override
       when: lxd.instance.cpu_mem.cpus is defined
       block:
-        - ansible.builtin.command: cat /proc/cpuinfo
+        - name: get /proc/cpuinfo
+          ansible.builtin.command: cat /proc/cpuinfo
+          changed_when: false
           register: proc_cpuinfo
 
         - name: transform 'cpus' into 'config.limits.cpu'

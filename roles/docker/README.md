@@ -10,7 +10,7 @@ Installs the latest version of `docker` & `docker-compose`.
 ## Role Variables
 
 #### Settable Variables:
-```
+```yaml
 # (linux only) usernames to be added to the `docker` group
 docker_linux_group_users:
   - user1
@@ -22,7 +22,7 @@ docker_linux_group_users:
 None.
 
 ## Example Playbook
-```
+```yaml
 - hosts: servers
   roles:
     - role: docker

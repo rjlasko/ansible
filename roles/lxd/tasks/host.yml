@@ -14,6 +14,7 @@
 # XXX: simplest way to void a prior LXD installation's configuration
 - name: uninstall prior LXD
   ansible.builtin.command: snap remove lxd --purge
+  changed_when: true
 
 - name: clear preseed storage_pools
   loop: "{{ lxd.host.preseed.storage_pools | default([]) }}"
@@ -28,21 +29,22 @@
 - name: check LXD executable accessible by Ansible
   ansible.builtin.command: which lxd
   ignore_errors: true
+  changed_when: false
   register: which_lxd
 
 - name: install LXD wrapper
   when: which_lxd is failed
+  vars:
+    lxd_path: /snap/bin/lxd
   block:
-    - ansible.builtin.set_fact:
-        lxd_path: /snap/bin/lxd
-
     - ansible.builtin.stat:
         path: "{{ lxd_path }}"
         get_checksum: false
       register: lxd_stat
       failed_when: not lxd_stat.stat.exists
 
-    - ansible.builtin.template:
+    - name: create lxd wrapper if lxd is not in PATH
+      ansible.builtin.template:
         src: wrapper.sh.j2
         dest: /usr/bin/lxd
         owner: root
@@ -55,21 +57,23 @@
 - name: check LXC executable accessible by Ansible
   ansible.builtin.command: which lxc
   ignore_errors: true
+  changed_when: false
   register: which_lxc
 
 - name: install LXD wrapper
   when: which_lxc is failed
+  vars:
+    lxc_path: /snap/bin/lxc
   block:
-    - ansible.builtin.set_fact:
-        lxc_path: /snap/bin/lxc
-
-    - ansible.builtin.stat:
+    - name: detect if lxc is in PATH
+      ansible.builtin.stat:
         path: "{{ lxc_path }}"
         get_checksum: false
       register: lxc_stat
       failed_when: not lxc_stat.stat.exists
 
-    - ansible.builtin.template:
+    - name: create lxc wrapper if lxc is not in PATH
+      ansible.builtin.template:
         src: wrapper.sh.j2
         dest: /usr/bin/lxc
         owner: root

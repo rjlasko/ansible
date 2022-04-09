@@ -17,8 +17,6 @@
   when: lxd.instance is defined
   ansible.builtin.include_tasks: instance.yml
 
-
-
 # TODO: https://lxd.readthedocs.io/en/latest/backup/#container-backup-and-restore
 
 # XXX: adding the user to the user group 'lxd' enables root-like access to LXD
