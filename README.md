@@ -10,78 +10,78 @@
 </div>
 <br clear="left"/>
 
-## Roles found in this collection
+## Roles in this collection
 
 #### Virtualization
 - [`rjlasko.ansible.docker`](https://github.com/rjlasko/ansible/blob/master/roles/docker/README.md)
-- [`rjlasko.ansible.hugepages`]()
+- `rjlasko.ansible.hugepages`
 - [`rjlasko.ansible.libvirt`](https://github.com/rjlasko/ansible/blob/master/roles/libvirt/README.md)
 - [`rjlasko.ansible.lxd`](https://github.com/rjlasko/ansible/blob/master/roles/lxd/README.md)
-- [`rjlasko.ansible.vagrant`]()
-- [`rjlasko.ansible.vfio`]()
+- `rjlasko.ansible.vagrant`
+- `rjlasko.ansible.vfio`
 
 #### Storage & Backup
-- [`rjlasko.ansible.fstrim`]()
-- [`rjlasko.ansible.simple_disk`]()
-- [`rjlasko.ansible.tmpreaper`]()
+- `rjlasko.ansible.fstrim`
+- `rjlasko.ansible.simple_disk`
+- `rjlasko.ansible.tmpreaper`
 - [`rjlasko.ansible.zfs`](https://github.com/rjlasko/ansible/blob/master/roles/zfs/README.md)
 
 #### Networking
-- [`rjlasko.ansible.mount_nfs`]()
-- [`rjlasko.ansible.msmtp`]()
-- [`rjlasko.ansible.network_bridge`]()
-- [`rjlasko.ansible.network_share`]()
-- [`rjlasko.ansible.unison`]()
+- `rjlasko.ansible.mount_nfs`
+- `rjlasko.ansible.msmtp`
+- `rjlasko.ansible.network_bridge`
+- `rjlasko.ansible.network_share`
+- `rjlasko.ansible.unison`
 
 #### Remote Access
 - [`rjlasko.ansible.ssh`](https://github.com/rjlasko/ansible/blob/master/roles/ssh/README.md)
-- [`rjlasko.ansible.ssh_utils`]()
-- [`rjlasko.ansible.wake_on_lan`]()
-- [`rjlasko.ansible.xfce_headless`]()
-- [`rjlasko.ansible.xrdp`]()
+- `rjlasko.ansible.ssh_utils`
+- `rjlasko.ansible.wake_on_lan`
+- `rjlasko.ansible.xfce_headless`
+- `rjlasko.ansible.xrdp`
 
 #### System monitoring
-- [`rjlasko.ansible.neofetch`]()
-- [`rjlasko.ansible.network_ups_tools`]()
-- [`rjlasko.ansible.rasdaemon`]()
+- `rjlasko.ansible.neofetch`
+- `rjlasko.ansible.network_ups_tools`
+- `rjlasko.ansible.rasdaemon`
 - [`rjlasko.ansible.smart_monitoring_tools`](https://github.com/rjlasko/ansible/blob/master/smart-monitoring-tools/docker/README.md)
 
 #### OS Configuration
-- [`rjlasko.ansible.boot_manager`]()
-- [`rjlasko.ansible.crontab`]()
-- [`rjlasko.ansible.cronic`]()
-- [`rjlasko.ansible.global_environment`]()
-- [`rjlasko.ansible.hostname`]()
-- [`rjlasko.ansible.nvidia`]()
-- [`rjlasko.ansible.package_upgrades`]()
-- [`rjlasko.ansible.pipx`]()
-- [`rjlasko.ansible.timezone`]()
+- `rjlasko.ansible.boot_manager`
+- `rjlasko.ansible.crontab`
+- `rjlasko.ansible.cronic`
+- `rjlasko.ansible.global_environment`
+- `rjlasko.ansible.hostname`
+- `rjlasko.ansible.nvidia`
+- `rjlasko.ansible.package_upgrades`
+- `rjlasko.ansible.pipx`
+- `rjlasko.ansible.timezone`
 
 #### User Management
-- [`rjlasko.ansible.hush_login`]()
-- [`rjlasko.ansible.initial_login`]()
-- [`rjlasko.ansible.groups`]()
+- `rjlasko.ansible.hush_login`
+- `rjlasko.ansible.initial_login`
+- `rjlasko.ansible.groups`
 - [`rjlasko.ansible.users`](https://github.com/rjlasko/ansible/blob/master/roles/users/README.md)
 - [`rjlasko.ansible.sudo`](https://github.com/rjlasko/ansible/blob/master/roles/sudo/README.md)
 
 #### Software Development
-- [`rjlasko.ansible.git`]()
-- [`rjlasko.ansible.java`]()
-- [`rjlasko.ansible.maven`]()
-- [`rjlasko.ansible.poetry`]()
+- `rjlasko.ansible.git`
+- `rjlasko.ansible.java`
+- `rjlasko.ansible.maven`
+- `rjlasko.ansible.poetry`
 - [`rjlasko.ansible.python`](https://github.com/rjlasko/ansible/blob/master/roles/python/README.md)
-- [`rjlasko.ansible.sourcetree`]()
+- `rjlasko.ansible.sourcetree`
 
 #### Misc. Applications
-- [`rjlasko.ansible.atom`]()
-- [`rjlasko.ansible.chrome`]()
-- [`rjlasko.ansible.firefox`]()
-- [`rjlasko.ansible.phoenix`]()
+- `rjlasko.ansible.atom`
+- `rjlasko.ansible.chrome`
+- `rjlasko.ansible.firefox`
+- `rjlasko.ansible.phoenix`
 
 #### Other
-- [`rjlasko.ansible.backup_restore`]()
-- [`rjlasko.ansible.envsubst`]()
-- [`rjlasko.ansible.file_drop`]()
+- `rjlasko.ansible.backup_restore`
+- `rjlasko.ansible.envsubst`
+- `rjlasko.ansible.file_drop`
 
 ## License
 
