@@ -19,7 +19,7 @@
   register: pyenv_root
 
 - name: delete pre-existing pyenv config and python installations
-  when: pyenv_reset
+  when: python_reset_pyenv
   ansible.builtin.file:
     path: "{{ pyenv_root.stdout }}"
     state: absent
@@ -29,11 +29,11 @@
   register: python_versions_installed
 
 - name: install Python versions via pyenv
-  loop: "{{ pyenv_python_versions }}"
+  loop: "{{ python_versions_installed }}"
   loop_control:
     loop_var: python_version
   when: python_version not in python_versions_installed.stdout_lines
   ansible.builtin.shell: "pyenv install {{ python_version }} && pyenv rehash"
 
 - name: set global Python versions
-  ansible.builtin.command: "pyenv global {{ pyenv_global_versions }}"
+  ansible.builtin.command: "pyenv global {{ python_global_versions }}"

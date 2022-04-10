@@ -90,5 +90,3 @@ MIT
 ## Author
 
 This collection was created by [Robert Lasko](http://www.linkedin.com/in/rjlasko).
-
-</div>

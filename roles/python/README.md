@@ -1,38 +1,43 @@
-Role Name
-=========
+# Ansible Role: Python
 
-A brief description of the role goes here.
+Installs any number of Python versions using `pyenv`.
 
-Requirements
-------------
+## Requirements
 
-Any pre-requisites that may not be covered by Ansible itself or the role should be mentioned here. For instance, if the role uses the EC2 module, it may be a good idea to mention in this section that the boto package is required.
+- MacOS: Homebrew must be installed
 
-Role Variables
---------------
+## Role Variables
 
-A description of the settable variables for this role should go here, including any variables that are in defaults/main.yml, vars/main.yml, and any variables that can/should be set via parameters to the role. Any variables that are read from other roles and/or the global scope (ie. hostvars, group vars, etc.) should be mentioned here as well.
+#### Settable Variables
+```yaml
+python_reset_pyenv: # boolean, delete preexisting pyenv
+python_versions_installed: # list of python versions to install
+    # defaults: [2.7.18,3.9.11]
+python_global_versions: # list of versions to put into PATH
+    # defaults to the same list as `python_versions_installed`
+```
 
-Dependencies
-------------
+## Dependencies
 
-A list of other roles hosted on Galaxy should go here, plus any details in regards to parameters that may need to be set for other roles, or variables that are used from other roles.
+None
 
-Example Playbook
-----------------
+## Example Playbook
+```yaml
+- hosts: servers
+  roles:
+    - role: python
+      vars:
+        python_reset_pyenv: false
+        python_versions_installed:
+          - 2.7.18
+          - 3.9.11
+        python_global_versions: "3.9.11"
+```
 
-Including an example of how to use your role (for instance, with variables passed in as parameters) is always nice for users too:
+## License
 
-    - hosts: servers
-      roles:
-         - { role: username.rolename, x: 42 }
+MIT
 
-License
--------
+## References
 
-BSD
-
-Author Information
-------------------
-
-An optional section for the role authors to include contact information, or a website (HTML is not allowed).
+[PyEnv](https://github.com/pyenv/pyenv)
