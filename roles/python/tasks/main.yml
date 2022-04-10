@@ -5,7 +5,8 @@
 
 # XXX: great tutorial see https://wilsonmar.github.io/pyenv/
 
-- when: ansible_facts.os_family != 'Darwin'
+- name: detect compatible OS
+  when: ansible_facts.os_family != 'Darwin'
   ansible.builtin.fail:
     msg: "Only supports MacOS!"
 
@@ -16,6 +17,7 @@
 
 - name: get pyenv root
   ansible.builtin.command: pyenv root
+  changed_when: false
   register: pyenv_root
 
 - name: delete pre-existing pyenv config and python installations
@@ -26,6 +28,7 @@
 
 - name: find previously installed Python versions
   ansible.builtin.command: pyenv versions --bare
+  changed_when: false
   register: python_versions_installed
 
 - name: install Python versions via pyenv
@@ -37,3 +40,4 @@
 
 - name: set global Python versions
   ansible.builtin.command: "pyenv global {{ python_global_versions }}"
+  changed_when: true
