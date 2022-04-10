@@ -17,7 +17,7 @@ lxd:
       ... # the elements found in an LXD preseed configuration
       ... # see: https://linuxcontainers.org/lxd/docs/master/preseed/
     extra_profiles: # list of profile objects
-      # see: https://docs.ansible.com/ansible/latest/collections/community/general/lxd_profile_module.html#parameters
+      ... # see: https://docs.ansible.com/ansible/latest/collections/community/general/lxd_profile_module.html#parameters
 
   instance: # targets a LXD container/VM installation
     create_mode: # mandatory, one of ['skip','build']
@@ -28,12 +28,12 @@ lxd:
     alias: # as listed when running command `lxc image list images:`
     protocol: # defaults to 'simplestreams', one of ['simplestreams','lxd']
     devices:
-      # see: https://linuxcontainers.org/lxd/docs/master/instances/#devices-configuration
-      # see: https://docs.ansible.com/ansible/latest/collections/community/general/lxd_container_module.html#parameter-devices
+      ... # see: https://linuxcontainers.org/lxd/docs/master/instances/#devices-configuration
+      ... # see: https://docs.ansible.com/ansible/latest/collections/community/general/lxd_container_module.html#parameter-devices
     profiles: # list of the names of profile names declared on the host
     config:
-      # see: https://linuxcontainers.org/lxd/docs/master/instances/#key-value-configuration
-      # see: https://docs.ansible.com/ansible/latest/collections/community/general/lxd_container_module.html#parameter-config
+      ... # see: https://linuxcontainers.org/lxd/docs/master/instances/#key-value-configuration
+      ... # see: https://docs.ansible.com/ansible/latest/collections/community/general/lxd_container_module.html#parameter-config
 
     # note that the following fields are mapped onto the above `config`, after converted from human-intuitive description.  Any preexisting `config` value will be overridden.
     cpu_mem:
