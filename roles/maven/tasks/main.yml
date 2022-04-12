@@ -3,7 +3,6 @@
 ## Installs and configures Maven ##
 ## ----------------------------- ##
 
-
 - name: install maven
   community.general.homebrew:
     name: maven
@@ -19,6 +18,7 @@
     mode: u=rwX,go-rwx
 
 - name: install maven settings
+  when: maven_username is defined or maven_password is defined
   ansible.builtin.template:
     src: settings.mirror.xml.j2
     dest: "{{ maven_settings_filepath }}"
