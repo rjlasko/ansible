@@ -4,10 +4,14 @@
 ## -------------------------------------- ##
 
 - name: install pipx
+  # this when condition is to avoid trying to reinstall pipx, because this role
+  # is used to install pipx, and to use pipx to install packages
   when: pipx_executable is not defined
   ansible.builtin.include_tasks: install_pipx.yml
 
 - name: configure pip
+  # this when condition is to avoid trying to reconfigure pipx, because this role
+  # is used to install pipx, and to use pipx to install packages
   when: pip_config_installed is not defined
   ansible.builtin.include_tasks: configure_pip.yml
 

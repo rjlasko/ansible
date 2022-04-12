@@ -3,13 +3,14 @@
 ## Installs pipx if not already installed ##
 ## -------------------------------------- ##
 
-
 - name: detect pipx installation
   ansible.builtin.command: which pipx
   register: which_pipx_initial
   ignore_errors: true
+  changed_when: false
 
-- when: which_pipx_initial.rc == 0
+- name: set pipx_executable if installed
+  when: which_pipx_initial.rc == 0
   ansible.builtin.set_fact:
     pipx_executable: "{{ which_pipx_initial.stdout }}"
 
@@ -22,8 +23,10 @@
 
     - name: detect pipx installation
       ansible.builtin.command: which pipx
+      changed_when: false
       register: which_pipx_retry
 
-    - when: which_pipx_retry.changed
+    - name: get pipx executable path after installation
+      when: which_pipx_retry.changed
       ansible.builtin.set_fact:
         pipx_executable: "{{ which_pipx_retry.stdout }}"

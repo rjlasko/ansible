@@ -3,7 +3,6 @@
 ## Installs the given pip packages ##
 ## ------------------------------- ##
 
-
 - name: install packages
   loop: "{{ pipx_packages | default([]) }}"
   loop_control:

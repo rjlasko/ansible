@@ -1,5 +1,7 @@
 [global]
-extra-index-url = {{ pip_extra_index_url }}
+{% if pip_extra_index_endpoint is defined %}
+extra-index-url = https://{{ pip_username | mandatory | urlencode }}:{{ pip_password | mandatory }}@{{ pip_extra_index_endpoint }}
+{% endif %}
 timeout = 60
 no-cache-dir = false
 

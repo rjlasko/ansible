@@ -30,8 +30,8 @@ None
       vars:
         maven_username: "{{ vault.username }}"
         maven_password: "{{ vault.password }}"
-        maven_mirror_release_url: https://repo-a/libs-release
-        maven_mirror_snapshot_url: https://repo-a/libs-snapshot
+        maven_mirror_release_url: https://company.jfrog.io/artifactory/libs-release
+        maven_mirror_snapshot_url: https://company.jfrog.io/artifactory/libs-snapshot
 ```
 
 ## License
