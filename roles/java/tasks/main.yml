@@ -3,43 +3,46 @@
 ## Installs Java and jenv to manage Java versions ##
 ## ---------------------------------------------- ##
 
-
 - name: install jenv
   community.general.homebrew:
     name: jenv
     state: present
 
 - name: install jenv & java versions
-  loop: "{{ java_brew_packages }}"
+  loop: "{{ java_brew_versions }}"
   loop_control:
     loop_var: brew_target
   community.general.homebrew_cask:
     name: "{{ brew_target }}"
     state: present
 
-
 - name: get jenv root
   ansible.builtin.command: jenv root
+  changed_when: false
   register: jenv_root
 
 - name: delete pre-existing jenv config
-  when: jenv_reset
+  when: java_reset_jenv
   ansible.builtin.file:
     path: "{{ jenv_root.stdout }}"
     state: absent
 
-- name: delete pre-existing jenv config
+- name: create jenv config directory
   ansible.builtin.file:
     path: "{{ jenv_root.stdout }}"
     state: directory
+    mode: u=rwX,g=rX,o-rwx
 
-- ansible.builtin.shell: bash -c eval \"$(jenv init -)\"
+# FIXME: this seems not to do anything helpful right now
+- name: initialize jenv
+  ansible.builtin.shell: bash -c eval \"$(jenv init -)\"
 
 - name: query for installed Java versions
   ansible.builtin.shell: set -o pipefail && /usr/libexec/java_home -V 2>&1 | awk '{$1=$1;print}' | grep -E '^([0-9]+)\.([0-9]+)\.([0-9]+)' | cut -d':' -f1
   args:
     executable: bash
   register: installed_java_versions
+  changed_when: false
 
 - name: register installed Java versions with jenv
   loop: "{{ installed_java_versions.stdout_lines }}"
@@ -48,9 +51,9 @@
   vars:
     java_version_arch: "{{ installed_java_version | split(',') | map('trim') }}"
   ansible.builtin.shell: "jenv add $(/usr/libexec/java_home -v{{ java_version_arch[0] }} -d{{ java_version_arch[1] }})"
-
-- name: find previously installed Java versions
-  ansible.builtin.command: jenv versions --bare
+  register: jenv_add_jversion
+  changed_when: "'added' in jenv_add_jversion.stdout"
 
 - name: set global Java versions
-  ansible.builtin.command: "jenv global {{ jenv_global_versions }}"
+  ansible.builtin.command: "jenv global {{ java_global_versions }}"
+  changed_when: true

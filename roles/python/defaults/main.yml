@@ -1,6 +1,6 @@
 ---
 python_reset_pyenv: false
-python_versions_installed:
+python_pyenv_versions:
   - 2.7.18
   - 3.9.11
-python_global_versions: "{{ python_versions_installed | join(' ') }}"
+python_global_versions: "{{ python_pyenv_versions | join(' ') }}"
