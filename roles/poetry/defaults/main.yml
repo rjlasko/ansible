@@ -1,6 +1,0 @@
-poetry_pip_url: https://repo-a/
-poetry_pip_username: username
-poetry_pip_password: password
-poetry_configs:
-  - "repositories.custom-mirror {{ poetry_pip_url }}"
-  - "http-basic.custom-mirror {{ poetry_pip_username }} {{ poetry_pip_password }}"
