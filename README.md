@@ -61,14 +61,15 @@
 - `rjlasko.ansible.hush_login`
 - `rjlasko.ansible.initial_login`
 - `rjlasko.ansible.groups`
-- [`rjlasko.ansible.users`](https://github.com/rjlasko/ansible/blob/master/roles/users/README.md)
+- [`rjlasko.ansible.shell_hooks`](https://github.com/rjlasko/ansible/blob/master/roles/shell_hooks/README.md)
 - [`rjlasko.ansible.sudo`](https://github.com/rjlasko/ansible/blob/master/roles/sudo/README.md)
+- [`rjlasko.ansible.users`](https://github.com/rjlasko/ansible/blob/master/roles/users/README.md)
 
 #### Software Development
 - `rjlasko.ansible.git`
-- `rjlasko.ansible.java`
-- `rjlasko.ansible.maven`
-- `rjlasko.ansible.poetry`
+- [`rjlasko.ansible.java`](https://github.com/rjlasko/ansible/blob/master/roles/java/README.md)
+- [`rjlasko.ansible.maven`](https://github.com/rjlasko/ansible/blob/master/roles/maven/README.md)
+- [`rjlasko.ansible.poetry`](https://github.com/rjlasko/ansible/blob/master/roles/poetry/README.md)
 - [`rjlasko.ansible.python`](https://github.com/rjlasko/ansible/blob/master/roles/python/README.md)
 - `rjlasko.ansible.sourcetree`
 
@@ -79,7 +80,7 @@
 - `rjlasko.ansible.phoenix`
 
 #### Other
-- `rjlasko.ansible.backup_restore`
+- [`rjlasko.ansible.backup_restore`](https://github.com/rjlasko/ansible/blob/master/roles/backup_restore/README.md)
 - `rjlasko.ansible.envsubst`
 - `rjlasko.ansible.file_drop`
 
