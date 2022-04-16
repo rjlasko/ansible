@@ -1,0 +1,47 @@
+---
+## ------------------------------------------------------------------ ##
+## Install shell-hooks framework for extensible shell script sourcing ##
+## ------------------------------------------------------------------ ##
+
+
+# create the base directory (never delete)
+# backup/replace original .bash_profile & .bashrc
+# drop in custom .bash_profile & .bashrc (which point to original)
+
+# needs support for interactive & non-interactive hooks
+
+- name: backup & restore original shell files
+  loop: "{{ shell_hooks_files }}"
+  loop_control:
+    loop_var: shell_hook_file
+  ansible.builtin.include_role:
+    name: backup_restore
+  vars:
+    br_target: "{{ shell_hook_file.dest }}"
+    br_suffix: ORIG
+
+- name: delete shell-hooks directories
+  loop: "{{ shell_hooks_directories }}"
+  loop_control:
+    loop_var: shell_hooks_dir
+  ansible.builtin.file:
+    path: "{{ shell_hooks_dir }}"
+    state: absent
+
+- name: create shell-hooks directories
+  loop: "{{ shell_hooks_directories }}"
+  loop_control:
+    loop_var: shell_hooks_dir
+  ansible.builtin.file:
+    path: "{{ shell_hooks_dir }}"
+    state: directory
+    mode: u=rwX,g=rX,o-rwx
+
+- name: replace original shell files with shell hooks entrypoints
+  loop: "{{ shell_hooks_files }}"
+  loop_control:
+    loop_var: shell_hook_file
+  ansible.builtin.template:
+    src: "{{ shell_hook_file.src }}"
+    dest: "{{ shell_hook_file.dest }}"
+    mode: u=rw,g=r,o-rwx

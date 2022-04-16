@@ -1,0 +1,22 @@
+#!/usr/bin/env sh
+
+if [ -n "${SHK_DEBUG}" ] ; then
+	echo "${USER}@$(hostname) sourcing: ${HOME}/.bash_profile"
+fi
+
+if [ -f "${HOME}/.bashrc" ] ; then
+	. "${HOME}/.bashrc"
+fi
+
+if [ -n "${SHK_LOGIN}" ] ; then
+	SHK_LOGIN=1
+
+	# load hooks for login shells
+	source_hooks "${SHK_ROOT}/login"
+
+	# load original login settings, if any
+	if [ -f "${HOME}/.bash_profile.ORIG" ]
+	then
+		. "${HOME}/.bash_profile.ORIG"
+	fi
+fi
