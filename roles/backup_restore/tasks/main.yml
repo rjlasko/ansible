@@ -3,42 +3,40 @@
 ## Backup and reset a given file ##
 ## ----------------------------- ##
 
-- name: declare filepath of target's backup
-  ansible.builtin.set_fact:
-    br_backup: "{{ br_target | mandatory }}.BAK"
-
 - name: "stat target: {{ br_target }}"
   ansible.builtin.stat:
     path: "{{ br_target }}"
-  register: stat_target
+  register: br_stat_target
   failed_when: >
-    stat_target.stat.exists and
+    br_stat_target.stat.exists and
     not (
-      stat_target.stat.isreg or
-      stat_target.stat.islnk
+      br_stat_target.stat.isreg or
+      br_stat_target.stat.islnk
     )
 
 - name: "stat backup: {{ br_backup }}"
   ansible.builtin.stat:
     path: "{{ br_backup }}"
-  register: stat_backup
+  register: br_stat_backup
   failed_when: >
-    stat_backup.stat.exists and
+    br_stat_backup.stat.exists and
     not (
-      stat_backup.stat.isreg or
-      stat_backup.stat.islnk
+      br_stat_backup.stat.isreg or
+      br_stat_backup.stat.islnk
     )
 
 - name: "restore backup: {{ br_backup }}"
-  when: stat_backup.stat.exists
+  when: br_stat_backup.stat.exists
   ansible.builtin.copy:
     src: "{{ br_backup }}"
     dest: "{{ br_target }}"
     remote_src: true
+    mode: "{{ br_stat_backup.stat.mode }}"
 
 - name: "backup target: {{ br_target }}"
-  when: stat_target.stat.exists and not stat_backup.stat.exists
+  when: br_stat_target.stat.exists and not br_stat_backup.stat.exists
   ansible.builtin.copy:
     src: "{{ br_target }}"
     dest: "{{ br_backup }}"
     remote_src: true
+    mode: "{{ br_stat_target.stat.mode }}"

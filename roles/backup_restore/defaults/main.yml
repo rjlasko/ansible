@@ -1,0 +1,2 @@
+br_suffix: BAK
+br_backup: "{{ br_target | mandatory }}.{{ br_suffix }}"
