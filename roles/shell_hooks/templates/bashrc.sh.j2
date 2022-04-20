@@ -1,19 +1,20 @@
 #!/usr/bin/env sh
 
-
 if [ -n "${SHK_DEBUG}" ] ; then
 	echo "${USER}@$(hostname) sourcing: ${HOME}/.bashrc"
 fi
 
 # only run shell hooks on shell start, or if reset is requested
 if [ -z "${SHK_ROOT}" ] ; then
-	SHK_ROOT="${HOME}/.shell_hooks"
-
 	# if the PATH inherited by shell_hooks has not been set, then set it now
 	# this should be the first thing we do
 	if [ -z "${SHK_INHERITED_PATH}" ]; then
 		export SHK_INHERITED_PATH="${PATH}"
 	fi
+
+	SHK_ROOT="${HOME}/.shell_hooks"
+
+	alias shk_debug='export SHK_DEBUG=1'
 
 	debug() {
 		if [ -n "${SHK_DEBUG}" ] ; then
@@ -47,7 +48,7 @@ if [ -z "${SHK_ROOT}" ] ; then
 				source_hook "${hook}"
 			done
 		fi
-		unset hooks_folder
+		unset hooks_folder hook
 	}
 
 	# load hooks for non-interactive shells
