@@ -25,10 +25,3 @@
   loop_control:
     loop_var: git_clone
   ansible.builtin.include_tasks: git_clone.yml
-
-- name: "Copy git_utils.sh to: {{ git.utils_path }}"
-  when: git.utils_path is defined
-  copy:
-    src: git_utils.sh
-    dest: "{{ git.utils_path }}"
-    mode: u=rw,g=r,o-rwx
