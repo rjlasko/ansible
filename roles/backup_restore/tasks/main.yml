@@ -25,6 +25,18 @@
       br_stat_backup.stat.islnk
     )
 
+- name: "create absent marker: {{ br_absent }}"
+  when: not br_stat_target.stat.exists
+  ansible.builtin.file:
+    path: "{{ br_absent }}"
+    state: touch
+    mode: u=rw,o=r
+
+- name: "stat absent marker: {{ br_absent }}"
+  ansible.builtin.stat:
+    path: "{{ br_absent }}"
+  register: br_stat_absent
+
 - name: "restore backup: {{ br_backup }}"
   when: br_stat_backup.stat.exists
   ansible.builtin.copy:
@@ -33,8 +45,17 @@
     remote_src: true
     mode: "{{ br_stat_backup.stat.mode }}"
 
+- name: "restore target absence: {{ br_target }}"
+  when: br_stat_absent.stat.exists
+  ansible.builtin.file:
+    path: "{{ br_target }}"
+    state: absent
+
 - name: "backup target: {{ br_target }}"
-  when: br_stat_target.stat.exists and not br_stat_backup.stat.exists
+  when: >
+    br_stat_target.stat.exists
+    and not br_stat_backup.stat.exists
+    and not br_stat_absent.stat.exists
   ansible.builtin.copy:
     src: "{{ br_target }}"
     dest: "{{ br_backup }}"

@@ -1,6 +1,6 @@
 # Ansible Role: Backup & Restore
 
-Backup of a given file, and if the file already exists, restores from the backup.
+Backup of a given file, and if the file already exists, restores from the backup. If that targeted file never existed, a DNE marker will be created to ensure a new file doesn't begin to appear like an original.
 
 ## Requirements
 

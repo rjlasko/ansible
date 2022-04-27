@@ -1,2 +1,3 @@
 br_suffix: BAK
 br_backup: "{{ br_target | mandatory }}.{{ br_suffix }}"
+br_absent: "{{ br_target | mandatory }}.DNE"
