@@ -8,7 +8,10 @@ Installs a hook system to generically manage login, interactive and non-interact
 
 ## Role Variables
 
-- None
+#### Settable Variables
+```yaml
+shell_hooks_directory: # location to install shell hooks, default ~/.shell_hooks
+```
 
 ## Dependencies
 

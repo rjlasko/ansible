@@ -8,7 +8,7 @@ if [ -f "${HOME}/.bashrc" ] ; then
 	. "${HOME}/.bashrc"
 fi
 
-if [ -n "${SHK_LOGIN}" ] ; then
+if [ -z "${SHK_LOGIN}" ] ; then
 	SHK_LOGIN=1
 
 	# load hooks for login shells
