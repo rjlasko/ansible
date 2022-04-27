@@ -66,7 +66,7 @@
 - [`rjlasko.ansible.users`](https://github.com/rjlasko/ansible/blob/master/roles/users/README.md)
 
 #### Software Development
-- `rjlasko.ansible.git`
+- [`rjlasko.ansible.git`](https://github.com/rjlasko/ansible/blob/master/roles/git/README.md)
 - [`rjlasko.ansible.java`](https://github.com/rjlasko/ansible/blob/master/roles/java/README.md)
 - [`rjlasko.ansible.maven`](https://github.com/rjlasko/ansible/blob/master/roles/maven/README.md)
 - [`rjlasko.ansible.poetry`](https://github.com/rjlasko/ansible/blob/master/roles/poetry/README.md)
