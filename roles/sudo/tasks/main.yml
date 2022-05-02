@@ -24,14 +24,23 @@
   ansible.builtin.set_fact:
     default_sudoers_group: "{{ item }}"
 
-- name: add custom sudoer file
-  ansible.builtin.lineinfile:
-    path: /etc/sudoers.d/wheel-sudoer
+- name: find preexisting custom sudoers files
+  find:
+    paths: "/etc/sudoers.d"
+    patterns: "custom_*"
+  register: find_custom_sudoers
+
+- name: reset custom sudoers files
+  when: find_custom_sudoers.files
+  with_items: find_custom_sudoers.files
+  file:
+    path: "{{ item.path }}"
+    state: absent
+
+- name: add custom sudoers file
+  community.general.sudoers:
+    name: custom_nologin
     state: present
-    create: true
-    mode: u=r,g=r,o-rwx
-    owner: root
-    group: root
-    regexp: '^.*%{{ default_sudoers_group | mandatory }}'
-    line: '%{{ default_sudoers_group }} ALL=(ALL) NOPASSWD: ALL'
-    validate: visudo -cf %s
+    group: "{{ default_sudoers_group }}"
+    commands: ALL
+    nopassword: true
