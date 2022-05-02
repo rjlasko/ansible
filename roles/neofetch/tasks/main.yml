@@ -4,35 +4,23 @@
 ## ------------------- ##
 
 - name: check if neofetch is accessible via path
-  ansible.builtin.shell: 'type neofetch'
+  ansible.builtin.shell: 'command -V neofetch'
   ignore_errors: true
   register: neofetch_exists
 
-- name: system install neofetch
-  when: neofetch_exists.rc != 0
-  become: true
-  ansible.builtin.package:
-    name: neofetch
-    state: present
-  ignore_errors: true
-  register: neofetch_package
-
-- name: check if neofetch is accessible via path
-  ansible.builtin.shell: 'type neofetch'
-  ignore_errors: true
-  register: neofetch_in_path
-
-- name: user install neofetch
-  when: neofetch_in_path.rc != 0
+- when: >
+    neofetch_exists.rc != 0
+    and (neofetch_install_home_bin | default(false))
   block:
-    - ansible.builtin.file:
+    - name: bin directory must exist
+      ansible.builtin.file:
         path: ~/bin
         state: directory
         mode: u=rwx
 
     - name: check if neofetch is where we will want to put it
       ansible.builtin.stat:
-          path: ~/bin/neofetch
+        path: ~/bin/neofetch
       register: neofetch_in_target
 
     - name: get from github
@@ -42,3 +30,22 @@
         dest: ~/bin/neofetch
         mode: u=rx
         force: true
+
+- name: check if neofetch is accessible via path
+  ansible.builtin.shell: 'command -V neofetch'
+  ignore_errors: true
+  register: neofetch_exists
+
+- when: neofetch_exists.rc != 0
+  block:
+    - name: system install neofetch
+      when: ansible_facts.system == 'Linux'
+      ansible.builtin.package:
+        name: neofetch
+        state: present
+
+    - name: brew install neofetch
+      when: ansible_facts.system == 'Darwin'
+      community.general.homebrew:
+        name: neofetch
+        state: present

@@ -9,7 +9,6 @@
 
 - name: update 'apt' packages
   when: ansible_facts['pkg_mgr'] == 'apt'
-  become: true
   ansible.builtin.apt:
     autoclean: true
     autoremove: true
@@ -18,7 +17,6 @@
 
 - name: update 'pacman' packages
   when: ansible_facts['pkg_mgr'] == 'pacman'
-  become: true
   community.general.pacman:
     update_cache: true
     upgrade: true

@@ -1,6 +1,6 @@
 # Ansible Role: Git
 
-Installs Git to the host, facilitates per-user configuration, and supports cloning and pushing of repositories to the target.
+Installs `git` to the host, facilitates per-user configuration, and supports cloning and pushing of repositories to the target.
 
 ## Requirements
 
@@ -41,7 +41,7 @@ None
 ```yaml
 - hosts: servers
   roles:
-    - role: shell_hooks
+    - role: git
       vars:
         git:
           bin_path: /opt/git/bin
