@@ -5,7 +5,7 @@
 
 - ansible.builtin.set_fact:
     hostname:
-      new: "{{ hostname.new | default(inventory_hostname )}}"
+      new: "{{ hostname.new | default(inventory_hostname) }}"
       old: "{{ ansible_hostname }}"
 
 - name: change hostname if the new name is different than the current

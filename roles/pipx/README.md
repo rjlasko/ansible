@@ -25,7 +25,7 @@ None
 ```yaml
 - hosts: servers
   roles:
-    - role: maven
+    - role: pipx
       vars:
         pip_username: "{{ vault.username }}"
         pip_password: "{{ vault.password }}"
