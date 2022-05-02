@@ -1,0 +1,40 @@
+---
+## ---------------------------- ##
+## Installs and configures nano ##
+## ---------------------------- ##
+
+- name: check if nano is accessible via path
+  ansible.builtin.shell: 'command -V vim'
+  ignore_errors: true
+  register: vim_exists
+
+- when: nano_exists.rc != 0
+  block:
+    - name: system install vim
+      when: ansible_facts.system == 'Linux'
+      ansible.builtin.package:
+        name: vim
+        state: present
+
+    - name: brew install vim
+      when: ansible_facts.system == 'Darwin'
+      community.general.homebrew:
+        name: vim
+        state: present
+
+- name: clear ~/.vimrc
+  ansible.builtin.file:
+    path: "{{ ansible_user_dir }}/.vimrc"
+    state: absent
+
+- name: find (sudo-ing) user's group
+  ansible.builtin.command: "id -gn {{ ansible_user }}"
+  register: vim_user_group_name
+
+- name: apply nano settings file
+  ansible.builtin.template:
+    src: vimrc.j2
+    dest: "{{ ansible_user_dir }}/.vimrc"
+    owner: "{{ ansible_user }}"
+    group: "{{ vim_user_group_name.stdout }}"
+    mode: u=rw,g=r,o-rwx

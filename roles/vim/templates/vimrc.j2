@@ -1,0 +1,4 @@
+" {{ ansible_managed }}
+{% for vimrc_setting in vimrc_settings | default([]) %}
+{{ vimrc_setting }}
+{% endfor %}
