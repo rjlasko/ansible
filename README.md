@@ -41,7 +41,7 @@
 - `rjlasko.ansible.xrdp`
 
 #### System monitoring
-- `rjlasko.ansible.neofetch`
+- [`rjlasko.ansible.neofetch`](https://github.com/rjlasko/ansible/blob/master/roles/neofetch/README.md)
 - `rjlasko.ansible.network_ups_tools`
 - `rjlasko.ansible.rasdaemon`
 - [`rjlasko.ansible.smart_monitoring_tools`](https://github.com/rjlasko/ansible/blob/master/smart-monitoring-tools/docker/README.md)
@@ -54,7 +54,7 @@
 - `rjlasko.ansible.hostname`
 - `rjlasko.ansible.nvidia`
 - `rjlasko.ansible.package_upgrades`
-- `rjlasko.ansible.pipx`
+- [`rjlasko.ansible.pipx`](https://github.com/rjlasko/ansible/blob/master/roles/pipx/README.md)
 - `rjlasko.ansible.timezone`
 
 #### User Management
@@ -77,7 +77,9 @@
 - `rjlasko.ansible.atom`
 - `rjlasko.ansible.chrome`
 - `rjlasko.ansible.firefox`
+- [`rjlasko.ansible.nano`](https://github.com/rjlasko/ansible/blob/master/roles/nano/README.md)
 - `rjlasko.ansible.phoenix`
+- [`rjlasko.ansible.vim`](https://github.com/rjlasko/ansible/blob/master/roles/vim/README.md)
 
 #### Other
 - [`rjlasko.ansible.backup_restore`](https://github.com/rjlasko/ansible/blob/master/roles/backup_restore/README.md)
