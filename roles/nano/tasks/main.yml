@@ -1,0 +1,47 @@
+---
+## ---------------------------- ##
+## Installs and configures nano ##
+## ---------------------------- ##
+
+- name: check if nano is accessible via path
+  ansible.builtin.shell: 'command -V nano'
+  ignore_errors: true
+  register: nano_exists
+
+- when: nano_exists.rc != 0
+  block:
+    - name: system install nano
+      when: ansible_facts.system == 'Linux'
+      ansible.builtin.package:
+        name: nano
+        state: present
+
+    - name: brew install nano
+      when: ansible_facts.system == 'Darwin'
+      community.general.homebrew:
+        name: nano
+        state: present
+
+- name: clear ~/.nanorc
+  ansible.builtin.file:
+    path: "{{ ansible_user_dir }}/.nanorc"
+    state: absent
+
+- name: find nanorc includes
+  ansible.builtin.find:
+    paths: /usr
+    recurse: true
+    patterns: "*.nanorc"
+  register: nanorc_includes
+
+- name: find (sudo-ing) user's group
+  ansible.builtin.command: "id -gn {{ ansible_user }}"
+  register: nano_user_group_name
+
+- name: apply nano settings file
+  ansible.builtin.template:
+    src: nanorc.j2
+    dest: "{{ ansible_user_dir }}/.nanorc"
+    owner: "{{ ansible_user }}"
+    group: "{{ nano_user_group_name.stdout }}"
+    mode: u=rw,g=r,o-rwx

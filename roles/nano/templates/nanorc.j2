@@ -1,0 +1,10 @@
+# {{ ansible_managed }}
+
+
+{% for nanorc_include in nanorc_includes.files | default([]) %}
+include {{ nanorc_include.path }}
+{% endfor %}
+
+{% for nanorc_setting in nanorc_settings | default([]) %}
+set {{ nanorc_setting }}
+{% endfor %}
