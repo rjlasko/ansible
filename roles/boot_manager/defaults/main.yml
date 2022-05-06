@@ -1,13 +1,3 @@
-bootloader_osmap:
-  Debian: grub
-  Ubuntu: grub
-  Pop!_OS: kernelstub
-
-bootloader_updater:
-  grub: grub.yml
-  kernelstub: kernelstub.yml
-
 grub_filepath: /etc/default/grub
-grub_cmdline: GRUB_CMDLINE_LINUX_DEFAULT
 kernelstub_cfgpath: /etc/kernelstub/configuration
 kernelstub_cfg_backup: /etc/default/kernelstub.configuration.BAK

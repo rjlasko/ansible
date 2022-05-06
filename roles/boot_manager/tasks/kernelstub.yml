@@ -34,7 +34,7 @@
   when: kstub_bkp.stat.exists
   ansible.builtin.command: "kernelstub -o \"{{ kernel_boot_options | join(' ') }}\""
 
-- name: build map of kernel cmdline options
+- name: build map of original kernel cmdline options
   loop: "{{ (kstub_cfg_dump.stdout | from_json).user.kernel_options }}"
   loop_control:
     loop_var: kernel_option
@@ -53,14 +53,15 @@
   ansible.builtin.command: "kernelstub --delete-options \"{{ param.key }}{{ ('=' + option_map[param.key] | string) if option_map[param.key] else '' }}\""
 
 - name: delete dropped kernel options
-  loop: "{{ boot_manager.cmdline.absent | default([]]) }}"
+  loop: "{{ boot_manager.cmdline.absent | default([]) }}"
   loop_control:
     loop_var: param
   when: param in option_map
-  ansible.builtin.command: "kernelstub --delete-options \"{{ param.key }}{{ ('=' + option_map[param.key] | string) if option_map[param.key] else '' }}\""
+  ansible.builtin.command: "kernelstub --delete-options \"{{ param }}{{ ('=' + option_map[param] | string) if option_map[param] else '' }}\""
 
 - name: add new or changed kernel options
-  loop: "{{ vfio_arch_cmdline[ansible_facts.processor[1]] | combine(vfio.cmdline_extra | default({})) | dict2items }}"
+#  loop: "{{ vfio_arch_cmdline[ansible_facts.processor[1]] | combine(vfio.cmdline_extra | default({})) | dict2items }}"
+  loop: "{{ boot_manager.cmdline.present | default({}) | dict2items }}"
   loop_control:
     loop_var: param
   when: >

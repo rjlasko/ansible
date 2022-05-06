@@ -1,0 +1,10 @@
+bootloader_osmap:
+  Debian: grub
+  Ubuntu: grub
+  Pop!_OS: kernelstub
+
+bootloader_updater:
+  grub: grub.yml
+  kernelstub: kernelstub.yml
+
+grub_cmdline: GRUB_CMDLINE_LINUX_DEFAULT
