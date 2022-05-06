@@ -5,14 +5,28 @@
 
 - name: shutdown UPS driver
   ansible.builtin.command: upsdrvctl stop
+  ignore_errors: true
+
+- shell: nut-scanner -q | grep -v 'product ' | grep -v 'vendor '
+  register: nut_scan_results
+
+#- name: "backup & restore {{ nut_config_path }}/ups.conf"
+#  ansible.builtin.include_role:
+#    name: backup_restore
+#  vars:
+#    br_target: "{{ nut_config_path }}/ups.conf"
+
+# TODO: need to extract the name (id?) of the connected UPS, and pass it round to other modules in the role
 
 - name: ups.conf
+  become: true
   ansible.builtin.template:
     src: ups.conf.j2
     dest: "{{ nut_config_path }}/ups.conf"
     owner: root
     group: nut
     mode: u=rw,g=r,o-rwx
+
 
 # Need to install ups.conf and reboot, before attempting to restart the nut services.
 # Upon reboot, the NUT-installed udev rules will assign correct group ownership to the device
@@ -38,15 +52,15 @@
     group: nut
     mode: u=rw,g=r,o-rwx
 
-- name: restart nut-driver
-  ansible.builtin.service:
-    name: nut-driver
-    state: restarted
-    enabled: yes
-  register: nut_driver_service
-  until: nut_driver_service.status.ActiveState == "active"
-  retries: 15
-  delay: 2
+#- name: restart nut-driver
+#  ansible.builtin.service:
+#    name: nut-driver
+#    state: restarted
+#    enabled: yes
+#  register: nut_driver_service
+#  until: nut_driver_service.status.ActiveState == "inactive"
+#  retries: 15
+#  delay: 2
 
 - name: restart nut-server
   ansible.builtin.service:
@@ -57,3 +71,15 @@
   until: nut_server_service.status.ActiveState == "active"
   retries: 15
   delay: 2
+
+- name: find assigned device names
+  ansible.builtin.command: upsc -l
+  register: nut_server_devices
+  failed_when: >
+    (nut_server_devices.rc != 0)
+    or
+    (nut_server_devices.stdout_lines | length != 1)
+
+- when: nut.mode == "standalone"
+  ansible.builtin.set_fact:
+    nut_monitor_name: "{{ nut_server_devices.stdout }}"

@@ -1,11 +1,8 @@
 # {{ ansible_managed }}
 
-{% for global in nut_ups_conf.globals %}
-{% if nut_ups_conf.globals[global] != none %}{{ global }} = {{ nut_ups_conf.globals[global] }}
+{% for global in nut_ups_conf %}
+{% if nut_ups_conf[global] != none %}{{ global }} = {{ nut_ups_conf[global] }}
 {% endif %}
 {% endfor %}
 
-[{{ nut.upsname }}]
-{% for option in nut_ups_conf.upses[nut.upsname] %}
-  {{ option }} = {{ nut_ups_conf.upses[nut.upsname][option] }}
-{% endfor %}
+{{ nut_scan_results.stdout }}

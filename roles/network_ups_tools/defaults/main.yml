@@ -2,24 +2,14 @@
 nut_config_path: /etc/nut
 
 nut_ups_conf:
-  globals:
-    chroot:
-    driverpath:
-    maxstartdelay:
-    maxretry: 3
-    retrydelay:
-    pollinterval:
-    synchronous:
-    user:
-  upses:
-    avr1350:
-      driver: usbhid-ups
-      port: auto
-      desc: '"Cyberpower CP1350AVR-G"'
-    avr685:
-      driver: usbhid-ups
-      port: auto
-      desc: '"Cyberpower CP685AVR-G"'
+  chroot:
+  driverpath:
+  maxstartdelay:
+  maxretry: 3
+  retrydelay:
+  pollinterval:
+  synchronous:
+  user:
 
 nut_upsd_conf:
   MAXAGE:
@@ -34,7 +24,7 @@ nut_upsd_conf:
 nut_upsd_users:
   monuser:
     password: "{{ nut_default_password | mandatory }}"
-    upsmon: "{{ nut_monitor.mode | mandatory }}"
+    upsmon: "{{ nut_monitor_mode | mandatory }}"
     actions:
       - set
       - fsd
@@ -45,7 +35,7 @@ nut_upsmon_conf:
   FINALDELAY: 60
   HOSTSYNC: 15
   MINSUPPLIES: 1
-  MONITOR: "{{ nut_monitor.name | mandatory }} 1 {{ nut.user | mandatory }} {{ nut_upsd_users[nut.user].password | mandatory }} {{ nut_monitor.mode | mandatory }}"
+  MONITOR: "{{ nut_monitor_name | mandatory }} 1 {{ nut.user | mandatory }} {{ nut_upsd_users[nut.user].password | mandatory }} {{ nut_monitor_mode | mandatory }}"
   NOCOMMWARNTIME: 300
   NOTIFYCMD: '"/etc/nut/notify.sh"'
   NOTIFYMSG: []

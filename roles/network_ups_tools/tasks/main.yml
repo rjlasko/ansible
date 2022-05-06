@@ -6,10 +6,6 @@
 
 # TODO: send emails on relevant status changes
 # https://unix.stackexchange.com/questions/164788/run-various-shell-commands-when-nut-reports-a-low-ups-battery
-# https://networkupstools.org/docs/user-manual.chunked/ar01s07.html
-# XXX: https://networkupstools.org/docs/user-manual.chunked/index.html
-# XXX: https://wiki.archlinux.org/index.php/Network_UPS_Tools
-# XXX: NUT has a HTML option, possibly useful...
 
 
 - when: nut.mode != "standalone" and nut.mode != "netclient"
@@ -21,15 +17,12 @@
 
 - when: nut.mode == "standalone"
   ansible.builtin.set_fact:
-    nut_monitor:
-      name: "{{ nut.upsname | mandatory }}"
-      mode: "master"
+    nut_monitor_mode: "master"
 
 - when: nut.mode == "netclient"
   ansible.builtin.set_fact:
-    nut_monitor:
-      name: "{{ nut.upsname | mandatory }}@{{ nut.server | mandatory }}"
-      mode: "slave"
+    nut_monitor_name: "{{ nut.upsname | mandatory }}@{{ nut.server | mandatory }}"
+    nut_monitor_mode: "slave"
 
 - ansible.builtin.package:
     name: nut
@@ -49,7 +42,7 @@
   ansible.builtin.include_tasks: monitor.yml
 
 - name: check ups connection
-  ansible.builtin.command: "upsc {{ nut_monitor.name }}"
+  ansible.builtin.command: "upsc {{ nut_monitor_name }}"
   register: upsc_out
 
 - name: display ups info
