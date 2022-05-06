@@ -18,11 +18,13 @@
   when: item in getent_groups.stdout_lines
   # XXX: in ascending order of precedence
   # see: https://wiki.archlinux.org/index.php/Sudo#Example_entries
-  with_items:
+  loop:
     - sudo
     - wheel
+  loop_control:
+    loop_var: sudoer_group
   ansible.builtin.set_fact:
-    default_sudoers_group: "{{ item }}"
+    default_sudoers_group: "{{ sudoer_group }}"
 
 - name: find preexisting custom sudoers files
   find:
@@ -32,9 +34,11 @@
 
 - name: reset custom sudoers files
   when: find_custom_sudoers.files
-  with_items: find_custom_sudoers.files
+  loop: "{{ find_custom_sudoers.files }}"
+  loop_control:
+    loop_var: custom_sudoer_file
   file:
-    path: "{{ item.path }}"
+    path: "{{ custom_sudoer_file.path }}"
     state: absent
 
 - name: add custom sudoers file
