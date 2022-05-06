@@ -42,12 +42,12 @@
 
 #### System monitoring
 - [`rjlasko.ansible.neofetch`](https://github.com/rjlasko/ansible/blob/master/roles/neofetch/README.md)
-- `rjlasko.ansible.network_ups_tools`
+- [`rjlasko.ansible.network_ups_tools`](https://github.com/rjlasko/ansible/blob/master/roles/network_ups_tools/README.md)
 - `rjlasko.ansible.rasdaemon`
 - [`rjlasko.ansible.smart_monitoring_tools`](https://github.com/rjlasko/ansible/blob/master/smart-monitoring-tools/docker/README.md)
 
 #### OS Configuration
-- `rjlasko.ansible.boot_manager`
+- [`rjlasko.ansible.boot_manager`](https://github.com/rjlasko/ansible/blob/master/roles/boot_manager/README.md)
 - `rjlasko.ansible.crontab`
 - `rjlasko.ansible.cronic`
 - `rjlasko.ansible.global_environment`
