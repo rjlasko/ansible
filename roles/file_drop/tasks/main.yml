@@ -39,7 +39,7 @@
   loop: "{{ file_drop.copies | default([]) }}"
   loop_control:
     loop_var: fd_copy
-  ansible.builtin.template:
+  ansible.builtin.copy:
     remote_src: "{{ fd_copy.remote_src | default(omit) }}"
     src: "{{ fd_copy.src }}"
     dest: "{{ fd_copy.dest }}"

@@ -30,7 +30,7 @@
   ansible.builtin.file:
     path: "{{ br_absent }}"
     state: touch
-    mode: u=rw,o=r
+    mode: a=r
 
 - name: "stat absent marker: {{ br_absent }}"
   ansible.builtin.stat:
@@ -43,7 +43,7 @@
     src: "{{ br_backup }}"
     dest: "{{ br_target }}"
     remote_src: true
-    mode: "{{ br_stat_backup.stat.mode }}"
+    mode: preserve
 
 - name: "restore target absence: {{ br_target }}"
   when: br_stat_absent.stat.exists
@@ -60,4 +60,4 @@
     src: "{{ br_target }}"
     dest: "{{ br_backup }}"
     remote_src: true
-    mode: "{{ br_stat_target.stat.mode }}"
+    mode: preserve
