@@ -1,5 +1,13 @@
----
-# blah
+--
+# Automated release playbook for Ansible Collections.
+#
+# Gratuitously ripped from the eminent geerlingguy.
+#
+# Requires a ANSIBLE_GALAXY_API_KEY secret to be configured on the GitHub repo.
+#
+# Usage:
+#   ansible-playbook -i 'localhost,' galaxy-deploy.yml \
+#   -e "github_tag=${{ github.ref }}"
 
 - hosts: localhost
   connection: local
@@ -10,13 +18,17 @@
     collection: ansible
     # Requires github_tag to be set when calling playbook.
     # release_version: "{{ github_tag.split('/')[-1] }}"
-    release_version: 0.1.0
+    # release_version: 0.1.2
+    release_version: "{{ lookup('env', 'GITHUB_REF_NAME') }}"
 
   pre_tasks:
     - name: Ensure the ~/.ansible directory exists.
       file:
         path: ~/.ansible
         state: directory
+
+    - debug:
+        var: release_version
 
     - shell: 'echo "token: ${ANSIBLE_GALAXY_API_KEY:?}" > ~/.ansible/galaxy_token'
 
@@ -47,6 +59,6 @@
     - name: Build the collection.
       command: ansible-galaxy collection build
 
-    - name: Publish the collection.
-      command: >
-        ansible-galaxy collection publish ./{{ namespace }}-{{ collection }}-{{ release_version }}.tar.gz
+    # - name: Publish the collection.
+    #   command: >
+    #     ansible-galaxy collection publish ./{{ namespace }}-{{ collection }}-{{ release_version }}.tar.gz

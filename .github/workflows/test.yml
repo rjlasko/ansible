@@ -3,14 +3,41 @@ name: Docker Image CI
 on:
   push:
     branches: [ master ]
+    tags:
+      - '*'
   pull_request:
     branches: [ master ]
 
 jobs:
 
-  lint:
-    name: Lint
+  # lint:
+  #   name: Lint
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Set up Python 3.
+  #       uses: actions/setup-python@v2
+  #       with:
+  #         python-version: '3.x'
+  #
+  #     - name: Install test dependencies.
+  #       run: pip3 install ansible-core ansible-lint yamllint
+  #
+  #     - name: Check out the codebase.
+  #       uses: actions/checkout@v3
+  #
+  #     - name: ansible-lint
+  #       run: ansible-lint --project-dir ./
+  #
+  #     - name: yamllint
+  #       run: yamllint .
+
+  release:
+    name: Release
     runs-on: ubuntu-latest
+    env:
+      ANSIBLE_GALAXY_API_KEY: ${{ secrets.ANSIBLE_GALAXY_API_KEY }}
+      GITHUB_REF_NAME: ${{ github.ref }}
+
     steps:
       - name: Check out the codebase.
         uses: actions/checkout@v3
@@ -20,11 +47,9 @@ jobs:
         with:
           python-version: '3.x'
 
-      - name: Install test dependencies.
-        run: pip3 install yamllint ansible-core ansible-lint
+      - name: Install Ansible.
+        run: pip3 install ansible-core
 
-      - name: ansible-lint
-        run: ansible-lint --project-dir ./
-
-      - name: yamllint
-        run: yamllint .
+      - name: Release to Ansible Galaxy.
+        run: ansible-playbook galaxy-release.yml
+        # run: ansible-playbook -i 'localhost,' galaxy-release.yml -e "github_tag=${{ github.ref }}"
