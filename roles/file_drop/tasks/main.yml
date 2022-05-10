@@ -9,6 +9,7 @@
   loop_control:
     loop_var: fd_empty
   ansible.builtin.shell: rm -rf {{ fd_empty }}/.[!.]* {{ fd_empty }}/*
+  changed_when: true
 
 - name: create files/directories/links
   loop: "{{ file_drop.files | default([]) }}"

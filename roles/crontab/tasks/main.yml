@@ -24,6 +24,7 @@
 
     - name: load staged crontab file
       ansible.builtin.command: crontab "{{ crontab_staging_dir.path }}/cron.tab"
+      changed_when: true
 
   always:
     - name: remove staging directory

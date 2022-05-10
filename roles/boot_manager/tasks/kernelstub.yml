@@ -26,6 +26,7 @@
 
 - name: read original configuration
   ansible.builtin.command: "cat {{ kernelstub_cfg_backup }}"
+  changed_when: false
   register: kstub_cfg_dump
 
 - name: load original kernel boot options

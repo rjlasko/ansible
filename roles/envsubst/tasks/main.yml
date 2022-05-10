@@ -23,6 +23,7 @@
 
     - name: envsubst the file to final destination
       ansible.builtin.shell: "envsubst < {{ envsubst_tempfile.path }} > {{ envsubst.dest | mandatory }}"
+      changed_when: true
       environment: "{{ envsubst.env_vars }}"
 
     - name: file permissions
