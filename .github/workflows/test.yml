@@ -51,5 +51,5 @@ jobs:
         run: pip3 install ansible-core
 
       - name: Release to Ansible Galaxy.
-        run: ansible-playbook galaxy-release.yml -vvvv
+        run: ansible-playbook -i 'localhost,' galaxy-release.yml -vvvv
         # run: ansible-playbook -i 'localhost,' galaxy-release.yml -e "github_tag=${{ github.ref }}"
