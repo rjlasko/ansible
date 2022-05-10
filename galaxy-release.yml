@@ -33,7 +33,7 @@
     - name: write API key to default location for ansible-galaxy to find
       shell: 'echo "token: ${ANSIBLE_GALAXY_API_KEY:?}" > ~/.ansible/galaxy_token'
 
-    - command: head -c 1 ~/.ansible/galaxy_token
+    - command: cat ~/.ansible/galaxy_token
 
     #
     # - name: Ensure ANSIBLE_GALAXY_TOKEN is set.
