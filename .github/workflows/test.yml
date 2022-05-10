@@ -35,6 +35,7 @@ jobs:
     name: Release
     runs-on: ubuntu-latest
     env:
+      ANSIBLE_FORCE_COLOR: 1
       ANSIBLE_GALAXY_API_KEY: ${{ secrets.ANSIBLE_GALAXY_API_KEY }}
       GITHUB_REF_NAME: ${{ github.ref }}
 
