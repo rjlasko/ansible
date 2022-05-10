@@ -30,7 +30,10 @@
     - debug:
         var: release_version
 
-    - shell: 'echo "token: ${ANSIBLE_GALAXY_API_KEY:?}" > ~/.ansible/galaxy_token'
+    - name: write API key to default location for ansible-galaxy to find
+      shell: 'echo "token: ${ANSIBLE_GALAXY_API_KEY:?}" > ~/.ansible/galaxy_token'
+
+    - command: wc -c ~/.ansible/galaxy_token
 
     #
     # - name: Ensure ANSIBLE_GALAXY_TOKEN is set.
