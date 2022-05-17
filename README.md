@@ -47,6 +47,7 @@
 - [`rjlasko.ansible.smart_monitoring_tools`](https://github.com/rjlasko/ansible/blob/master/smart-monitoring-tools/docker/README.md)
 
 #### OS Configuration
+- [`rjlasko.ansible.bash_completion`](https://github.com/rjlasko/ansible/blob/master/roles/bash_completion/README.md)
 - [`rjlasko.ansible.boot_manager`](https://github.com/rjlasko/ansible/blob/master/roles/boot_manager/README.md)
 - `rjlasko.ansible.crontab`
 - `rjlasko.ansible.cronic`
