@@ -14,6 +14,9 @@ poetry_pip_username: # string (optional), username for PyPi repository
 poetry_pip_password: # string (optional), password for PyPi repository
 poetry_pip_url: # string (optional), URL for PyPi repository
 poetry_extra_configs: # list
+
+# optional
+poetry_completions_filepath: # filepath to install poetry completions script
 ```
 
 ## Dependencies

@@ -33,6 +33,6 @@
   changed_when: false
   register: poetry_config_list
 
-- name: list poetry configs
-  ansible.builtin.debug:
-    var: poetry_config_list.stdout
+- name: install poetry completions
+  when: poetry_completions_filepath is defined
+  shell: "poetry completions {{ ansible_facts.user_shell | split('/') | last }} > {{ poetry_completions_filepath }}"
