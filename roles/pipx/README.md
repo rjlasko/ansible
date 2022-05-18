@@ -13,9 +13,14 @@ Installs latest version of `pipx`, and configures its repository settings.
 pip_username: # string (optional), username for PyPi repository
 pip_password: # string (optional), password for PyPi repository
 pip_extra_index_endpoint: # string (optional), URL for PyPi repository
-```
+# If either username or password are provided, then all 3 of the variables above must be provided.
 
-Note, if either username or password are provided, then all 3 of the variables above must be provided.
+pipx_ensurepath: # boolean, adds pipx app directory to PATH via ~/.bashrc & ~/.bash_profile, if not already in PATH.
+                  # default: true
+
+pipx_completions_init_file: # filepath to update PATH update with pipx completions... default: ~/.bashrc
+pipx_completions_init_file_create: # boolean, create the pipx init file. default: false
+```
 
 ## Dependencies
 

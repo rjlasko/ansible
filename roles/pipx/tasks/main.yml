@@ -15,5 +15,6 @@
   when: pip_config_installed is not defined
   ansible.builtin.include_tasks: configure_pip.yml
 
-- name: install pipx
+- name: install pipx packages
+  when: pipx_packages is defined
   ansible.builtin.include_tasks: install_packages.yml
