@@ -33,10 +33,6 @@
     state: directory
     mode: u=rwX,g=rX,o-rwx
 
-# FIXME: this seems not to do anything helpful right now
-- name: initialize jenv
-  ansible.builtin.shell: bash -c eval \"$(jenv init -)\"
-
 - name: query for installed Java versions
   ansible.builtin.shell: set -o pipefail && /usr/libexec/java_home -V 2>&1 | awk '{$1=$1;print}' | grep -E '^([0-9]+)\.([0-9]+)\.([0-9]+)' | cut -d':' -f1
   args:
@@ -57,3 +53,19 @@
 - name: set global Java versions
   ansible.builtin.command: "jenv global {{ java_global_versions }}"
   changed_when: true
+
+- name: "add jenv shims to shell initialization script: {{ java_jenv_init_file }}"
+  lineinfile:
+    path: "{{ java_jenv_init_file }}"
+    create: "{{ java_jenv_init_file_create }}"
+    regexp: '$(jenv root)/shims'
+    line: 'if ! $(echo "$PATH" | tr ":" "\n" | grep -qx "$(jenv root)/shims") ; then PATH=$(jenv root)/shims:$PATH ; fi'
+    state: present
+
+- name: "add jenv init to shell initialization script: {{ java_jenv_init_file }}"
+  lineinfile:
+    path: "{{ java_jenv_init_file }}"
+    create: "{{ java_jenv_init_file_create }}"
+    regexp: 'jenv init'
+    line: 'eval "$(jenv init -)"'
+    state: present

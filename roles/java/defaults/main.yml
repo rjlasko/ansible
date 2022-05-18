@@ -1,6 +1,8 @@
-java_reset_jenv: true
+java_reset_jenv: false
 java_brew_versions:
   - oracle-jdk
   - adoptopenjdk/openjdk/adoptopenjdk8
   - adoptopenjdk/openjdk/adoptopenjdk11
 java_global_versions: 1.8
+java_jenv_init_file: "{{ ansible_user_dir }}/.bashrc"
+java_jenv_init_file_create: false

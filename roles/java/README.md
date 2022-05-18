@@ -1,4 +1,4 @@
-# Ansible Role: Python
+# Ansible Role: Java
 
 Installs any number of Java versions and `jenv` to manage them.
 
@@ -13,6 +13,9 @@ Installs any number of Java versions and `jenv` to manage them.
 java_reset_jenv: # boolean, delete preexisting jenv
 java_brew_versions: # list of Java packages to install via brew
 java_global_versions: # list of Java versions to put into PATH
+
+java_jenv_init_file: # filepath to update PATH update with jenv shims. default: ~/.bashrc
+java_jenv_init_file_create: # boolean, create the jenv init file. default: false
 ```
 
 ## Dependencies
@@ -29,7 +32,7 @@ None
         java_brew_versions:
           - adoptopenjdk/openjdk/adoptopenjdk8
           - adoptopenjdk/openjdk/adoptopenjdk11
-        python_global_versions: 1.8
+        java_global_versions: 1.8
 ```
 
 ## License
