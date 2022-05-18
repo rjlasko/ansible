@@ -14,8 +14,6 @@ if [ -z "${SHK_ROOT}" ] ; then
 
 	SHK_ROOT="${HOME}/.shell_hooks"
 
-	alias shk_debug='export SHK_DEBUG=1'
-
 	debug() {
 		if [ -n "${SHK_DEBUG}" ] ; then
 			>&2 echo "${1}"
@@ -26,7 +24,11 @@ if [ -z "${SHK_ROOT}" ] ; then
 	rebash() {
 		unset SHK_ROOT SHK_LOGIN
 		export PATH="${SHK_INHERITED_PATH}"
-		. "${HOME}/.bash_profile"
+		if [ "${1:-}" == '-v' ] ; then
+			SHK_DEBUG=1 . "${HOME}/.bash_profile"
+		else
+			. "${HOME}/.bash_profile"
+		fi
 	}
 
 	source_hook() {
@@ -34,10 +36,10 @@ if [ -z "${SHK_ROOT}" ] ; then
 		hook_dir="$(cd "$(dirname "${hook_filepath}")" && pwd -P)"
 		hook_name="$(basename "${hook_filepath}")"
 		start_dir="$(pwd)"
+		debug "${USER}@$(hostname) sourcing: ${hook_dir}/${hook_name}"
 		cd "${hook_dir}"
 		. "${hook_name}"
 		cd "${start_dir}"
-		debug "${USER}@$(hostname) sourcing: ${hook_dir}/${hook_name}"
 		unset hook_filepath hook_dir hook_name start_dir
 	}
 

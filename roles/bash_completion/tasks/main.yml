@@ -6,7 +6,8 @@
 - name: install for linux
   when: ansible_facts.system == 'Linux'
   block:
-    - ansible.builtin.package:
+    - name: install bash-completion
+      ansible.builtin.package:
         name: bash-completion
         state: present
 

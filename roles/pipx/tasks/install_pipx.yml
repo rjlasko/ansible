@@ -9,10 +9,18 @@
   ignore_errors: true
   changed_when: false
 
+- name: get pipx app directory
+  ansible.builtin.shell: set -o pipefail && pipx list | grep '$PATH'| sed 's#^[^/]*##g'
+  args:
+    executable: bash
+  register: where_pipx_install
+  changed_when: false
+
 - name: set pipx_executable if installed
   when: which_pipx_initial.rc == 0
   ansible.builtin.set_fact:
-    pipx_executable: "{{ which_pipx_initial.stdout }}"
+    pipx_executable: "{{ which_pipx_initial.stdout | mandatory }}"
+    pipx_app_path: "{{ where_pipx_install.stdout | mandatory }}"
 
 - when: which_pipx_initial.rc != 0
   block:
