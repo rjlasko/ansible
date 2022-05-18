@@ -10,11 +10,13 @@ Installs any number of Python versions using `pyenv`, which is also used to mana
 
 #### Settable Variables
 ```yaml
-python_reset_pyenv: # boolean, delete preexisting pyenv
+python_reset_pyenv: # boolean, delete preexisting pyenv, default: false
 python_pyenv_versions: # list of python versions to install
     # defaults: [2.7.18,3.9.11]
 python_global_versions: # list of versions to put into PATH
     # defaults to the same list as `python_versions_installed`
+python_pyenv_init_file: # filepath to update PATH update with pyenv shims. default: ~/.bashrc
+python_pyenv_init_file_create: # boolean, create the pyenv init file. default: false
 ```
 
 ## Dependencies

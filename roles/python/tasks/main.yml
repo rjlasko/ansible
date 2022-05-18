@@ -36,3 +36,19 @@
 - name: set global Python versions
   ansible.builtin.command: "pyenv global {{ python_global_versions }}"
   changed_when: true
+
+- name: "add pyenv shims to shell initialization script: {{ python_pyenv_init_file }}"
+  lineinfile:
+    path: "{{ python_pyenv_init_file }}"
+    create: "{{ python_pyenv_init_file_create }}"
+    regexp: '$(pyenv root)/shims'
+    line: 'if ! $(echo "$PATH" | tr ":" "\n" | grep -qx "$(pyenv root)/shims") ; then PATH=$(pyenv root)/shims:$PATH ; fi'
+    state: present
+
+- name: "add pyenv init to shell initialization script: {{ python_pyenv_init_file }}"
+  lineinfile:
+    path: "{{ python_pyenv_init_file }}"
+    create: "{{ python_pyenv_init_file_create }}"
+    regexp: 'pyenv init'
+    line: 'eval "$(pyenv init -)"'
+    state: present
