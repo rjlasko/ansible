@@ -23,3 +23,8 @@
     src: settings.mirror.xml.j2
     dest: "{{ maven_settings_filepath }}"
     mode: u=rw,go-rwx
+
+- name: install maven completions
+  community.general.homebrew:
+    name: maven-completion
+    state: present
