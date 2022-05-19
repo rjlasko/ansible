@@ -18,7 +18,7 @@
 - [`rjlasko.ansible.libvirt`](https://github.com/rjlasko/ansible/blob/master/roles/libvirt/README.md)
 - [`rjlasko.ansible.lxd`](https://github.com/rjlasko/ansible/blob/master/roles/lxd/README.md)
 - `rjlasko.ansible.vagrant`
-- `rjlasko.ansible.vfio`
+- [`rjlasko.ansible.vfio`](https://github.com/rjlasko/ansible/blob/master/roles/vfio/README.md)
 
 #### Storage & Backup
 - `rjlasko.ansible.fstrim`
@@ -35,7 +35,8 @@
 
 #### Remote Access
 - [`rjlasko.ansible.ssh`](https://github.com/rjlasko/ansible/blob/master/roles/ssh/README.md)
-- `rjlasko.ansible.ssh_utils`
+- [`rjlasko.ansible.sshfs`](https://github.com/rjlasko/ansible/blob/master/roles/sshfs/README.md)
+- [`rjlasko.ansible.sshpass`](https://github.com/rjlasko/ansible/blob/master/roles/sshpass/README.md)
 - `rjlasko.ansible.wake_on_lan`
 - `rjlasko.ansible.xfce_headless`
 - `rjlasko.ansible.xrdp`
@@ -59,7 +60,7 @@
 - `rjlasko.ansible.timezone`
 
 #### User Management
-- `rjlasko.ansible.hush_login`
+- [`rjlasko.ansible.hush_login`](https://github.com/rjlasko/ansible/blob/master/roles/hush_login/README.md)
 - `rjlasko.ansible.initial_login`
 - `rjlasko.ansible.groups`
 - [`rjlasko.ansible.shell_hooks`](https://github.com/rjlasko/ansible/blob/master/roles/shell_hooks/README.md)
