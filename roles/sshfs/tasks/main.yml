@@ -1,0 +1,12 @@
+---
+## -------------- ##
+## Installs SSHFS ##
+## -------------- ##
+
+- name: install macFUSE
+  community.general.homebrew_cask:
+    name: macfuse
+    state: present
+
+- name: install SSHFS
+  ansible.builtin.include_tasks: install_sshfs.yml

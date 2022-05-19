@@ -1,0 +1,12 @@
+---
+## --------------------------------------------------------- ##
+## Installs sshpass, so Ansible doesn't prompt for passwords ##
+## --------------------------------------------------------- ##
+
+- name: install sshpass
+  community.general.homebrew:
+    name: esolitos/ipa/sshpass
+    state: present
+# TODO: sshpass
+# see: https://stackoverflow.com/questions/32255660/how-to-install-sshpass-on-mac/62623099#62623099
+# - esolitos/ipa/sshpass
