@@ -8,14 +8,14 @@
   ansible.builtin.shell: >
     set -o pipefail
     && git ls-remote --exit-code --tags https://github.com/osxfuse/sshfs.git
-        | cut -d'/' -f3
-        | grep -E '^osxfuse-sshfs-([0-9]+)\.([0-9]+)\.([0-9]+)$'
-        | awk '{print $1 " " $1}'
-        | sed 's#^[a-z\-]*##g'
-        | sort --version-sort -k 1
-        | tail -n1
-        | awk '{print $2}'
-        | sed 's:.*/::'
+    | cut -d'/' -f3
+    | grep -E '^osxfuse-sshfs-([0-9]+)\.([0-9]+)\.([0-9]+)$'
+    | awk '{print $1 " " $1}'
+    | sed 's#^[a-z\-]*##g'
+    | sort --version-sort -k 1
+    | tail -n1
+    | awk '{print $2}'
+    | sed 's:.*/::'
   args:
     executable: bash
   register: sshfs_repo_version
