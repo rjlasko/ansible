@@ -46,7 +46,7 @@ if [ -z "${SHK_ROOT}" ] ; then
 	source_hooks() {
 		hooks_folder="${1}"
 		if [ -d "${hooks_folder}" ] ; then
-			for hook in $(find "${hooks_folder}" -maxdepth 1 -type f -print | LC_COLLATE=C sort) ; do
+			for hook in $(find "${hooks_folder}" -maxdepth 1 \( -type f -or -type l \) -print | LC_COLLATE=C sort) ; do
 				source_hook "${hook}"
 			done
 		fi
