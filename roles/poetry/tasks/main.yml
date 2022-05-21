@@ -13,7 +13,7 @@
 
 - name: load pipx app directory into PATH
   environment:
-    PATH: "{{ pipx_app_path }}:{{ ansible_env.PATH }}"
+    PATH: "{{ pipx_bin_path }}:{{ ansible_env.PATH }}"
   block:
     - when: poetry_pip_url is defined
       block:
