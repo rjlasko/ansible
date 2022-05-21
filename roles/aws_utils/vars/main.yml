@@ -1,0 +1,11 @@
+aws_creds:
+  aws_creds_path: "{{ ansible_facts.user_dir }}/.aws/credentials"
+  aws_cfg_path: "{{ ansible_facts.user_dir }}/.aws/config"
+  log_err: "{{ ansible_facts.user_dir }}/.aws/aws_login.launchd.stderr"
+  log_out: "{{ ansible_facts.user_dir }}/.aws/aws_login.launchd.stdout"
+
+  gimme_creds_login_config_path: "{{ ansible_facts.user_dir }}/.okta_aws_login_config"
+
+  plist_filepath: "{{ ansible_facts.user_dir }}/Library/LaunchAgents/{{ aws_gimme_creds_plist_domain }}.aws_login.plist"
+  plist_domain: "{{ aws_gimme_creds_plist_domain | mandatory }}"
+  launchd_service_name: "{{ aws_gimme_creds_plist_domain | mandatory }}.aws_login"

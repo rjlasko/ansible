@@ -1,0 +1,18 @@
+[DEFAULT]
+app_url = {{ aws_okta_app_url }}
+aws_appname =
+aws_default_duration = 3600
+aws_rolename = {{ aws_login_rolename }}
+client_id =
+cred_profile = default
+device_token =
+gimme_creds_server = appurl
+include_path = False
+okta_auth_server =
+okta_org_url = {{ okta_org_url }}
+okta_username = {{ okta_username | default(ansible_facts.user_id) }}
+output_format = export
+preferred_mfa_type = push
+remember_device = True
+resolve_aws_alias = False
+write_aws_creds = True

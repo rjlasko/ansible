@@ -1,0 +1,87 @@
+---
+## -------------------------------------------------- ##
+## Installs common utilities for interacting with AWS ##
+## -------------------------------------------------- ##
+
+
+- name: unload any previously installed service
+  community.general.launchd:
+    name: "{{ aws_creds.launchd_service_name }}"
+    enabled: true
+    state: unloaded
+  ignore_errors: true
+
+- name: "delete preexisting files created by this role"
+  with_items:
+    - "{{ aws_creds.gimme_creds_login_config_path }}"
+    - "{{ aws_creds.aws_creds_path }}"
+    - "{{ aws_creds.aws_cfg_path }}"
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+
+- block:
+    - name: create temp directory to store download
+      ansible.builtin.tempfile:
+        state: directory
+      register: awscli_tempdir
+
+    - name: download AWS CLI
+      ansible.builtin.get_url:
+        url: "https://awscli.amazonaws.com/AWSCLIV2.pkg"
+        dest: "{{ awscli_tempdir.path }}/awscli.pkg"
+        mode: u=rwx,go-rwx
+        force: yes
+
+    - name: install AWS CLI
+      become: true
+      ansible.builtin.command: "installer -pkg {{ awscli_tempdir.path }}/awscli.pkg -target /"
+
+    - name: find aws_completer
+      command: which aws_completer
+      changed_when: false
+
+  always:
+    - name: delete temporary directory
+      ansible.builtin.file:
+        path: "{{ awscli_tempdir.path }}"
+        state: absent
+
+- name: install packages with pipx
+  ansible.builtin.include_role:
+    name: pipx
+  vars:
+    pipx_packages:
+      - gimme-aws-creds
+
+- name: "copy {{ aws_creds.aws_cfg_path }}"
+  ansible.builtin.copy:
+    src: "{{ aws_config_file }}"
+    dest: "{{ aws_creds.aws_cfg_path }}"
+    mode: u=r,go-rwx
+
+- name: "generate from template: {{ aws_creds.gimme_creds_login_config_path }}"
+  ansible.builtin.template:
+    src: okta_aws_login_config.ini.j2
+    dest: "{{ aws_creds.gimme_creds_login_config_path }}"
+    mode: u=r,go-rwx
+
+- name: "generate from template: {{ aws_login_filepath }}"
+  vars:
+    aws_bin_path: "{{ pipx_bin_path | mandatory }}"
+  ansible.builtin.template:
+    src: aws-login.sh.j2
+    dest: "{{ aws_login_filepath }}"
+    mode: u=rx,go-rwx
+
+- name: "generate from template: {{ aws_creds.plist_filepath }}"
+  ansible.builtin.template:
+    src: aws_login.plist.xml.j2
+    dest: "{{ aws_creds.plist_filepath }}"
+    mode: u=rw,go=r
+
+- name: Load, enable and start service
+  community.general.launchd:
+    name: "{{ aws_creds.launchd_service_name }}"
+    enabled: true
+    state: reloaded
