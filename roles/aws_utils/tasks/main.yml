@@ -38,8 +38,17 @@
       ansible.builtin.command: "installer -pkg {{ awscli_tempdir.path }}/awscli.pkg -target /"
 
     - name: find aws_completer
-      command: which aws_completer
+      command: command -v aws_completer
       changed_when: false
+      register: aws_completer_filepath
+
+    - name: "add aws completion to shell initialization script: {{ aws_completions_filepath }}"
+      blockinfile:
+        path: "{{ aws_completions_filepath }}"
+        create: true
+        marker: "# --- {mark} AWS Completions ---"
+        block: "complete -C '{{ aws_completer_filepath.stdout }}' aws"
+        state: present
 
   always:
     - name: delete temporary directory

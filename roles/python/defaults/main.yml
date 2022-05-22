@@ -4,4 +4,3 @@ python_pyenv_versions:
   - 3.9.11
 python_global_versions: "{{ python_pyenv_versions | join(' ') }}"
 python_pyenv_init_file: "{{ ansible_user_dir }}/.bashrc"
-python_pyenv_init_file_create: false

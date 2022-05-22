@@ -37,6 +37,14 @@
       changed_when: false
       register: poetry_config_list
 
-    - name: install poetry completions
-      when: poetry_completions_filepath is defined
-      shell: "poetry completions {{ ansible_facts.user_shell | split('/') | last }} > {{ poetry_completions_filepath }}"
+    - name: generate poetry completion script
+      command: "poetry completions {{ ansible_facts.user_shell | split('/') | last }}"
+      register: poetry_completions_generator
+
+    - name: "add poetry completions to shell initialization script: {{ poetry_completions_filepath }}"
+      blockinfile:
+        path: "{{ poetry_completions_filepath }}"
+        create: true
+        marker: "# --- {mark} poetry Completions ---"
+        block: "{{ poetry_completions_generator.stdout }}"
+        state: present
