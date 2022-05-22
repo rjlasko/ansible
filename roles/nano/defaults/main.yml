@@ -1,4 +1,3 @@
 nanorc_settings:
-  - set smooth
   - set autoindent
   - set tabsize 4

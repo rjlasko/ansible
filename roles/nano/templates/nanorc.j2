@@ -6,5 +6,5 @@ include {{ nanorc_include.path }}
 {% endfor %}
 
 {% for nanorc_setting in nanorc_settings | default([]) %}
-set {{ nanorc_setting }}
+{{ nanorc_setting }}
 {% endfor %}

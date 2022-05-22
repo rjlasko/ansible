@@ -21,7 +21,7 @@
     br_suffix: ORIG
 
 - name: delete shell-hooks directories
-  when: "{{ shell_hooks_reset | default(false) }}"
+  when: shell_hooks_reset | default(false)
   loop: "{{ shell_hooks_directories }}"
   loop_control:
     loop_var: shell_hooks_dir

@@ -29,7 +29,7 @@
 
 - name: find nanorc includes
   ansible.builtin.find:
-    paths: /usr
+    paths: /usr/local
     recurse: true
     patterns: "*.nanorc"
   register: nanorc_includes
