@@ -37,6 +37,7 @@ okta_org_url: # Okta organization url, which is typically something like https:/
 okta_username: # (optional), username for Okta to authenticate. default: host's $USER
 
 aws_login_filepath: # (optional) string, location to install `aws-login` script to. default: ~/bin/aws-login
+aws_completions_filepath: # filepath to load aws completions. default: ~/.bashrc
 ```
 
 ## Example Playbook

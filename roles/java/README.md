@@ -14,8 +14,7 @@ java_reset_jenv: # boolean, delete preexisting jenv
 java_brew_versions: # list of Java packages to install via brew
 java_global_versions: # list of Java versions to put into PATH
 
-java_jenv_init_file: # filepath to update PATH update with jenv shims. default: ~/.bashrc
-java_jenv_init_file_create: # boolean, create the jenv init file. default: false
+java_jenv_init_file: # filepath to update PATH with jenv shims + completions. default: ~/.bashrc
 ```
 
 ## Dependencies

@@ -1,3 +1,1 @@
 pipx_ensurepath: true
-pipx_completions_init_file: "{{ ansible_user_dir }}/.bashrc"
-pipx_completions_init_file_create: false

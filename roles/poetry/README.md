@@ -16,7 +16,7 @@ poetry_pip_url: # string (optional), URL for PyPi repository
 poetry_extra_configs: # list
 
 # optional
-poetry_completions_filepath: # filepath to install poetry completions script
+poetry_completions_filepath: # filepath to load poetry completions. default: ~/.bashrc
 ```
 
 ## Dependencies
