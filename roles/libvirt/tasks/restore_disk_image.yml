@@ -16,7 +16,8 @@
   ansible.builtin.fail:
     msg: got more matches than expected
 
-- ansible.builtin.set_fact:
+- name: set image type
+  ansible.builtin.set_fact:
     libvirt_image_type: "{{ libvirt_disk_driver.matches[0].driver.type }}"
 
 - name: RAW images get full preallocation
@@ -26,6 +27,10 @@
 
 - name: "restore VM disk image as '{{ libvirt_image_type }}' type"
   become: true
-  ansible.builtin.command: qemu-img convert -O {{ libvirt_image_type }} {{ libvirt.vm.backup_dir }}/{{ libvirt_vm_vol | basename | splitext | first}}.qcow2 {{ libvirt_vm_vol }}
+  ansible.builtin.command: >
+    qemu-img
+    convert -O {{ libvirt_image_type }}
+    {{ libvirt.vm.backup_dir }}/{{ libvirt_vm_vol | basename | splitext | first }}.qcow2 {{ libvirt_vm_vol }}
+  changed_when: true
 
 # FIXME? does this file need proper owner/group? libvirt-qemu?

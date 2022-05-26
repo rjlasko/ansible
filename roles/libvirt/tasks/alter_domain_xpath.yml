@@ -20,7 +20,8 @@
         name: "{{ libvirt.vm.name }}"
       register: current_domain_xml
 
-    - ansible.builtin.set_fact:
+    - name: get current domain XML content
+      ansible.builtin.set_fact:
         selected_domain_xml: "{{ current_domain_xml.get_xml }}"
 
 - name: use deferred domain XML
@@ -30,9 +31,11 @@
   block:
     - name: get contents of deferred XML
       ansible.builtin.command: cat {{ libvirt_defered_xml }}
+      changed_when: false
       register: deferred_domain_xml
 
-    - ansible.builtin.set_fact:
+    - name: capture deferred domain XML content
+      ansible.builtin.set_fact:
         selected_domain_xml: "{{ deferred_domain_xml.stdout }}"
 
 # - name: print selected_domain_xml
@@ -62,6 +65,7 @@
     content: "{{ altered_domain_xml.xmlstring }}"
     dest: "{{ libvirt_defered_xml }}"
     force: true
+    mode: u=rw,go-rwx
 
 - name: apply domain configuration
   when: >

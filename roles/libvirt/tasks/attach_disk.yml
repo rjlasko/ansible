@@ -68,6 +68,7 @@
 
 - name: "attach disk to {{ libvirt.vm.name }}"
   ansible.builtin.command: "{{ virt_attach }} --config"
+  changed_when: true
 
 # XXX: The following can only be done (currently) from within libvirt's XML model
 

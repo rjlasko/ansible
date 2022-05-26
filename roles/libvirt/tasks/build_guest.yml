@@ -22,13 +22,14 @@
       ansible.builtin.template:
         src: "{{ libvirt.vm.virt_install.preseed.template | mandatory }}"
         dest: "{{ vm_staging_dir.path }}/preseed.cfg"
-        force: yes
+        force: true
+        mode: u=rw,go-rwx
       vars:
         preseed: "{{ libvirt.vm.virt_install.preseed }}"
 
     - name: build preseeded install command arguments
       ansible.builtin.set_fact:
-        virt_install_iso_location: "--location={{ libvirt.vm.virt_install.iso | mandatory}}"
+        virt_install_iso_location: "--location={{ libvirt.vm.virt_install.iso | mandatory }}"
         virt_install_initrd_inject: "--initrd-inject={{ vm_staging_dir.path }}/preseed.cfg"
 
     - name: create VM
@@ -36,6 +37,7 @@
       become: true
       ansible.builtin.command:
         argv: "{{ [virt_install_cmd] + [virt_install_name] + virt_install_given_args + [virt_install_iso_location] + [virt_install_initrd_inject] }}"
+      changed_when: true
 
   always:
     - name: remove preseed staging directory
@@ -48,11 +50,12 @@
   block:
     - name: build non-preseed install command arguments
       ansible.builtin.set_fact:
-        virt_install_iso_cdrom: "--cdrom={{ libvirt.vm.virt_install.iso | mandatory}}"
+        virt_install_iso_cdrom: "--cdrom={{ libvirt.vm.virt_install.iso | mandatory }}"
 
     - name: create VM
       ansible.builtin.command:
         argv: "{{ [virt_install_cmd] + [virt_install_name] + virt_install_given_args + [virt_install_iso_cdrom] }}"
+      changed_when: true
 
 - name: "conclude build with {{ libvirt.vm.name }} in running state"
   ansible.builtin.include_tasks: start_guest.yml

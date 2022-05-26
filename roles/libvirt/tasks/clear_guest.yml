@@ -21,12 +21,21 @@
     # XXX: the "nvram" option was introduced to delete VMs using UEFI
     - name: "undefine VM: {{ libvirt.vm.name }}"
       ansible.builtin.command: virsh undefine --nvram {{ libvirt.vm.name }}
+      changed_when: true
 
 # FIXME: for some reason, sometimes this doesn't find everything
 # XXX: maybe it never does.  Does the QEMU URI have something to do with it? Is that properly set for this call?
 # Handle like-named VM volume
 - name: list volumes
-  ansible.builtin.shell: virsh vol-list --pool default | tail -n+3 | grep {{ libvirt.vm.name }} | awk '{print $1}'
+  ansible.builtin.shell:
+    set -o pipefail
+    && virsh vol-list --pool default
+    | tail -n+3
+    | grep {{ libvirt.vm.name }}
+    | awk '{print $1}'
+  args:
+    executable: bash
+  changed_when: false
   register: libvirt_existing_vols
 
 # FIXME: for some reason, sometimes this doesn't delete everything
@@ -35,7 +44,7 @@
   loop: "{{ libvirt_existing_vols.stdout_lines }}"
   loop_control:
     loop_var: libvirt_del_vol
-  ansible.builtin.shell: "virsh vol-delete --pool default {{ libvirt_del_vol }}"
+  ansible.builtin.command: "virsh vol-delete --pool default {{ libvirt_del_vol }}"
 
 - name: clear any previously existing hooks
   become: true

@@ -3,7 +3,8 @@
 ## Installs libvirt and related libraries & utilities ##
 ## -------------------------------------------------- ##
 
-- when: ansible_facts['distribution'] not in libvirt_host_packages
+- name: fail if unhandled linux distribution
+  when: ansible_facts['distribution'] not in libvirt_host_packages
   ansible.builtin.fail:
     msg: "libvirt role not tested for {{ ansible_facts['distribution'] }}"
 
@@ -14,9 +15,6 @@
       and (libvirt_host_packages[ansible_facts['distribution']].backports is defined)
     }}"
   block:
-    - ansible.builtin.debug:
-        var: libvirt_backported_install
-
     - name: install backported packages
       when: libvirt_backported_install
       ansible.builtin.apt:

@@ -4,7 +4,8 @@
 ## --------------------------- ##
 
 - name: "empty directory contents of {{ libvirt_hooks_path }}"
-  ansible.builtin.shell: rm -rf {{ libvirt_hooks_path }}/.[!.]* {{ libvirt_hooks_path }}/*
+  ansible.builtin.command: rm -rf {{ libvirt_hooks_path }}/.[!.]* {{ libvirt_hooks_path }}/*
+  changed_when: true
 
 - name: "create directory: {{ qemu_hooks_path }}"
   ansible.builtin.file:

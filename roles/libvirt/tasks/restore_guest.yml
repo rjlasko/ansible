@@ -6,6 +6,7 @@
 - name: restore VM from XML
   # TODO: look into using "virt" module to do this
   ansible.builtin.command: virsh define --file {{ libvirt.vm.backup_dir | mandatory }}/domain.xml
+  changed_when: true
 
 - name: get XML of restored VM definition
   community.libvirt.virt:
@@ -14,7 +15,15 @@
   register: restored_domain_xml
 
 - name: list expected VM block devices
-  ansible.builtin.shell: virsh domblklist {{ libvirt.vm.name }} | tail -n+3 | awk '{print $2}' | sed '/^$/d'
+  ansible.builtin.shell: >
+    set -o pipefail
+    && virsh domblklist {{ libvirt.vm.name }}
+    | tail -n+3
+    | awk '{print $2}'
+    | sed '/^$/d'
+  args:
+    executable: bash
+  changed_when: false
   register: libvirt_vm_domblklist_vols
 
 - name: list files in backup directory
@@ -23,7 +32,8 @@
     file_type: file
   register: libvirt_vm_backup_dir_listing
 
-- ansible.builtin.set_fact:
+- name: set fact for files to backup
+  ansible.builtin.set_fact:
     libvirt_vm_backup_files: "{{ libvirt_vm_backup_dir_listing.files | map(attribute='path') | map('basename') | map('splitext') | map('first') | list }}"
 
 - name: restore each disk associated with the restored VM definition

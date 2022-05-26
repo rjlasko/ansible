@@ -19,6 +19,7 @@
 
     - name: "attach device to {{ libvirt.vm.name }}"
       ansible.builtin.command: "virsh attach-device {{ libvirt.vm.name }} --file {{ temp_xml.path }} --config"
+      changed_when: true
 
   always:
     - name: remove deferred domain XML

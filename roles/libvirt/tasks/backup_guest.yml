@@ -18,14 +18,35 @@
     mode: u=rwx,g=rx,o-rwx
 
 - name: backup XML
-  ansible.builtin.shell: virsh dumpxml {{ libvirt.vm.name }} > {{ libvirt.vm.backup_dir }}/domain.xml
+  ansible.builtin.shell:
+    set -o pipefail
+    && virsh dumpxml {{ libvirt.vm.name }}
+    > {{ libvirt.vm.backup_dir }}/domain.xml
+  args:
+    executable: bash
+  changed_when: true
 
 - name: list VM block devices
-  ansible.builtin.shell: virsh domblklist {{ libvirt.vm.name }} | tail -n+3 | awk '{print $2}'
+  ansible.builtin.shell: >
+    set -o pipefail
+    && virsh domblklist {{ libvirt.vm.name }}
+    | tail -n+3
+    | awk '{print $2}'
+  args:
+    executable: bash
+  changed_when: false
   register: libvirt_vm_domblklist_vols
 
 - name: list volumes
-  ansible.builtin.shell: virsh vol-list --pool default | tail -n+3 | sed '/^[[:space:]]*$/d' | awk '{print $2}'
+  ansible.builtin.shell: >
+    set -o pipefail
+    && virsh vol-list --pool default
+    | tail -n+3
+    | sed '/^[[:space:]]*$/d'
+    | awk '{print $2}'
+  args:
+    executable: bash
+  changed_when: false
   register: libvirt_existing_vols
 
 - name: backup VM associated volumes

@@ -12,7 +12,8 @@
     state: absent
     path: "{{ qemu_hooks_path }}/{{ libvirt.vm.name }}"
 
-- when: libvirt.vm.hooks is defined
+- name: install VM hooks
+  when: libvirt.vm.hooks is defined
   become: true
   block:
     - name: "create hooks directory for VM {{ libvirt.vm.name }}"
@@ -23,7 +24,8 @@
         owner: root
         group: root
 
-    - loop: "{{ libvirt.vm.hooks | default([]) }}"
+    - name: "install hook for VM {{ libvirt.vm.name }}"
+      loop: "{{ libvirt.vm.hooks | default([]) }}"
       loop_control:
         loop_var: libvirt_vm_hook
       ansible.builtin.template:

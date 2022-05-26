@@ -12,8 +12,8 @@
 
 - name: "apply configurations for {{ qemu_cfg_path }}"
   loop:
-    - [ '#user =', 'user = "{{ libvirt_user }}"' ]
-    - [ '#group =', 'group = "{{ libvirt_group }}"' ]
+    - ['#user =', 'user = "{{ libvirt_user }}"']
+    - ['#group =', 'group = "{{ libvirt_group }}"']
   loop_control:
     loop_var: qemu_cfg_var
   ansible.builtin.lineinfile:

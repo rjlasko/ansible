@@ -3,14 +3,17 @@
 ## CPU isolation ##
 ## ------------- ##
 
-- become: true
+- name: do all tasks as super user
+  become: true
   block:
-    - when: libvirt.isolate is not defined or (libvirt.isolate | length) == 0
+    - name: skip cpu isolation definition
+      when: libvirt.isolate is not defined or (libvirt.isolate | length) == 0
       ansible.builtin.file:
         path: "{{ qemu_isolated_guests_path }}"
         state: absent
 
-    - when: libvirt.isolate is defined and (libvirt.isolate | length) > 0
+    - name: apply cpu isolation definitions
+      when: libvirt.isolate is defined and (libvirt.isolate | length) > 0
       block:
         - name: install python3 pip
           ansible.builtin.package:
@@ -20,7 +23,9 @@
           ansible.builtin.pip:
             name: vfio-isolate
 
-        - ansible.builtin.command: cat /proc/cpuinfo
+        - name: get info for intuitive cpu mapping
+          ansible.builtin.command: cat /proc/cpuinfo
+          changed_when: false
           register: proc_cpuinfo
 
         - name: apply vfio-isolate from template

@@ -45,7 +45,7 @@
       vars:
         global_env_vars:
           # https://libvirt.org/uri.html#URI_default
-          - [ 'LIBVIRT_DEFAULT_URI', "{{ libvirt.host.default_uri }}" ]
+          - ["LIBVIRT_DEFAULT_URI", "{{ libvirt.host.default_uri }}"]
 
     - name: install network bridge
       when: libvirt.host.bridge is defined

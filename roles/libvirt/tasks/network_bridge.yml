@@ -7,7 +7,10 @@
 # reference: https://www.thegeekdiary.com/how-to-remove-virbr0-and-lxcbr0-interfaces-on-centos-rhel-5-and-rhel-7/
 
 - name: list defined libvirt networks
-  ansible.builtin.shell: virsh net-list --all | tail -n+3 | awk '{print $1}'
+  ansible.builtin.shell: set -o pipefail && virsh net-list --all | tail -n+3 | awk '{print $1}'
+  args:
+    executable: bash
+  changed_when: false
   register: libvirt_networks
 
 - name: destroy all libvirt network adapters
@@ -15,6 +18,7 @@
   loop_control:
     loop_var: libvirt_network
   ansible.builtin.command: virsh net-destroy {{ libvirt_network }}
+  changed_when: true
   ignore_errors: true
 
 - name: disable autostart on all libvirt network adapters
@@ -22,6 +26,7 @@
   loop_control:
     loop_var: libvirt_network
   ansible.builtin.command: virsh net-autostart {{ libvirt_network }} --disable
+  changed_when: true
 
 - name: create bridge network config
   ansible.builtin.lineinfile:

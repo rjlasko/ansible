@@ -4,7 +4,8 @@
 ## ------------------ ##
 
 
-- ansible.builtin.set_fact:
+- name: declare image format
+  ansible.builtin.set_fact:
     qemu_img_format: "{{ libvirt_image.path.split('.') | last }}"
 
 - name: build image creation command for suffix-derived format
@@ -59,6 +60,7 @@
 
 - name: "create disk image at path: {{ libvirt_image.path }}"
   ansible.builtin.command: "{{ qemu_img_cmd }} {{ libvirt_image.path }} {{ libvirt_image.capacity | mandatory }}"
+  changed_when: true
 
 - name: set file permissions for disk image
   become: true
