@@ -1,2 +1,12 @@
 exclude_paths:
   - .github/
+
+warn_list:
+  - git-latest
+  - package-latest
+  - deprecated-command-syntax
+  - no-handler
+  - command-instead-of-module
+  - deprecated-local-action
+  - ignore-errors
+  - fqcn-builtins
