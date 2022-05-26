@@ -4,7 +4,8 @@
 ## ------------ ##
 
 - name: check if git is accessible via path
-  ansible.builtin.shell: command -V git
+  ansible.builtin.command: command -V git
+  changed_when: false
   ignore_errors: true
   register: git_exists
 
