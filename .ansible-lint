@@ -1,4 +1,5 @@
 exclude_paths:
+  - .git/
   - .github/
   - .ansible-lint
   - .yamllint
