@@ -5,6 +5,7 @@
 
 - name: verify host hardware supports iommu
   ansible.builtin.command: grep -E '^flags.*(svm|vmx)' /proc/cpuinfo
+  changed_when: false
 
 - name: reset any initramfs changes from prior installs
   ansible.builtin.include_tasks: initramfs_reset.yml

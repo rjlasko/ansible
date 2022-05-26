@@ -9,3 +9,4 @@
   ansible.builtin.file:
     path: ~/.hushlogin
     state: touch
+    mode: u=rw,go=r

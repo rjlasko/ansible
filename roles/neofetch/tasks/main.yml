@@ -4,11 +4,13 @@
 ## ------------------- ##
 
 - name: check if neofetch is accessible via path
-  ansible.builtin.shell: 'command -V neofetch'
+  ansible.builtin.command: command -V neofetch
+  changed_when: false
   ignore_errors: true
   register: neofetch_exists
 
-- when: >
+- name: local user installation
+  when: >
     neofetch_exists.rc != 0
     and (neofetch_install_home_bin | default(false))
   block:
@@ -24,7 +26,7 @@
       register: neofetch_in_target
 
     - name: get from github
-      when: neofetch_in_target.stat.exists == False
+      when: not neofetch_in_target.stat.exists
       ansible.builtin.get_url:
         url: https://raw.githubusercontent.com/dylanaraps/neofetch/master/neofetch
         dest: ~/bin/neofetch
@@ -32,11 +34,13 @@
         force: true
 
 - name: check if neofetch is accessible via path
-  ansible.builtin.shell: 'command -V neofetch'
+  ansible.builtin.command: command -V neofetch
+  changed_when: false
   ignore_errors: true
   register: neofetch_exists
 
-- when: neofetch_exists.rc != 0
+- name: install if not already installed
+  when: neofetch_exists.rc != 0
   block:
     - name: system install neofetch
       when: ansible_facts.system == 'Linux'

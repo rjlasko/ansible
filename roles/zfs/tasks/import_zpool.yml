@@ -7,8 +7,11 @@
 # https://github.com/ansible/ansible/pull/43690
 
 - name: get current zpools
-  ansible.builtin.shell: zpool list | awk '{print $1}' | tail -n+2
+  ansible.builtin.shell: set -o pipefail && zpool list | awk '{print $1}' | tail -n+2
+  args:
+    executable: bash
   register: initial_zpool_listing
+  changed_when: false
 
 # XXX: consider.... for any zpool previously existing, unimport, and then reimport
 

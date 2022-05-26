@@ -23,9 +23,11 @@
   block:
     - name: find smbd CONFIGFILE
       ansible.builtin.shell: smbd -b | grep CONFIGFILE | cut -d ":" -f 2 | xargs
+      changed_when: false
       register: config_file
 
-    - ansible.builtin.set_fact:
+    - name: set samba config file
+      ansible.builtin.set_fact:
         samba_config_file: "{{ config_file.stdout }}"
 
     - name: backup & restore "{{ samba_config_file }}"
@@ -67,6 +69,7 @@
 
     - name: find smbd PRIVATE_DIR
       ansible.builtin.shell: smbd -b | grep PRIVATE_DIR | cut -d ":" -f 2 | xargs
+      changed_when: false
       register: private_dir
 
     - name: restore passdb.tdb

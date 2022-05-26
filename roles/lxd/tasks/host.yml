@@ -37,7 +37,8 @@
   vars:
     lxd_path: /snap/bin/lxd
   block:
-    - ansible.builtin.stat:
+    - name: verify snap lxd installation exists
+      ansible.builtin.stat:
         path: "{{ lxd_path }}"
         get_checksum: false
       register: lxd_stat

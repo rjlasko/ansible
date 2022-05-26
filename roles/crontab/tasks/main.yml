@@ -21,6 +21,7 @@
         src: "{{ crontab.file }}"
         dest: "{{ crontab_staging_dir.path }}/cron.tab"
         force: true
+        mode: u=rw,go-rwx
 
     - name: load staged crontab file
       ansible.builtin.command: crontab "{{ crontab_staging_dir.path }}/cron.tab"

@@ -15,7 +15,8 @@
   environment:
     PATH: "{{ pipx_bin_path }}:{{ ansible_env.PATH }}"
   block:
-    - when: poetry_pip_url is defined
+    - name: handle custom mirror
+      when: poetry_pip_url is defined
       block:
         - name: set URL for custom-mirror
           ansible.builtin.command: "poetry config repositories.custom-mirror {{ poetry_pip_url }}"
@@ -38,13 +39,15 @@
       register: poetry_config_list
 
     - name: generate poetry completion script
-      command: "poetry completions {{ ansible_facts.user_shell | split('/') | last }}"
+      ansible.builtin.command: "poetry completions {{ ansible_facts.user_shell | split('/') | last }}"
+      changed_when: true
       register: poetry_completions_generator
 
     - name: "add poetry completions to shell initialization script: {{ poetry_completions_filepath }}"
-      blockinfile:
+      ansible.builtin.blockinfile:
         path: "{{ poetry_completions_filepath }}"
         create: true
         marker: "# --- {mark} poetry Completions ---"
         block: "{{ poetry_completions_generator.stdout }}"
         state: present
+        mode: u=rw,g=r,o-rwx

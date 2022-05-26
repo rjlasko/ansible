@@ -3,7 +3,8 @@
 ## Installs the packages to support SAMBA and common configurations ##
 ## ---------------------------------------------------------------- ##
 
-- become: true
+- name: install and configure NFS or SMB
+  become: true
   block:
     - name: install and configure SAMBA server
       when: net_share.samba is defined

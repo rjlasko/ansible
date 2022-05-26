@@ -1,17 +1,18 @@
 ---
-## ---------------------------------------------------------------- ##
+## ----------------------------------------------------------------- ##
 ## Installs SMART monitoring tools, and configures smartd as desired ##
-## ---------------------------------------------------------------- ##
+## ----------------------------------------------------------------- ##
 # https://www.smartmontools.org
 # https://www.lisenet.com/2014/using-smartctl-smartd-and-hddtemp-on-debian/
 # https://help.ubuntu.com/community/Smartmontools#Advanced:_Running_as_Smartmontools_as_a_Daemon
 # https://wiki.archlinux.org/index.php/S.M.A.R.T.
 
-- ansible.builtin.package:
+- name: install smartmontools
+  ansible.builtin.package:
     name: smartmontools
     state: present
 
-- name:
+- name: backup and restore smartd config
   ansible.builtin.include_role:
     name: backup_restore
   vars:
@@ -29,8 +30,12 @@
 # "-M test" - send test email for each device on SMART daemon restart
 # "-s (S/../(02|10|18|26)/./03|L/../28/./03)" - short @ 3am (2nd,10th,18th,26th of the month), long @ 3am (28th of the month)
 
-- ansible.builtin.set_fact:
-    smartd_params: "-a -d sat -S on -o off -R 190 -R 194 -R 231 -W 4,40,45 -m {{ smartmontools_email | mandatory }} -s (S/../(02|10|18|26)/./03|L/../28/./03)"
+- name: build smartd parameters for DEVICESCAN
+  ansible.builtin.set_fact:
+    smartd_params: >
+      -a -d sat -S on -o off -R 190 -R 194 -R 231 -W 4,40,45
+      -m {{ smartmontools_email | mandatory }}
+      -s (S/../(02|10|18|26)/./03|L/../28/./03)
 
 - name: common smartd scheduling
   ansible.builtin.lineinfile:
@@ -38,7 +43,6 @@
     state: present
     regexp: '^DEVICESCAN'
     line: "DEVICESCAN {{ smartd_params }}"
-    # line: "DEVICESCAN -a -d sat -S on -o off -R 190 -R 194 -R 231 -W 4,40,45 -m {{ smartmontools_email | mandatory }} -M test -s (S/../(02|10|18|26)/./03|L/../28/./03)"
 
 - name: smartd scheduling for SCSI attached ATA (sat) devices
   loop: "{{ smartd_sat_devices | default([]) }}"
@@ -51,7 +55,14 @@
     line: "{{ device_path }} {{ smartd_params }}"
 
 - name: find location of environment file
-  ansible.builtin.shell: systemctl cat smartd | grep -i EnvironmentFile | sed -n -e 's/^.*=-//p'
+  ansible.builtin.shell: >
+    set -o pipefail
+    && systemctl cat smartd
+    | grep -i EnvironmentFile
+    | sed -n -e 's/^.*=-//p'
+  args:
+    executable: bash
+  changed_when: false
   register: smartd_env_file
 
 - name: find if environment file exists

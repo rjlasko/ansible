@@ -7,7 +7,8 @@
 - name: get info on all ZFS pools
   community.general.zpool_facts:
 
-- ansible.builtin.set_fact:
+- name: set facts
+  ansible.builtin.set_fact:
     zpool_names: "{{ ansible_zfs_pools | map(attribute='name') | list }}"
     zfs_expected_zpool: "{{ zfs_target_dataset.split('/')[0] }}"
 
@@ -30,7 +31,8 @@
   ansible.builtin.set_fact:
     zfs_zpool_children: "{{ ansible_zfs_datasets | map(attribute='name') | list }}"
 
-- when: zfs_target_dataset in zfs_zpool_children
+- name: install dataset found in zpool
+  when: zfs_target_dataset in zfs_zpool_children
   block:
     # if any expected child datasets are declared, compile them
     - name: accrue expected datasets found under target

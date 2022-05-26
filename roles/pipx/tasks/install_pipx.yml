@@ -22,7 +22,8 @@
     pipx_executable: "{{ which_pipx_initial.stdout | mandatory }}"
     pipx_bin_path: "{{ where_pipx_install.stdout | mandatory }}"
 
-- when: which_pipx_initial.rc != 0
+- name: install pipx if not already installed
+  when: which_pipx_initial.rc != 0
   block:
     - name: install pipx
       community.general.homebrew:
@@ -41,6 +42,6 @@
 
 - name: ensure pipx in PATH
   when: pipx_ensurepath
-  command: pipx ensurepath
+  ansible.builtin.command: pipx ensurepath
   register: pipx_ensurepath_result
   changed_when: "{{ 'Success' in pipx_ensurepath_result.stdout }}"

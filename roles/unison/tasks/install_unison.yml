@@ -6,7 +6,8 @@
 # XXX: if we were installing to Alpine linux, we would also need the following dependencies:
 # build-time: musl-dev
 # runtime: openssh
-- ansible.builtin.package:
+- name: install required packages for building unison
+  ansible.builtin.package:
     name:
       - curl
       - gcc
@@ -14,96 +15,111 @@
       - libc6
     state: present
 
-- name: mktemp dir
-  ansible.builtin.tempfile:
-    state: directory
-    suffix: unison
-  register: work_base_dir
+- name: build and install from temp directory
+  block:
+    - name: mktemp dir
+      ansible.builtin.tempfile:
+        state: directory
+        suffix: unison
+      register: work_base_dir
 
-- ansible.builtin.set_fact:
-    work_src_dir: "{{ work_base_dir.path }}/src"
-    ocaml_minor_version: "{{ unison.versions.ocaml | regex_replace('^([0-9])\\.([0-9]*).*', '\\1.\\2') }}"
-    ocaml_install_dir: "{{ work_base_dir.path }}/ocaml"
+    - name: set source directory and versions
+      ansible.builtin.set_fact:
+        work_src_dir: "{{ work_base_dir.path }}/src"
+        ocaml_minor_version: "{{ unison.versions.ocaml | regex_replace('^([0-9])\\.([0-9]*).*', '\\1.\\2') }}"
+        ocaml_install_dir: "{{ work_base_dir.path }}/ocaml"
 
-- ansible.builtin.set_fact:
-    ocaml_extract_dir: "{{ work_src_dir }}/ocaml"
-    ocaml_src_dir: "{{ work_src_dir }}/ocaml/ocaml-{{ unison.versions.ocaml }}"
-    unison_extract_dir: "{{ work_src_dir }}/unison"
-    unison_src_dir: "{{ work_src_dir }}/unison/src"
+    - name: set source and extract directory locations
+      ansible.builtin.set_fact:
+        ocaml_extract_dir: "{{ work_src_dir }}/ocaml"
+        ocaml_src_dir: "{{ work_src_dir }}/ocaml/ocaml-{{ unison.versions.ocaml }}"
+        unison_extract_dir: "{{ work_src_dir }}/unison"
+        unison_src_dir: "{{ work_src_dir }}/unison/src"
 
-- name: create output target directories
-  loop:
-    - "{{ ocaml_extract_dir }}"
-    - "{{ unison_extract_dir }}"
-  loop_control:
-    loop_var: make_target_dir
-  ansible.builtin.file:
-    path: "{{ make_target_dir }}"
-    state: directory
+    - name: create output target directories
+      loop:
+        - "{{ ocaml_extract_dir }}"
+        - "{{ unison_extract_dir }}"
+      loop_control:
+        loop_var: make_target_dir
+      ansible.builtin.file:
+        path: "{{ make_target_dir }}"
+        state: directory
+        mode: u=rw,go-rwx
 
 #########
 # OCaml #
 #########
 
-- name: download OCaml
-  ansible.builtin.unarchive:
-    remote_src: true
-    src: "http://caml.inria.fr/pub/distrib/ocaml-{{ ocaml_minor_version }}/ocaml-{{ unison.versions.ocaml }}.tar.gz"
-    dest: "{{ ocaml_extract_dir }}"
+    - name: download OCaml
+      ansible.builtin.unarchive:
+        remote_src: true
+        src: "http://caml.inria.fr/pub/distrib/ocaml-{{ ocaml_minor_version }}/ocaml-{{ unison.versions.ocaml }}.tar.gz"
+        dest: "{{ ocaml_extract_dir }}"
 
-- name: configure OCaml build
-  ansible.builtin.command:
-    argv:
-      - ./configure
-      - "-prefix"
-      - "{{ ocaml_install_dir }}"
-      - "-with-pthread"
-      - "-no-graph"
-      - "-no-debugger"
-      - "-no-ocamldoc"
-      # XXX: GCC10 breaks compilation (in Ubuntu 20.10) without this change
-      - "-cc"
-      - "gcc -fcommon"
-  args:
-    chdir: "{{ ocaml_src_dir }}"
+    - name: configure OCaml build
+      ansible.builtin.command:
+        argv:
+          - ./configure
+          - "-prefix"
+          - "{{ ocaml_install_dir }}"
+          - "-with-pthread"
+          - "-no-graph"
+          - "-no-debugger"
+          - "-no-ocamldoc"
+          # XXX: GCC10 breaks compilation (in Ubuntu 20.10) without this change
+          - "-cc"
+          - "gcc -fcommon"
+      args:
+        chdir: "{{ ocaml_src_dir }}"
+      changed_when: true
 
-- name: make + install OCaml
-  ansible.builtin.command: make world.opt install
-  args:
-    chdir: "{{ ocaml_src_dir }}"
+    - name: make + install OCaml
+      ansible.builtin.command: make world.opt install
+      changed_when: true
+      args:
+        chdir: "{{ ocaml_src_dir }}"
 
 ##########
 # Unison #
 ##########
 
-- name: download Unison
-  ansible.builtin.unarchive:
-    remote_src: true
-    src: "http://www.seas.upenn.edu/~bcpierce/unison/download/releases/unison-{{ unison.versions.unison }}/unison-{{ unison.versions.unison }}.tar.gz"
-    dest: "{{ unison_extract_dir }}"
+    - name: download Unison
+      ansible.builtin.unarchive:
+        remote_src: true
+        src: "http://www.seas.upenn.edu/~bcpierce/unison/download/releases/unison-{{ unison.versions.unison }}/unison-{{ unison.versions.unison }}.tar.gz"
+        dest: "{{ unison_extract_dir }}"
 
 # XXX: if we were installing to Alpine Linux, we would want to consider the following:
 # Unison's build process was not designed with musl libc in mind. As a result, when it searches
 # for the header files that indicate support for 'inotify', it does not see them where expected.
 # By overwritting the source, we can force it to believe it is supported by musl libc. (it is!)
-#sed -i -e 's/GLIBC_SUPPORT_INOTIFY 0/GLIBC_SUPPORT_INOTIFY 1/' fsmonitor/linux/inotify_stubs.c
-#make UISTYLE=text THREADS=true STATIC=true
+#   sed -i -e 's/GLIBC_SUPPORT_INOTIFY 0/GLIBC_SUPPORT_INOTIFY 1/' fsmonitor/linux/inotify_stubs.c
+#   make UISTYLE=text THREADS=true STATIC=true
 
-- name: make + install Unison
-  ansible.builtin.command: make UISTYLE=text THREADS=true
-  args:
-    chdir: "{{ unison_src_dir }}"
-  environment:
-    PATH: "{{ ocaml_install_dir }}/bin:{{ ansible_env.PATH }}"
+    - name: make + install Unison
+      ansible.builtin.command: make UISTYLE=text THREADS=true
+      changed_when: true
+      args:
+        chdir: "{{ unison_src_dir }}"
+      environment:
+        PATH: "{{ ocaml_install_dir }}/bin:{{ ansible_env.PATH }}"
 
 ##################
 # Install Unison #
 ##################
 
-- ansible.builtin.copy:
-    remote_src: true
-    src: "{{ unison_src_dir }}/unison"
-    dest: "/usr/local/bin/"
-    owner: root
-    mode: a=rx
-    force: true
+    - name: install unison for all users
+      ansible.builtin.copy:
+        remote_src: true
+        src: "{{ unison_src_dir }}/unison"
+        dest: "/usr/local/bin/"
+        owner: root
+        mode: a=rx
+        force: true
+
+  always:
+    - name: remove tempdir
+      ansible.builtin.file:
+        path: "{{ work_base_dir.path }}"
+        state: absent

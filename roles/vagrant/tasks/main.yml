@@ -20,7 +20,7 @@
       vars:
         global_env_vars:
           # https://www.vagrantup.com/docs/other/environmental-variables.html#vagrant_home
-          - [ 'VAGRANT_HOME', "{{ vagrant.home }}" ]
+          - ["VAGRANT_HOME", "{{ vagrant.home }}"]
 
     - name: define VAGRANT_DEFAULT_PROVIDER in all environments
       when: vagrant.provider is defined
@@ -29,4 +29,4 @@
       vars:
         global_env_vars:
           # https://github.com/vagrant-libvirt/vagrant-libvirt/blob/master/README.md#start-vm
-          - [ 'VAGRANT_DEFAULT_PROVIDER', "{{ vagrant.provider }}" ]
+          - ["VAGRANT_DEFAULT_PROVIDER", "{{ vagrant.provider }}"]

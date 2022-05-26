@@ -11,7 +11,7 @@
     state: unloaded
   ignore_errors: true
 
-- name: "delete preexisting files created by this role"
+- name: delete preexisting files created by this role
   with_items:
     - "{{ aws_creds.gimme_creds_login_config_path }}"
     - "{{ aws_creds.aws_creds_path }}"
@@ -20,7 +20,8 @@
     path: "{{ item }}"
     state: absent
 
-- block:
+- name: install awscli and included components
+  block:
     - name: create temp directory to store download
       ansible.builtin.tempfile:
         state: directory
@@ -31,24 +32,26 @@
         url: "https://awscli.amazonaws.com/AWSCLIV2.pkg"
         dest: "{{ awscli_tempdir.path }}/awscli.pkg"
         mode: u=rwx,go-rwx
-        force: yes
+        force: true
 
     - name: install AWS CLI
       become: true
       ansible.builtin.command: "installer -pkg {{ awscli_tempdir.path }}/awscli.pkg -target /"
+      changed_when: true
 
     - name: find aws_completer
-      command: command -v aws_completer
+      ansible.builtin.command: command -v aws_completer
       changed_when: false
       register: aws_completer_filepath
 
     - name: "add aws completion to shell initialization script: {{ aws_completions_filepath }}"
-      blockinfile:
+      ansible.builtin.blockinfile:
         path: "{{ aws_completions_filepath }}"
         create: true
         marker: "# --- {mark} AWS Completions ---"
         block: "complete -C '{{ aws_completer_filepath.stdout }}' aws"
         state: present
+        mode: u=rw,go=r
 
   always:
     - name: delete temporary directory

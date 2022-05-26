@@ -12,7 +12,7 @@
         state: present
 
     - name: define expected bash completion paths
-      set_fact:
+      ansible.builtin.set_fact:
         bash_completion_filepath: /usr/share/bash-completion/bash_completion
         bash_completions_dir: /usr/share/bash-completion/completions
 
@@ -53,7 +53,7 @@
         state: present
       register: bash_4_2plus_completion_install
 
-    - name:
+    - name: check version of Bash is supported
       when: >
         (bash_3_2_completion_install.skipped | default(false))
         and
@@ -62,7 +62,7 @@
         msg: "Unsupported Bash version: {{ bash_version.stdout }}"
 
     - name: define expected bash completion paths
-      set_fact:
+      ansible.builtin.set_fact:
         bash_completion_filepath: /usr/local/etc/bash_completion
         bash_completions_dir: /usr/local/etc/bash_completion.d
 

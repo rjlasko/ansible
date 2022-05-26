@@ -44,6 +44,7 @@
 
         - name: find location of ras-mc-ctl
           ansible.builtin.command: which ras-mc-ctl
+          changed_when: false
           register: ras_mc_ctl_path
 
         - name: backup & restore ras-mc-ctl executable

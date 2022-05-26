@@ -49,6 +49,7 @@
 
     - name: get the user's public key
       ansible.builtin.command: "cat {{ find_pubkey_result.files[0].path }}"
+      changed_when: false
       register: user_pubkey
 
     - name: set user's SSH key as authorized

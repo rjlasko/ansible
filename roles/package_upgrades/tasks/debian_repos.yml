@@ -4,7 +4,18 @@
 ## ----------------------------------------------------------- ##
 
 - name: find selected mirror
-  ansible.builtin.shell: "grep {{ ansible_facts['distribution_release'] }} /etc/apt/sources.list | grep -ve '^#' | grep -v security | sort | head -n1 | cut -d' ' -f2 | sed s#http#https#g"
+  ansible.builtin.shell: >
+    set -o pipefail
+    && grep {{ ansible_facts['distribution_release'] }} /etc/apt/sources.list
+    | grep -ve '^#'
+    | grep -v security
+    | sort
+    | head -n1
+    | cut -d' ' -f2
+    | sed s#http#https#g
+  args:
+    executable: bash
+  changed_when: false
   register: mirror_url
 
 - name: install Debian repos
@@ -17,7 +28,7 @@
   ansible.builtin.apt_repository:
     repo: "{{ item }}"
     state: present
-    update_cache: yes
+    update_cache: true
 
 - name: install Debian backports repo
   when: package_upgrades.backports is defined and package_upgrades.backports
@@ -27,13 +38,23 @@
   ansible.builtin.apt_repository:
     repo: "{{ item }}"
     state: present
-    update_cache: yes
+    update_cache: true
 
 - name: security updates
   when: package_upgrades.security is defined and package_upgrades.security
   block:
     - name: find selected mirror
-      ansible.builtin.shell: "grep {{ ansible_facts['distribution_release'] }} /etc/apt/sources.list | grep -ve '^#' | grep security | sort | head -n1 | cut -d' ' -f2"
+      ansible.builtin.shell: >
+        set -o pipefail
+        && grep {{ ansible_facts['distribution_release'] }} /etc/apt/sources.list
+        | grep -ve '^#'
+        | grep security
+        | sort
+        | head -n1
+        | cut -d' ' -f2
+      args:
+        executable: bash
+      changed_when: false
       register: security_mirror_url
 
     - name: update Debian security repo
@@ -43,4 +64,4 @@
       ansible.builtin.apt_repository:
         repo: "{{ item }}"
         state: present
-        update_cache: yes
+        update_cache: true

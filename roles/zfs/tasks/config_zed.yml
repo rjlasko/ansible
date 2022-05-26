@@ -5,7 +5,8 @@
 
 # https://wiki.archlinux.org/index.php/ZFS#Monitoring_/_Mailing_on_Events
 
-- ansible.builtin.set_fact:
+- name: set zed config file fact
+  ansible.builtin.set_fact:
     zed_rc_path: /etc/zfs/zed.d/zed.rc
 
 - name: "backup & restore {{ zed_rc_path }}"

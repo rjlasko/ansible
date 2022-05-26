@@ -9,7 +9,16 @@
     state: present
 
 - name: detect nvidia recommended driver packages
-  ansible.builtin.shell: nvidia-detect | awk '/recommended to install/{getline; print}' | awk '{$1=$1};1' | sort | uniq
+  ansible.builtin.shell: >
+    set -o pipefail
+    && nvidia-detect
+    | awk '/recommended to install/{getline; print}'
+    | awk '{$1=$1};1'
+    | sort
+    | uniq
+  args:
+    executable: bash
+  changed_when: false
   register: nvidia_driver_list
 
 - name: install nvidia recommended drivers

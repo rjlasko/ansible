@@ -17,3 +17,4 @@
 
 - name: update initramfs with new kernel boot parameters
   ansible.builtin.command: update-initramfs -u
+  changed_when: true

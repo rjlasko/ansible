@@ -3,12 +3,16 @@
 ## Build + install Unison, then setup users ##
 ## ---------------------------------------- ##
 
-- ansible.builtin.command: which unison
+- name: detect if unison installed
+  ansible.builtin.command: which unison
+  changed_when: false
   ignore_errors: true
   register: detected_filepath
 
-- ansible.builtin.command: unison -version
+- name: detect version
+  ansible.builtin.command: unison -version
   ignore_errors: true
+  changed_when: false
   register: detected_version
 
 - name: install Unison if missing or wrong version

@@ -5,12 +5,21 @@
 
 - name: shutdown UPS driver
   ansible.builtin.command: upsdrvctl stop
+  changed_when: true
   ignore_errors: true
 
-- shell: nut-scanner -q | grep -v 'product ' | grep -v 'vendor '
+- name: scan for UPS devices and drivers
+  ansible.builtin.shell: >
+    set -o pipefail
+    && nut-scanner -q
+    | grep -v 'product '
+    | grep -v 'vendor '
+  args:
+    executable: bash
+  changed_when: false
   register: nut_scan_results
 
-#- name: "backup & restore {{ nut_config_path }}/ups.conf"
+# - name: "backup & restore {{ nut_config_path }}/ups.conf"
 #  ansible.builtin.include_role:
 #    name: backup_restore
 #  vars:
@@ -35,6 +44,7 @@
 
 - name: restart UPS driver
   ansible.builtin.command: upsdrvctl start
+  changed_when: true
 
 - name: upsd.conf
   ansible.builtin.template:
@@ -52,7 +62,7 @@
     group: nut
     mode: u=rw,g=r,o-rwx
 
-#- name: restart nut-driver
+# - name: restart nut-driver
 #  ansible.builtin.service:
 #    name: nut-driver
 #    state: restarted
@@ -66,7 +76,7 @@
   ansible.builtin.service:
     name: nut-server
     state: restarted
-    enabled: yes
+    enabled: true
   register: nut_server_service
   until: nut_server_service.status.ActiveState == "active"
   retries: 15
@@ -74,12 +84,14 @@
 
 - name: find assigned device names
   ansible.builtin.command: upsc -l
+  changed_when: false
   register: nut_server_devices
   failed_when: >
     (nut_server_devices.rc != 0)
     or
     (nut_server_devices.stdout_lines | length != 1)
 
-- when: nut.mode == "standalone"
+- name: standalone mode monitors itself
+  when: nut.mode == "standalone"
   ansible.builtin.set_fact:
     nut_monitor_name: "{{ nut_server_devices.stdout }}"

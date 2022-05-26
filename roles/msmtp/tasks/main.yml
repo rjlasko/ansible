@@ -7,7 +7,8 @@
 
 #
 - name: check if 'mailx' is accessible via path
-  ansible.builtin.shell: 'type mailx'
+  ansible.builtin.command: command -V mailx
+  changed_when: false
   ignore_errors: true
   register: mailx_exists
 
@@ -18,7 +19,8 @@
     name: mailutils
     state: present
 
-- ansible.builtin.package:
+- name: install msmtp & associated packages
+  ansible.builtin.package:
     name: "{{ msmtp_packages }}"
     state: present
   vars:
@@ -34,7 +36,7 @@
     owner: root
     group: mail
     mode: u=r,g=r,o-rwx
-    force: yes
+    force: true
 
 - name: detect if /etc/aliases exists
   ansible.builtin.stat:
@@ -49,7 +51,7 @@
     line: "aliases /etc/aliases"
 
 - name: update config if /etc/aliases exists
-  when: aliases_exists.stat.exists == False
+  when: not aliases_exists.stat.exists
   ansible.builtin.lineinfile:
     dest: /etc/msmtprc
     regexp: "^.*aliases"

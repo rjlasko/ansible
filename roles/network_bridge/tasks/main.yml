@@ -6,10 +6,18 @@
 
 - name: find best (default) physical interface to respond to wake on lan
   when: not network_bridge.device is defined
-  ansible.builtin.shell: find /sys/class/net -type l -not -lname '*virtual*' -exec basename {} \; | sort | head -n1
+  ansible.builtin.shell: >
+    set -o pipefail
+    && find /sys/class/net -type l -not -lname '*virtual*' -exec basename {} \;
+    | sort
+    | head -n1
+  args:
+    executable: bash
+  changed_when: false
   register: default_network_device
 
-- ansible.builtin.set_fact:
+- name: set device to build bridge on top of
+  ansible.builtin.set_fact:
     network_bridge_device: "{{ network_bridge.device | default(default_network_device.stdout) }}"
 
 - name: "configure {{ network_bridge.name | mandatory }} as bridge using device {{ network_bridge_device }}"
@@ -53,5 +61,6 @@
         # which appears to include lxc+libvirt devices.
         bridge_mac: "{{ ansible_facts[network_bridge_device].macaddress }}"
 
-    - ansible.builtin.reboot:
+    - name: reboot with bridge network enabled
+      ansible.builtin.reboot:
         reboot_timeout: 120

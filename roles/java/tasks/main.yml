@@ -55,9 +55,10 @@
   changed_when: true
 
 - name: "add jenv init to shell initialization script: {{ java_jenv_init_file }}"
-  blockinfile:
+  ansible.builtin.blockinfile:
     path: "{{ java_jenv_init_file }}"
     create: true
     marker: "# --- {mark} jenv Completions ---"
     block: 'eval "$(jenv init -)"'
     state: present
+    mode: u=rw,go=r

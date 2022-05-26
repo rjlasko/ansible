@@ -38,7 +38,7 @@
   changed_when: true
 
 - name: "add pyenv shims & init to shell initialization script: {{ python_pyenv_init_file }}"
-  blockinfile:
+  ansible.builtin.blockinfile:
     path: "{{ python_pyenv_init_file }}"
     create: true
     marker: "# --- {mark} pyenv Shims + Completions ---"
@@ -46,3 +46,4 @@
       if ! $(echo "$PATH" | tr ":" "\n" | grep -qx "$(pyenv root)/shims") ; then PATH=$(pyenv root)/shims:$PATH ; fi
       eval "$(pyenv init -)"
     state: present
+    mode: u=rw,g=r,o-rwx

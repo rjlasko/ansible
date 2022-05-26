@@ -25,8 +25,11 @@
   ansible.builtin.include_tasks: install_zfs.yml
 
 - name: get zfs kernel module info
-  ansible.builtin.shell: modinfo zfs | grep -v parm
+  ansible.builtin.shell: set -o pipefail && modinfo zfs | grep -v parm
+  args:
+    executable: bash
   register: zfs_module_info
+  changed_when: false
 
 - name: module info
   ansible.builtin.debug: msg="{{ zfs_module_info.stdout_lines }}"
@@ -60,6 +63,7 @@
 - name: list all zfs datasets
   ansible.builtin.command: zfs list
   register: zfs_dataset_listing
+  changed_when: false
 
 - name: show ZFS datasets
   ansible.builtin.debug:

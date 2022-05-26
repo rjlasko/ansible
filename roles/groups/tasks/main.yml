@@ -3,7 +3,8 @@
 ## Creates or updates a group and its GID ##
 ## -------------------------------------- ##
 
-- loop: "{{ user_groups | dict2items }}"
+- name: create user group
+  loop: "{{ user_groups | dict2items }}"
   ansible.builtin.group:
     name: "{{ item.key | mandatory }}"
     gid: "{{ item.value | mandatory }}"

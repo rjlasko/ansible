@@ -20,6 +20,7 @@
         dest: "{{ envsubst_tempfile.path }}"
         remote_src: "{{ envsubst.remote_src | default(omit) }}"
         src: "{{ envsubst.src | default(omit) }}"
+        mode: "{{ envsubst.mode | default('u=rw,g=r,o-rwx') }}"
 
     - name: envsubst the file to final destination
       ansible.builtin.shell: "envsubst < {{ envsubst_tempfile.path }} > {{ envsubst.dest | mandatory }}"

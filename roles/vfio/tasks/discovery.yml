@@ -6,6 +6,7 @@
 - name: get PCI bus IDs for all device names
   ansible.builtin.command: lspci -q
   register: vfio_pci_devices
+  changed_when: false
 
 - name: discover VFIO devices by name
   with_nested:

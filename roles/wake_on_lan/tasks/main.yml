@@ -17,7 +17,14 @@
     state: present
 
 - name: find best (default) physical interface to respond to wake on lan
-  ansible.builtin.shell: find /sys/class/net -type l -not -lname '*virtual*' -exec basename {} \; | sort | head -n1
+  ansible.builtin.shell: >
+    set -o pipefail
+    && find /sys/class/net -type l -not -lname '*virtual*' -exec basename {} \;
+    | sort
+    | head -n1
+  args:
+    executable: bash
+  changed_when: false
   register: default_device
 
 - name: choose WoL device

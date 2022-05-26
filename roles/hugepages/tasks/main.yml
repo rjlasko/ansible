@@ -12,7 +12,14 @@
 
 
 - name: get current huge page size
-  ansible.builtin.shell: grep Hugepagesize /proc/meminfo | cut -d ":" -f 2 | xargs
+  ansible.builtin.shell: >
+    set -o pipefail
+    && grep Hugepagesize /proc/meminfo
+    | cut -d ":" -f 2
+    | xargs
+  args:
+    executable: bash
+  changed_when: false
   register: hugepagesize_shell
 
 # TODO: currently does not change the hugepage size
@@ -32,7 +39,8 @@
   when: hugepages.group is defined
   block:
     # TODO: not yet needed, so implementation not tested
-    - ansible.builtin.fail:
+    - name: not fully implemented, def not tested!
+      ansible.builtin.fail:
         msg: implementation not complete
 
     - name: calculate mem for user-locking
@@ -42,6 +50,7 @@
 
     - name: get the GID for the given group name
       ansible.builtin.command: id {{ hugepages.group }} -g
+      changed_when: false
       register: hugepages_gid
 
     # XXX: https://wiki.debian.org/Hugepages#Hugepage_enabled_applications
@@ -85,7 +94,7 @@
 
 # XXX: http://vfiogaming.blogspot.com/2017/08/guide-how-to-enable-huge-pages-to.html
 - name: disable transparent huge pages
-  when: (hugepages.transparent | default(false)) == false
+  when: not (hugepages.transparent | default(false))
   ansible.builtin.copy:
     src: "{{ role_path }}/files/disable-thp.service"
     dest: /etc/systemd/system/disable-thp.service
@@ -94,7 +103,7 @@
     mode: u=rw,g=r,o=r
 
 - name: enable transparent huge pages
-  when: (hugepages.transparent | default(false)) == true
+  when: hugepages.transparent | default(false)
   ansible.builtin.file:
     path: /etc/systemd/system/disable-thp.service
     state: absent
@@ -105,11 +114,12 @@
     daemon_reload: true
 
 - name: enable and start disable-thp service
-  when: (hugepages.transparent | default(false)) == false
+  when: not (hugepages.transparent | default(false))
   ansible.builtin.systemd:
     name: disable-thp
     enabled: true
     state: restarted
 
-- ansible.builtin.reboot:
+- name: reboot to activate hugepages
+  ansible.builtin.reboot:
     reboot_timeout: 600

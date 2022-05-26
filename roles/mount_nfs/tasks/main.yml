@@ -12,10 +12,11 @@
   block:
     - name: find pre-existing NFS mounts
       ansible.builtin.shell: cat /etc/fstab | grep ' nfs ' | awk '{print $2}'
-      register: preexisting_NFS_mounts
+      changed_when: false
+      register: preexisting_nfs_mounts
 
     - name: remove NFS mounts
-      loop: "{{ preexisting_NFS_mounts.stdout_lines }}"
+      loop: "{{ preexisting_nfs_mounts.stdout_lines }}"
       loop_control:
         loop_var: old_mount
       ansible.posix.mount:

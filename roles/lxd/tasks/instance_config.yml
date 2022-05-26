@@ -69,7 +69,8 @@
         database: group
 
     # the raw.idmap needs to have its ids appear in ascending order
-    - when: lxd.instance.host_idmap.both is defined
+    - name: handle combined idmaps
+      when: lxd.instance.host_idmap.both is defined
       block:
         - name: get UID from username
           loop: "{{ lxd.instance.host_idmap.both }}"
@@ -85,7 +86,8 @@
           ansible.builtin.set_fact:
             lxd_raw_idmap: "{{ lxd_raw_idmap | default([]) + [ 'both ' + lxd_host_id | string + ' ' + lxd_host_id | string ] }}"
 
-    - when: lxd.instance.host_idmap.users is defined
+    - name: handle user idmaps
+      when: lxd.instance.host_idmap.users is defined
       block:
         - name: uid mapping
           loop: "{{ lxd.instance.host_idmap.users }}"
@@ -101,7 +103,8 @@
           ansible.builtin.set_fact:
             lxd_raw_idmap: "{{ lxd_raw_idmap | default([]) + [ 'uid ' + lxd_host_id | string + ' ' + lxd_host_id | string ] }}"
 
-    - when: lxd.instance.host_idmap.groups is defined
+    - name: handle group idmaps
+      when: lxd.instance.host_idmap.groups is defined
       block:
         - name: gid mapping
           loop: "{{ lxd.instance.host_idmap.groups }}"

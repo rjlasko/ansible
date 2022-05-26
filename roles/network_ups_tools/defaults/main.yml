@@ -35,7 +35,12 @@ nut_upsmon_conf:
   FINALDELAY: 60
   HOSTSYNC: 15
   MINSUPPLIES: 1
-  MONITOR: "{{ nut_monitor_name | mandatory }} 1 {{ nut.user | mandatory }} {{ nut_upsd_users[nut.user].password | mandatory }} {{ nut_monitor_mode | mandatory }}"
+  MONITOR: >
+    {{ nut_monitor_name | mandatory }}
+    1
+    {{ nut.user | mandatory }}
+    {{ nut_upsd_users[nut.user].password | mandatory }}
+    {{ nut_monitor_mode | mandatory }}
   NOCOMMWARNTIME: 300
   NOTIFYCMD: '"/etc/nut/notify.sh"'
   NOTIFYMSG: []

@@ -18,7 +18,8 @@
 
 
 ### backup & restore from configurations
-- ansible.builtin.set_fact:
+- name: set configuration facts
+  ansible.builtin.set_fact:
     xrdp_ini_path: /etc/xrdp/xrdp.ini
     xwrapper_cfg_path: /etc/X11/Xwrapper.config
 
@@ -41,7 +42,8 @@
 # XXX: 'man sesman.ini', as in /etc/xrdp/sesman.ini
 # TODO: Generate certificate /etc/xrdp/{cert,key}.pem if you don't want to use the self-signed certificate
 
-- when: xrdp.headless | default(true) == false
+- name: configure for non-headless operation
+  when: not (xrdp.headless | default(true))
   block:
     # see: https://github.com/neutrinolabs/xrdp/issues/218
     - name: disable $HOME/thinclient_drives

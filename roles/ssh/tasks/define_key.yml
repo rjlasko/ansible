@@ -21,6 +21,7 @@
 
 - name: get username (in case of using 'su')
   ansible.builtin.command: whoami
+  changed_when: false
   register: whoami_result
 
 - name: define key with common parameters

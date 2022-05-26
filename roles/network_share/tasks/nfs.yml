@@ -36,11 +36,13 @@
 
     - name: turn off cleared NFS exports
       ansible.builtin.command: "exportfs -r"
+      changed_when: true
 
 - name: remove pre-existing bind mounts in NFS root (/srv/nfs)
   block:
     - name: find pre-existing bind mounts in NFS root (/srv/nfs)
       ansible.builtin.shell: cat /etc/fstab | grep '/srv/nfs' | awk '{print $2}'
+      changed_when: false
       register: preexisting_bind_mounts
 
     - name: remove bind mounts in NFS root (/srv/nfs)
@@ -54,9 +56,11 @@
     # XXX: note that we just unmounted everything here defined in /etc/fstab
     - name: clear out all mount points
       ansible.builtin.command: find /srv/nfs -mindepth 1 -type d -empty -delete
+      changed_when: true
 
     - name: fail if leftovers in NFS root (/srv/nfs)
       ansible.builtin.command: find /srv/nfs -mindepth 1
+      changed_when: false
       register: nfs_root_leftovers
       failed_when: nfs_root_leftovers.stdout != ""
 
@@ -68,8 +72,9 @@
         loop_var: nfs_share
       ansible.builtin.include_tasks: nfs_share.yml
 
-    - name: export udpated NFS shares
+    - name: export updated NFS shares
       ansible.builtin.command: "exportfs -r"
+      changed_when: true
 
 - name: restart NFS service
   ansible.builtin.service:

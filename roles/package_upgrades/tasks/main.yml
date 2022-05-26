@@ -20,3 +20,10 @@
   community.general.pacman:
     update_cache: true
     upgrade: true
+
+
+# TODO: add section for MacOS / Homebrew
+# add general update
+# add general purge of unused dependencies
+# - name: cleanup unused build dependencies
+#   ansible.builtin.command: brew autoremove

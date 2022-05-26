@@ -4,11 +4,13 @@
 ## ---------------------------- ##
 
 - name: check if nano is accessible via path
-  ansible.builtin.shell: 'command -V vim'
+  ansible.builtin.command: 'command -V vim'
+  changed_when: false
   ignore_errors: true
   register: vim_exists
 
-- when: nano_exists.rc != 0
+- name: install vim
+  when: vim_exists.rc != 0
   block:
     - name: system install vim
       when: ansible_facts.system == 'Linux'
@@ -29,6 +31,7 @@
 
 - name: find (sudo-ing) user's group
   ansible.builtin.command: "id -gn {{ ansible_user }}"
+  changed_when: false
   register: vim_user_group_name
 
 - name: apply nano settings file

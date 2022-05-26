@@ -11,7 +11,8 @@
     pattern: "zfs"
   register: zfs_detect_modules
 
-- when: (zfs_detect_modules.files | length) == 0
+- name: install zfs as dynamic kernel module
+  when: (zfs_detect_modules.files | length) == 0
   block:
     - name: validate distribution support for DKMS installation
       when: ansible_facts['distribution'] not in zfs_dkms_plus_dependencies

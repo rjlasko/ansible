@@ -3,7 +3,8 @@
 ## Set the hostname ##
 ## ---------------- ##
 
-- ansible.builtin.set_fact:
+- name: declare hostname facts
+  ansible.builtin.set_fact:
     hostname:
       new: "{{ hostname.new | default(inventory_hostname) }}"
       old: "{{ ansible_hostname }}"

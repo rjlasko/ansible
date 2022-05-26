@@ -15,12 +15,14 @@
 # passed through to a VM guest.
 - name: create Xorg configuration file (which enables multiple gpus)
   ansible.builtin.command: Xorg -configure
+  changed_when: true
 
 - name: copy Xorg config to expected location
   ansible.builtin.copy:
     remote_src: true
     src: /root/xorg.conf.new
     dest: /etc/X11/xorg.conf
+    mode: preserve
 
 - name: cleanup generated xorg config
   ansible.builtin.file:

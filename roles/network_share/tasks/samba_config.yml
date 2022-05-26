@@ -13,3 +13,4 @@
     option: "{{ samba_config_option[0] }}"
     value: "{{ samba_config_option[1] }}"
     no_extra_spaces: false
+    mode: u=rw,go=r
