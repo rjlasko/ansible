@@ -69,14 +69,14 @@
       ansible.builtin.lineinfile:
         dest: /etc/security/limits.conf
         state: present
-        regexp: # FIXME
+        # regexp: # FIXME
         line: "@{{ hugepages.group }} soft memlock {{ (total_hugepages_kb + lock_limit_buffer_kb) }}"
 
     - name: set hard limit
       ansible.builtin.lineinfile:
         dest: /etc/security/limits.conf
         state: present
-        regexp: # FIXME
+        # regexp: # FIXME
         line: "@{{ hugepages.group }} hard memlock {{ (total_hugepages_kb + lock_limit_buffer_kb) }}"
 
 # It is required that the total hugepage size to reserve is specified

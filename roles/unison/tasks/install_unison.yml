@@ -47,9 +47,9 @@
         state: directory
         mode: u=rw,go-rwx
 
-#########
-# OCaml #
-#########
+    #########
+    # OCaml #
+    #########
 
     - name: download OCaml
       ansible.builtin.unarchive:
@@ -80,9 +80,9 @@
       args:
         chdir: "{{ ocaml_src_dir }}"
 
-##########
-# Unison #
-##########
+    ##########
+    # Unison #
+    ##########
 
     - name: download Unison
       ansible.builtin.unarchive:
@@ -90,12 +90,12 @@
         src: "http://www.seas.upenn.edu/~bcpierce/unison/download/releases/unison-{{ unison.versions.unison }}/unison-{{ unison.versions.unison }}.tar.gz"
         dest: "{{ unison_extract_dir }}"
 
-# XXX: if we were installing to Alpine Linux, we would want to consider the following:
-# Unison's build process was not designed with musl libc in mind. As a result, when it searches
-# for the header files that indicate support for 'inotify', it does not see them where expected.
-# By overwritting the source, we can force it to believe it is supported by musl libc. (it is!)
-#   sed -i -e 's/GLIBC_SUPPORT_INOTIFY 0/GLIBC_SUPPORT_INOTIFY 1/' fsmonitor/linux/inotify_stubs.c
-#   make UISTYLE=text THREADS=true STATIC=true
+    # XXX: if we were installing to Alpine Linux, we would want to consider the following:
+    # Unison's build process was not designed with musl libc in mind. As a result, when it searches
+    # for the header files that indicate support for 'inotify', it does not see them where expected.
+    # By overwritting the source, we can force it to believe it is supported by musl libc. (it is!)
+    #   sed -i -e 's/GLIBC_SUPPORT_INOTIFY 0/GLIBC_SUPPORT_INOTIFY 1/' fsmonitor/linux/inotify_stubs.c
+    #   make UISTYLE=text THREADS=true STATIC=true
 
     - name: make + install Unison
       ansible.builtin.command: make UISTYLE=text THREADS=true
@@ -105,9 +105,9 @@
       environment:
         PATH: "{{ ocaml_install_dir }}/bin:{{ ansible_env.PATH }}"
 
-##################
-# Install Unison #
-##################
+    ##################
+    # Install Unison #
+    ##################
 
     - name: install unison for all users
       ansible.builtin.copy:

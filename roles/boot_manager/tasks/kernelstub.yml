@@ -61,7 +61,7 @@
   ansible.builtin.command: "kernelstub --delete-options \"{{ param }}{{ ('=' + option_map[param] | string) if option_map[param] else '' }}\""
 
 - name: add new or changed kernel options
-#  loop: "{{ vfio_arch_cmdline[ansible_facts.processor[1]] | combine(vfio.cmdline_extra | default({})) | dict2items }}"
+  # loop: "{{ vfio_arch_cmdline[ansible_facts.processor[1]] | combine(vfio.cmdline_extra | default({})) | dict2items }}"
   loop: "{{ boot_manager.cmdline.present | default({}) | dict2items }}"
   loop_control:
     loop_var: param

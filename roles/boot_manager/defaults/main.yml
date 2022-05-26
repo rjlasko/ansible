@@ -1,3 +1,4 @@
+---
 grub_filepath: /etc/default/grub
 kernelstub_cfgpath: /etc/kernelstub/configuration
 kernelstub_cfg_backup: /etc/default/kernelstub.configuration.BAK

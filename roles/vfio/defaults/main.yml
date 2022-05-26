@@ -1,3 +1,4 @@
+---
 vfio_dynamic_gpu_scripts:
   - src: host-nosleep@.service
     dest: /etc/systemd/system/host-nosleep@.service

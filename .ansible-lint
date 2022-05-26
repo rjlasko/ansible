@@ -1,5 +1,7 @@
 exclude_paths:
   - .github/
+  - .ansible-lint
+  - .yamllint
 
 warn_list:
   - git-latest

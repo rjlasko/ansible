@@ -1,3 +1,4 @@
+---
 aws_creds:
   aws_creds_path: "{{ ansible_facts.user_dir }}/.aws/credentials"
   aws_cfg_path: "{{ ansible_facts.user_dir }}/.aws/config"

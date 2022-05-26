@@ -1,3 +1,4 @@
+---
 vimrc_settings:
   - syntax on
   - set noswapfile
