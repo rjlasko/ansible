@@ -4,7 +4,7 @@
 ## ------------------- ##
 
 - name: check if neofetch is accessible via path
-  ansible.builtin.command: command -V neofetch
+  ansible.builtin.shell: command -V neofetch
   changed_when: false
   ignore_errors: true
   register: neofetch_exists
@@ -34,7 +34,7 @@
         force: true
 
 - name: check if neofetch is accessible via path
-  ansible.builtin.command: command -V neofetch
+  ansible.builtin.shell: command -V neofetch
   changed_when: false
   ignore_errors: true
   register: neofetch_exists

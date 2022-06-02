@@ -7,7 +7,7 @@
 
 #
 - name: check if 'mailx' is accessible via path
-  ansible.builtin.command: command -V mailx
+  ansible.builtin.shell: command -V mailx
   changed_when: false
   ignore_errors: true
   register: mailx_exists
