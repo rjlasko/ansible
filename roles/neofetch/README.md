@@ -14,7 +14,8 @@ Installs `neofetch` to the host, and facilitates per-user configuration.
 All the following variables are optional.  If none are specified, this role will simply try to install `git`. If `git` is found in the `PATH`, installation will be skipped.
 
 ```yaml
-neofetch_install_home_bin: # boolean, installs to ~/bin instead of system package
+neofetch_install_home_bin: # boolean, default: false, installs to ~/bin instead of system package
+neofetch_configs: # list of 2-element lists, configs to update in neofetch config file
 ```
 
 ## Dependencies
@@ -29,6 +30,9 @@ None
     - role: neofetch
       vars:
         neofetch_install_home_bin: true
+        neofetch_configs:
+          - ['color_blocks', '"off"']
+
 ```
 
 ## License

@@ -16,20 +16,20 @@
   block:
     - name: bin directory must exist
       ansible.builtin.file:
-        path: ~/bin
+        path: "{{ ansible_user_dir }}/bin"
         state: directory
         mode: u=rwx
 
     - name: check if neofetch is where we will want to put it
       ansible.builtin.stat:
-        path: ~/bin/neofetch
+        path: "{{ ansible_user_dir }}/bin/neofetch"
       register: neofetch_in_target
 
     - name: get from github
       when: not neofetch_in_target.stat.exists
       ansible.builtin.get_url:
         url: https://raw.githubusercontent.com/dylanaraps/neofetch/master/neofetch
-        dest: ~/bin/neofetch
+        dest: "{{ ansible_user_dir }}/bin/neofetch"
         mode: u=rx
         force: true
 
@@ -55,12 +55,12 @@
         state: present
 
 - name: delete preexisting neofetch configuration
-  when: neofetch_config_path is not defined
   file:
     path: "{{ ansible_user_dir }}/.config/neofetch/config.conf"
     state: absent
 
 - name: test command and autogenerate config
+  become: false
   command: neofetch
 
 - name: update configuration
@@ -68,7 +68,7 @@
   loop_control:
     loop_var: neofetch_config
   community.general.ini_file:
-    path: "{{ neofetch_config_path | default( ansible_user_dir + '/.config/neofetch/config.conf' ) }}"
+    path: "{{ ansible_user_dir }}/.config/neofetch/config.conf"
     create: false
     no_extra_spaces: true
     option: "{{ neofetch_config[0] }}"

@@ -24,7 +24,7 @@
         name: nano
         state: present
 
-- name: clear ~/.nanorc
+- name: "clear {{ ansible_user_dir }}/.nanorc"
   ansible.builtin.file:
     path: "{{ ansible_user_dir }}/.nanorc"
     state: absent
