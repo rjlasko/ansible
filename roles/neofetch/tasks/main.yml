@@ -53,3 +53,24 @@
       community.general.homebrew:
         name: neofetch
         state: present
+
+- name: delete preexisting neofetch configuration
+  when: neofetch_config_path is not defined
+  file:
+    path: "{{ ansible_user_dir }}/.config/neofetch/config.conf"
+    state: absent
+
+- name: test command and autogenerate config
+  command: neofetch
+
+- name: update configuration
+  loop: "{{ neofetch_configs | default([]) }}"
+  loop_control:
+    loop_var: neofetch_config
+  community.general.ini_file:
+    path: "{{ neofetch_config_path | default( ansible_user_dir + '/.config/neofetch/config.conf' ) }}"
+    create: false
+    no_extra_spaces: true
+    option: "{{ neofetch_config[0] }}"
+    value: "{{ neofetch_config[1] }}"
+    section: null
