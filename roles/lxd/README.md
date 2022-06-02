@@ -147,4 +147,3 @@ MIT
 * Enhance support for `qemu` virtual machines
 * Virtual machine feature parity with `libvirt` role
 * Run, backup, snapshot, restore to/from ZFS
-	* --> update ZFS trim & FSTrim roles

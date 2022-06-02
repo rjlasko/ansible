@@ -1,10 +1,11 @@
 ---
 ## ------------------------------------------------- ##
-## enables fstrim for devices mounted via /etc/fstab ##
+## Enables fstrim for devices mounted via /etc/fstab ##
 ## ------------------------------------------------- ##
 
+# Note: does not include ZFS pools & volumes because they are not listed in /etc/fstab
+
 - name: enable fstrim.timer for mounts defined in /etc/fstab
-  # XXX: ZFS pools & volumes are safe because they are not found in /etc/fstab
   ansible.builtin.service:
     name: fstrim.timer
     enabled: true
