@@ -40,7 +40,7 @@
       changed_when: true
 
     - name: find aws_completer
-      ansible.builtin.command: command -v aws_completer
+      ansible.builtin.shell: command -v aws_completer
       changed_when: false
       register: aws_completer_filepath
 
