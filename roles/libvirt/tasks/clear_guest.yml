@@ -35,12 +35,13 @@
     | awk '{print $1}'
   args:
     executable: bash
+  failed_when: false
   changed_when: false
   register: libvirt_existing_vols
 
 # FIXME: for some reason, sometimes this doesn't delete everything
 - name: Delete old VM volumes
-  when: libvirt_existing_vols.stdout_lines | length > 0
+  when: (libvirt_existing_vols.rc == 0) and (libvirt_existing_vols.stdout_lines | length > 0)
   loop: "{{ libvirt_existing_vols.stdout_lines }}"
   loop_control:
     loop_var: libvirt_del_vol

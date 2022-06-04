@@ -46,6 +46,7 @@
     | awk '{print $2}'
   args:
     executable: bash
+  failed_when: false
   changed_when: false
   register: libvirt_existing_vols
 
