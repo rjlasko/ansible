@@ -27,7 +27,8 @@
 
     - name: shutdown VM
       community.libvirt.virt:
-        # FIXME: consider using ACPI to shutdown the guest cleanly
+        # XXX: Windows guests need to have the VirtIO Guest Tools installed
+        # Linux guests should shutdown cleanly without any special attention
         command: shutdown
         name: "{{ libvirt.vm.name }}"
 
