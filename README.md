@@ -25,6 +25,7 @@
 - `rjlasko.ansible.simple_disk`
 - `rjlasko.ansible.tmpreaper`
 - [`rjlasko.ansible.zfs`](https://github.com/rjlasko/ansible/blob/master/roles/zfs/README.md)
+- [`rjlasko.ansible.fio`](https://github.com/rjlasko/ansible/blob/master/roles/fio/README.md)
 
 #### Networking
 - `rjlasko.ansible.mount_nfs`

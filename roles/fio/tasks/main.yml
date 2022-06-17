@@ -1,0 +1,73 @@
+---
+## ------------------------------------ ##
+## Installs Flexible I/O Tester (`fio`) ##
+## ------------------------------------ ##
+
+- name: determine if fio is already installed
+  ansible.builtin.command: fio --version
+  failed_when: false
+  register: fio_version_detect
+
+- name: query for latest version of fio
+  ansible.builtin.shell: >
+    set -o pipefail
+    && git ls-remote --exit-code --tags http://git.kernel.dk/fio.git
+    | cut -d'/' -f3
+    | grep -E '^fio-([0-9]+)\.([0-9]+)\.?([0-9]*)$'
+    | awk '{print $1 " " $1}'
+    | sed 's#^[a-z\-]*##g'
+    | sort --version-sort -k 1
+    | tail -n1
+    | awk '{print $2}'
+    | sed 's:.*/::'
+  args:
+    executable: bash
+  changed_when: false
+  register: fio_latest_version
+
+- name: install fio
+  vars:
+    fio_version_installed: "{{ fio_version_detect.stdout | default('none') }}"
+  when: >
+    fio_version_installed == 'none'
+    or (fio_version is defined and fio_version != fio_version_installed)
+    or (fio_version is not defined and fio_version_installed != fio_latest_version.stdout)
+  block:
+    - name: create temp directory to store download
+      ansible.builtin.tempfile:
+        state: directory
+      register: fio_tempdir
+
+    - name: clone fio repository
+      vars:
+        desired_fio_version: "{{ fio_version | default(fio_latest_version.stdout) }}"
+      ansible.builtin.git:
+        repo: "http://git.kernel.dk/fio.git"
+        dest: "{{ fio_tempdir.path }}"
+        version: "{{ desired_fio_version }}"
+
+    - name: install packages required to build fio
+      ansible.builtin.package:
+        name: build-essential
+        state: present
+
+    - name: configure fio installation
+      ansible.builtin.command: ./configure
+      args:
+        chdir: "{{ fio_tempdir.path }}"
+
+    - name: build fio binary
+      ansible.builtin.command: make
+      args:
+        chdir: "{{ fio_tempdir.path }}"
+
+    - name: install fio to system
+      ansible.builtin.command: make install
+      args:
+        chdir: "{{ fio_tempdir.path }}"
+
+  always:
+    - name: delete temporary directory
+      ansible.builtin.file:
+        path: "{{ fio_tempdir.path }}"
+        state: absent
