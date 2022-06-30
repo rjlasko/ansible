@@ -1,0 +1,31 @@
+---
+## ------------------------------------------ ##
+## Perform simple disk partition/format/mount ##
+## ------------------------------------------ ##
+
+- name: install required packages
+  ansible.builtin.include_tasks: install_dependencies.yml
+
+- name: dismount disks being updated or rebuilt
+  loop: "{{ simple_storage | mandatory }}"
+  loop_control:
+    loop_var: simple_disk
+  ansible.builtin.include_tasks: dismount_disk_partitions.yml
+
+- name: update ansible_facts for mounts
+  ansible.builtin.setup:
+    gather_subset:
+      - mounts
+
+# rebuild + mount after all potential conflicts have been cleared from declared devices
+
+- name: setup disks
+  loop: "{{ simple_storage | mandatory }}"
+  loop_control:
+    loop_var: simple_disk
+  ansible.builtin.include_tasks: build_disk.yml
+
+- name: update ansible_facts for mounts
+  ansible.builtin.setup:
+    gather_subset:
+      - mounts

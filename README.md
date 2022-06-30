@@ -22,7 +22,7 @@
 
 #### Storage & Backup
 - `rjlasko.ansible.fstrim`
-- `rjlasko.ansible.simple_disk`
+- [`rjlasko.ansible.simple_storage`](https://github.com/rjlasko/ansible/blob/master/roles/simple_storage/README.md)
 - `rjlasko.ansible.tmpreaper`
 - [`rjlasko.ansible.zfs`](https://github.com/rjlasko/ansible/blob/master/roles/zfs/README.md)
 - [`rjlasko.ansible.fio`](https://github.com/rjlasko/ansible/blob/master/roles/fio/README.md)

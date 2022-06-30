@@ -1,0 +1,69 @@
+---
+## -------------------------------------------------------------- ##
+## Identifies if a device needs to have its partitions dismounted ##
+## -------------------------------------------------------------- ##
+
+- when: simple_disk.rebuild | default(false)
+  block:
+    - name: "identify all partition UUIDs needing full rebuild in device: {{ simple_disk.disk_id }}"
+      loop: "{{ ansible_facts.device_links.ids | dict2items }}"
+      loop_control:
+        loop_var: device_link_id
+      when: simple_disk.disk_id in device_link_id.value
+      ansible.builtin.set_fact:
+        selected_partition_uuids: "{{
+          ((selected_partition_uuids | default([])) + ansible_facts.devices[device_link_id.key].partitions)
+            | dict2items
+            | map(attribute='value')
+            | map(attribute='uuid') }}"
+
+    - name: get mountpoints of all partitions
+      set_fact:
+        dismount_paths: "{{ simple_disk.partitions | selectattr('mount', 'defined') | map(attribute='mount') }}"
+
+- when: >
+    not (simple_disk.rebuild | default(false))
+    and
+    (simple_disk.partitions | selectattr('format', 'defined') | map(attribute='format') is any)
+  block:
+    - name: build partition ID to UUID map
+      with_items:
+        - "{{ ansible_facts.devices | dict2items | map(attribute='value') | map(attribute='partitions') | combine | dict2items }}"
+      ansible.builtin.set_fact:
+        partition_id_uuid_map: "{{ partition_id_uuid_map | default({}) | combine({ item.value.links.ids[0]: item.value.uuid }) }}"
+
+    - name: get partitions UUIDs and mountpoints to format
+      loop: "{{ simple_disk.partitions }}"
+      loop_control:
+        loop_var: simple_disk_partition
+        index_var: simple_disk_partition_ix
+      when: simple_disk_partition.format | default(false)
+      vars:
+        # this is the common convention, which is also adhered to when this role creates partitions
+        selected_partition_id: "{{ simple_disk.disk_id }}-part{{ simple_disk_partition_ix + 1 }}"
+      ansible.builtin.set_fact:
+        dismount_paths: "{{ dismount_paths | default([]) + [simple_disk_partition.mount] }}"
+        selected_partition_uuids: "{{ selected_partition_uuids | default([]) + [partition_id_uuid_map[selected_partition_id]] }}"
+
+
+- name: identify all mounts by UUID
+  with_items:
+    - "{{ ansible_facts.mounts }}"
+  ansible.builtin.set_fact:
+    mounts_by_uuid: "{{ mounts_by_uuid | default({}) | combine({ item.uuid: item }) }}"
+
+- name: find all mountpoints via partitions UUIDs, and add to declared mountpoints
+  loop: "{{ selected_partition_uuids | default([]) }}"
+  loop_control:
+    loop_var: selected_partition_uuid
+  when: selected_partition_uuid in mounts_by_uuid
+  ansible.builtin.set_fact:
+    dismount_paths: "{{ dismount_paths | default([]) + [ mounts_by_uuid[selected_partition_uuid].mount ] | sort | unique | list }}"
+
+- name: dismount any mountpoint tied to a partition being rebuilt or formatted
+  loop: "{{ dismount_paths | default([]) }}"
+  loop_control:
+    loop_var: dismount_path
+  ansible.posix.mount:
+    path: "{{ dismount_path }}"
+    state: absent
