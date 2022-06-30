@@ -3,12 +3,6 @@
 ## Clones a Git repository ##
 ## ----------------------- ##
 
-- name: create user space directory
-  ansible.builtin.file:
-    state: directory
-    path: "{{ git_clone.dest | dirname | mandatory }}"
-    mode: u=rw,go-rwx
-
 - name: clone the repo
   ansible.builtin.git:
     repo: "{{ git_clone.src | mandatory }}"
