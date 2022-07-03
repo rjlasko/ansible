@@ -25,7 +25,7 @@
       simple_disk_partition.format | default(false)
     )
   community.general.filesystem:
-    dev: "{{ simple_disk_device_path }}-part{{ simple_disk_partition_index + 1 }}"
+    dev: "{{ simple_disk_partition_path }}"
     fstype: "{{ simple_disk_partition.fstype }}"
     force: true
 

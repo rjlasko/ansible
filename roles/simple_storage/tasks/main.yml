@@ -7,25 +7,21 @@
   ansible.builtin.include_tasks: install_dependencies.yml
 
 - name: dismount disks being updated or rebuilt
-  loop: "{{ simple_storage | mandatory }}"
-  loop_control:
-    loop_var: simple_disk
   ansible.builtin.include_tasks: dismount_disk_partitions.yml
 
-- name: update ansible_facts for mounts
+- name: update ansible_facts
   ansible.builtin.setup:
     gather_subset:
       - mounts
 
-# rebuild + mount after all potential conflicts have been cleared from declared devices
-
-- name: setup disks
+- name: rebuild + mount after all potential conflicts have been cleared from declared devices
   loop: "{{ simple_storage | mandatory }}"
   loop_control:
     loop_var: simple_disk
   ansible.builtin.include_tasks: build_disk.yml
 
-- name: update ansible_facts for mounts
+- name: update ansible_facts
   ansible.builtin.setup:
     gather_subset:
       - mounts
+      - devices

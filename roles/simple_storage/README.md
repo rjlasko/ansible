@@ -15,15 +15,14 @@ Performs the following operations, for filesystems that live on a single partiti
 #### Settable Variables
 
 ```yaml
-simple_storage:
-  - disk_id: ata-Samsung_SSD_850_EVO_250GB_S21NNXBGA26614A
-    rebuild: true
-    partitions:
-      - mount: /mnt/myNewFilesystem
-        fstype: ext4
-        state: mounted # one of [dismounted, mounted]
-        format: true
-      # TODO - another
+simple_storage: # list
+  - disk_id: # string following format of files under /dev/disk/by-id
+    rebuild: # boolean, optional, default: false
+    partitions: # list
+      - mount: # path in filesystem to mount to
+        fstype: # type of filesystem
+        state: # one of [dismounted, mounted]
+        format: # boolean, optional, default: false
 ```
 
 ## Dependencies
@@ -37,10 +36,10 @@ None
     - role: simple_disk
       vars:
         simple_disks:
-          - dev: ata-Samsung_SSD_850_EVO_250GB_S21NNXBGA26614A
-            # rebuild: true
+          - dev: ata-Samsung_SSD_850_EVO_250GB_ABCDEFGHIJKLMNOPQRSTUVWXYZ
+            rebuild: true
             partitions:
-              - mount: "{{ managed_folders.virt.path }}"
+              - mount: /mnt/evo850
                 fstype: ext4
 ```
 

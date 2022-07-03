@@ -9,19 +9,23 @@
     simple_storage_fstypes: "{{
       simple_storage
       | selectattr('partitions', 'defined') | map(attribute='partitions')
+      | flatten
       | selectattr('fstype', 'defined') | map(attribute='fstype')
       | unique }}"
     # rebuilding means wiping out all preexisting partitions on a given device or pool of devices
-    simple_storage_repartitions: >
-      {{ simple_storage | selectattr('rebuild', 'defined') | map(attribute='rebuild') | unique | list }}
+    simple_storage_repartitions: "{{
+      simple_storage
+      | selectattr('rebuild', 'defined')
+      | map(attribute='rebuild')
+      | unique }}"
 
 - name: install support for XFS
-  when: "xfs" in simple_storage_fstypes
+  when: "'xfs' in simple_storage_fstypes"
   ansible.builtin.package:
     name: xfsprogs
 
 - name: install support for btrfs
-  when: "btrfs" in simple_storage_fstypes
+  when: "'btrfs' in simple_storage_fstypes"
   ansible.builtin.package:
     name: btrfs-progs
 
