@@ -7,11 +7,12 @@
   ansible.builtin.set_fact:
     # fstypes can be indicated only on partitions
     simple_storage_fstypes: "{{
-      simple_storage
-      | selectattr('partitions', 'defined') | map(attribute='partitions')
-      | flatten
-      | selectattr('fstype', 'defined') | map(attribute='fstype')
-      | unique }}"
+      ((simple_storage
+        | selectattr('partitions', 'defined') | map(attribute='partitions')
+        | flatten
+        | selectattr('fstype', 'defined') | map(attribute='fstype'))
+      + (simple_storage | selectattr('fstype', 'defined') | map(attribute='fstype'))
+      ) | unique }}"
     # rebuilding means wiping out all preexisting partitions on a given device or pool of devices
     simple_storage_repartitions: "{{
       simple_storage

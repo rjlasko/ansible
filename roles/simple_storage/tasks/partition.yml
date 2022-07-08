@@ -46,4 +46,5 @@
     src: "{{ simple_disk_partition_path }}"
     path: "{{ simple_disk_partition.mount }}"
     fstype: "{{ simple_disk_partition.fstype }}"
-    state: mounted
+    state: "{{ simple_disk.state | default('mounted') }}"
+    opts: "{{ simple_disk_partition.opts | default(omit) }}"

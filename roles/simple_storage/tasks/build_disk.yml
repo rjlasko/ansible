@@ -6,7 +6,7 @@
 # XXX: for simplicity, the following operations use the by-id path of the given device
 - name: set fs path for disk device
   ansible.builtin.set_fact:
-    simple_disk_device_path: "/dev/disk/by-id/{{ simple_disk.disk_id }}"
+    simple_disk_device_path: "/dev/disk/by-id/{{ simple_disk.disk_id | mandatory }}"
 
 - name: "Remove all partitions from device: {{ simple_disk_device_path }}"
   when: simple_disk.rebuild | default(false)

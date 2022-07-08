@@ -1,0 +1,12 @@
+---
+## ----------------------------------------- ##
+## Mount filesystem identified only by label ##
+## ----------------------------------------- ##
+
+- name: "Mount filesystem by label: {{ simple_disk.label }} to {{ simple_disk.mount }}"
+  ansible.posix.mount:
+    src: "LABEL={{ simple_disk.label }}"
+    path: "{{ simple_disk.mount }}"
+    fstype: "{{ simple_disk.fstype }}"
+    state: "{{ simple_disk.state | default('mounted') }}"
+    opts: "{{ simple_disk.opts | default('omit') }}"

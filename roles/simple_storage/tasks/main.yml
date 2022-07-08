@@ -18,7 +18,18 @@
   loop: "{{ simple_storage | mandatory }}"
   loop_control:
     loop_var: simple_disk
+  when: simple_disk.disk_id is defined or simple_disk.partitions is defined
   ansible.builtin.include_tasks: build_disk.yml
+
+- name: mount filesystems identified solely by a label
+  loop: "{{ simple_storage | mandatory }}"
+  loop_control:
+    loop_var: simple_disk
+  when: >
+    (simple_disk.label is defined)
+    and (simple_disk.disk_id is not defined)
+    and (simple_disk.partitions is not defined)
+  ansible.builtin.include_tasks: mount_labeled_filesys.yml
 
 - name: update ansible_facts
   ansible.builtin.setup:
