@@ -22,11 +22,12 @@
   loop:
     - "deb {{ mirror_url.stdout }} {{ ansible_facts['distribution_release'] }} main contrib non-free"
     - "deb-src {{ mirror_url.stdout }} {{ ansible_facts['distribution_release'] }} main contrib non-free"
-
     - "deb {{ mirror_url.stdout }} {{ ansible_facts['distribution_release'] }}-updates main contrib non-free"
     - "deb-src {{ mirror_url.stdout }} {{ ansible_facts['distribution_release'] }}-updates main contrib non-free"
+  loop_control:
+    loop_var: deb_repo
   ansible.builtin.apt_repository:
-    repo: "{{ item }}"
+    repo: "{{ deb_repo }}"
     state: present
     update_cache: true
 
@@ -35,8 +36,10 @@
   loop:
     - "deb {{ mirror_url.stdout }} {{ ansible_facts['distribution_release'] }}-backports main contrib non-free"
     - "deb-src {{ mirror_url.stdout }} {{ ansible_facts['distribution_release'] }}-backports main contrib non-free"
+  loop_control:
+    loop_var: deb_repo
   ansible.builtin.apt_repository:
-    repo: "{{ item }}"
+    repo: "{{ deb_repo }}"
     state: present
     update_cache: true
 
