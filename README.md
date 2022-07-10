@@ -56,13 +56,13 @@
 - `rjlasko.ansible.global_environment`
 - `rjlasko.ansible.hostname`
 - `rjlasko.ansible.nvidia`
-- `rjlasko.ansible.package_upgrades`
+- [`rjlasko.ansible.package_upgrades`]((https://github.com/rjlasko/ansible/blob/master/roles/package_upgrades/README.md))
 - [`rjlasko.ansible.pipx`](https://github.com/rjlasko/ansible/blob/master/roles/pipx/README.md)
-- `rjlasko.ansible.timezone`
+- [`rjlasko.ansible.timezone`]((https://github.com/rjlasko/ansible/blob/master/roles/timezone/README.md))
 
 #### User Management
 - [`rjlasko.ansible.hush_login`](https://github.com/rjlasko/ansible/blob/master/roles/hush_login/README.md)
-- `rjlasko.ansible.initial_login`
+- [`rjlasko.ansible.initial_login`]((https://github.com/rjlasko/ansible/blob/master/roles/initial_login/README.md))
 - `rjlasko.ansible.groups`
 - [`rjlasko.ansible.shell_hooks`](https://github.com/rjlasko/ansible/blob/master/roles/shell_hooks/README.md)
 - [`rjlasko.ansible.sudo`](https://github.com/rjlasko/ansible/blob/master/roles/sudo/README.md)
