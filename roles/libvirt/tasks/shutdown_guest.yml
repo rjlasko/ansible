@@ -20,7 +20,7 @@
 - name: shutdown from running state
   when: libvirt_vm_status.status == 'running'
   block:
-    - name: Pause for manual indication if specified
+    - name: "Hit [enter] to initiate shutdown of guest: {{ libvirt.vm.name }}"
       when: libvirt.vm.check_manual | default(false)
       ansible.builtin.pause:
         prompt: "Continue when ready for shutdown"
