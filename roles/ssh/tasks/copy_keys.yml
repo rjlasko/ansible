@@ -20,7 +20,7 @@
 - name: handle private key
   when: ssh_key_def.source.private is defined
   ansible.builtin.copy:
-    src: "{{ ssh_key_def.source.private }}"
+    src: "{{ ssh_key_def.source.private.path }}"
     dest: "~/.ssh/{{ ssh_key_name }}"
     mode: u=rw,go-rwx
     decrypt: "{{ ssh_key_def.decrypt | default(omit) }}"
