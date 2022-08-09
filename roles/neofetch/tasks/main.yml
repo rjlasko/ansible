@@ -20,13 +20,12 @@
         state: directory
         mode: u=rwx
 
-    - name: check if neofetch is where we will want to put it
-      ansible.builtin.stat:
+    - name: remove neofetch exe for replacement
+      ansible.builtin.file:
         path: "{{ ansible_user_dir }}/bin/neofetch"
-      register: neofetch_in_target
+        state: absent
 
     - name: get from github
-      when: not neofetch_in_target.stat.exists
       ansible.builtin.get_url:
         url: https://raw.githubusercontent.com/dylanaraps/neofetch/master/neofetch
         dest: "{{ ansible_user_dir }}/bin/neofetch"
@@ -35,6 +34,8 @@
 
 - name: check if neofetch is accessible via path
   ansible.builtin.shell: command -V neofetch
+  environment:
+    PATH: "{{ ansible_user_dir }}/bin:{{ ansible_env.PATH }}"
   changed_when: false
   ignore_errors: true
   register: neofetch_exists
@@ -62,6 +63,8 @@
 - name: test command and autogenerate config
   become: false
   command: neofetch
+  environment:
+    PATH: "{{ ansible_user_dir }}/bin:{{ ansible_env.PATH }}"
 
 - name: update configuration
   loop: "{{ neofetch_configs | default([]) }}"
