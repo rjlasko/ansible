@@ -31,7 +31,9 @@
 
 - name: find nanorc includes
   ansible.builtin.find:
-    paths: /usr/local
+    paths:
+      - /usr/local/Cellar/nano
+      - /usr/share/nano
     recurse: true
     patterns: "*.nanorc"
   register: nanorc_includes
