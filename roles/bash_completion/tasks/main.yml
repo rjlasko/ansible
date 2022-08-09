@@ -7,6 +7,7 @@
   when: ansible_facts.system == 'Linux'
   block:
     - name: install bash-completion
+      when: bash_completion_install | default(true)
       ansible.builtin.package:
         name: bash-completion
         state: present
@@ -41,13 +42,18 @@
         bash_version.stdout is version('3.2.0', 'ge', version_type='semver')
         and
         bash_version.stdout is version('3.3.0', 'lt', version_type='semver')
+        and
+        bash_completion_install | default(true)
       community.general.homebrew:
         name: bash-completion
         state: present
       register: bash_3_2_completion_install
 
     - name: install bash-completion for Bash 4.2+
-      when: bash_version.stdout is version('4.2.0', 'ge', version_type='semver')
+      when: >
+        bash_version.stdout is version('4.2.0', 'ge', version_type='semver')
+        and
+        bash_completion_install | default(true)
       community.general.homebrew:
         name: bash-completion@2
         state: present

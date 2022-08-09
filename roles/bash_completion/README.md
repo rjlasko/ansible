@@ -13,6 +13,7 @@ Installs the `bash-completion` shell utility, to enhance shell usability.
 
 #### Declared Variables
 ```yaml
+bash_completion_install: # boolean, default(true), installs system package
 bash_completion_filepath: # OS specific path to load bash completions
 bash_completions_dir: # OS specific path for command completions
 ```
