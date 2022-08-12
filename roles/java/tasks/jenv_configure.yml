@@ -1,0 +1,28 @@
+---
+## -------------------------- ##
+## Installs & configures jenv ##
+## -------------------------- ##
+
+- when: ansible_facts.system == 'Darwin'
+  block:
+    - name: create jenv config directory
+      ansible.builtin.file:
+        path: "{{ jenv_root.stdout }}"
+        state: directory
+        mode: u=rwX,g=rX,o-rwx
+
+- name: register installed Java versions with jenv
+  environment:
+    PATH: "{{ java_jenv_user_bin }}:{{ ansible_env.PATH }}"
+  loop: "{{ java_homes }}"
+  loop_control:
+    loop_var: java_home
+  ansible.builtin.shell: "jenv add {{ java_home }}"
+  register: jenv_add_jversion
+  changed_when: "'added' in jenv_add_jversion.stdout"
+
+- name: set global Java versions
+  ansible.builtin.command: "jenv global {{ java_global_versions }}"
+  environment:
+    PATH: "{{ java_jenv_user_bin }}:{{ ansible_env.PATH }}"
+  changed_when: true
