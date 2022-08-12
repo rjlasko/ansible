@@ -8,7 +8,12 @@
 # backup/replace original .bash_profile & .bashrc
 # drop in custom .bash_profile & .bashrc (which point to original)
 
-# needs support for interactive & non-interactive hooks
+- name: set shell_hooks facts
+  set_fact:
+    shell_hooks_login: "{{ shell_hooks_directory }}/login"
+    shell_hooks_startup: "{{ shell_hooks_directory }}/startup"
+    shell_hooks_interactive: "{{ shell_hooks_directory }}/interactive"
+    shell_hooks_resource: "{{ shell_hooks_directory }}/resource"
 
 - name: backup & restore original shell files
   loop: "{{ shell_hooks_files }}"
@@ -21,7 +26,7 @@
     br_suffix: ORIG
 
 - name: delete shell-hooks directories
-  when: shell_hooks_reset | default(false)
+  when: shell_hooks_reset
   loop: "{{ shell_hooks_directories }}"
   loop_control:
     loop_var: shell_hooks_dir

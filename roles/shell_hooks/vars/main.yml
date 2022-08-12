@@ -1,9 +1,5 @@
 ---
 shell_hooks_directory: "{{ ansible_user_dir }}/.shell_hooks"
-shell_hooks_login: "{{ shell_hooks_directory }}/login"
-shell_hooks_startup: "{{ shell_hooks_directory }}/startup"
-shell_hooks_interactive: "{{ shell_hooks_directory }}/interactive"
-shell_hooks_resource: "{{ shell_hooks_directory }}/resource"
 shell_hooks_directories:
   - "{{ shell_hooks_directory }}"
   - "{{ shell_hooks_login }}"
@@ -17,3 +13,4 @@ shell_hooks_files:
     dest: "{{ shell_hooks_bashrc }}"
   - src: bash_profile.sh.j2
     dest: "{{ shell_hooks_bash_profile }}"
+shell_hooks_reset: false

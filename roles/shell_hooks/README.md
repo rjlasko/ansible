@@ -10,8 +10,16 @@ Installs a hook system to generically manage login, interactive and non-interact
 
 #### Settable Variables
 ```yaml
-shell_hooks_directory: # location to install shell hooks, default ~/.shell_hooks
-shell_hooks_reset: # boolean, deletes the ~/.shell_hooks directory when true
+shell_hooks_directory: # default('~/.shell_hooks'), location to install shell hooks
+shell_hooks_reset: # boolean, default(false), deletes the ~/.shell_hooks directory when true
+```
+
+#### Declared Facts
+```yaml
+shell_hooks_login: "{{ shell_hooks_directory }}/login"
+shell_hooks_startup: "{{ shell_hooks_directory }}/startup"
+shell_hooks_interactive: "{{ shell_hooks_directory }}/interactive"
+shell_hooks_resource: "{{ shell_hooks_directory }}/resource"
 ```
 
 ## Dependencies
