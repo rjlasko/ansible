@@ -6,44 +6,13 @@
 # XXX: great tutorial see https://wilsonmar.github.io/pyenv/
 
 - name: install pyenv
-  community.general.homebrew:
-    name: pyenv
-    state: present
+  ansible.builtin.include_tasks: pyenv_install.yml
 
-- name: get pyenv root
-  ansible.builtin.command: pyenv root
-  changed_when: false
-  register: pyenv_root
-
-- name: delete pre-existing pyenv config and python installations
-  when: python_reset_pyenv
-  ansible.builtin.file:
-    path: "{{ pyenv_root.stdout }}"
-    state: absent
-
-- name: find previously installed Python versions
-  ansible.builtin.command: pyenv versions --bare
-  changed_when: false
-  register: python_versions_installed
-
-- name: install Python versions via pyenv
-  loop: "{{ python_pyenv_versions }}"
-  loop_control:
-    loop_var: python_version
-  when: python_version not in python_versions_installed.stdout_lines
-  ansible.builtin.shell: "pyenv install {{ python_version }} && pyenv rehash"
+- name: build/install/manage python versions with pyenv
+  ansible.builtin.include_tasks: python_build.yml
 
 - name: set global Python versions
+  environment:
+    PATH: "{{ python_pyenv_user_bin }}:{{ ansible_env.PATH }}"
   ansible.builtin.command: "pyenv global {{ python_global_versions }}"
   changed_when: true
-
-- name: "add pyenv shims & init to shell initialization script: {{ python_pyenv_init_file }}"
-  ansible.builtin.blockinfile:
-    path: "{{ python_pyenv_init_file }}"
-    create: true
-    marker: "# --- {mark} pyenv Shims + Completions ---"
-    block: |
-      if ! $(echo "$PATH" | tr ":" "\n" | grep -qx "$(pyenv root)/shims") ; then PATH=$(pyenv root)/shims:$PATH ; fi
-      eval "$(pyenv init -)"
-    state: present
-    mode: u=rw,g=r,o-rwx

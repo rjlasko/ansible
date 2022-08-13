@@ -4,4 +4,35 @@ python_pyenv_versions:
   - 2.7.18
   - 3.9.11
 python_global_versions: "{{ python_pyenv_versions | join(' ') }}"
+
 python_pyenv_init_file: "{{ ansible_user_dir }}/.bashrc"
+python_pyenv_user_dir: "{{ ansible_user_dir }}/.pyenv"
+python_pyenv_user_bin: "{{ python_pyenv_user_dir }}/bin"
+
+python_system_install_dependencies: true
+python_build_packages:
+  Debian:
+    - make
+    - build-essential
+    - libssl-dev
+    - zlib1g-dev
+    - libbz2-dev
+    - libreadline-dev
+    - libsqlite3-dev
+    - wget
+    - curl
+    - llvm
+    - libncursesw5-dev
+    - xz-utils
+    - tk-dev
+    - libxml2-dev
+    - libxmlsec1-dev
+    - libffi-dev
+    - liblzma-dev
+  Darwin:
+    - openssl
+    - readline
+    - sqlite3
+    - xz
+    - zlib
+    - tcl-tk
