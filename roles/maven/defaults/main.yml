@@ -1,2 +1,5 @@
 ---
-maven_settings_filepath: ~/.m2/settings.xml
+maven_installation: home
+maven_version: ''
+maven_reset: false
+maven_completions_filepath: "{{ bash_completions_dir | mandatory }}/maven"

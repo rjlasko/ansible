@@ -1,0 +1,55 @@
+---
+## -------------------------- ##
+## Installs Maven completions ##
+## -------------------------- ##
+
+- when: ansible_facts.system == 'Darwin' and maven_installation == "system"
+  name: install maven completions (MacOS)
+  community.general.homebrew:
+    name: maven-completion
+    state: present
+
+- when: maven_installation == "home" or ansible_facts.system == 'Linux'
+  block:
+    - name: create temp directory to store clone
+      ansible.builtin.tempfile:
+        state: directory
+      register: maven_completion_tempdir
+
+    - name: clone maven-bash-completion repository
+      ansible.builtin.git:
+        repo: https://github.com/juven/maven-bash-completion.git
+        dest: "{{ maven_completion_tempdir.path }}"
+
+    - name: find cloned maven completion executable
+      find:
+        path: "{{ maven_completion_tempdir.path }}"
+        pattern: bash_completion.bash
+        recurse: true
+      register: mvn_completion_search
+      failed_when: mvn_completion_search.files | length != 1
+
+    - name: "copy maven completion script to {{ maven_completions_filepath }}"
+      become: "{{ ansible_facts.system == 'Linux' and maven_installation == 'system' }}"
+      copy:
+        remote_src: true
+        src: "{{ mvn_completion_search.files[0].path }}"
+        dest: "{{ maven_completions_filepath }}"
+        mode: u=rw,go=r
+
+  always:
+    - name: delete temporary directory
+      ansible.builtin.file:
+        path: "{{ maven_completion_tempdir.path }}"
+        state: absent
+
+# XXX: this will intentionally fail if the user does not supply a writable `maven_completions_filepath`
+- when: "{{ maven_installation == 'home' and ansible_facts.system == 'Linux' }}"
+  ansible.builtin.blockinfile:
+    path: "{{ maven_init_file }}"
+    create: true
+    insertafter: ".*maven\ aliases"
+    marker: "# --- {mark} maven completions ---"
+    block: ". {{ maven_completions_filepath }}"
+    state: present
+    mode: u=rw,go=r

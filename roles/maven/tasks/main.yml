@@ -4,17 +4,21 @@
 ## ----------------------------- ##
 
 - name: install maven
-  community.general.homebrew:
-    name: maven
-    state: present
-    # avoids installing openjdk (which may break)
-    # XXX: requires version of Java already installed
-    install_options: ignore-dependencies
+  ansible.builtin.include_tasks: maven_install.yml
 
-- name: create maven directory
-  ansible.builtin.file:
-    state: directory
+- name: install maven-completion
+  ansible.builtin.include_tasks: maven_completion_install.yml
+
+- name: delete maven settings and local repository
+  when: maven_reset
+  file:
     path: "{{ maven_settings_filepath | dirname }}"
+    state: absent
+
+- name: create maven configuration directory
+  ansible.builtin.file:
+    path: "{{ maven_settings_filepath | dirname }}"
+    state: directory
     mode: u=rwX,go-rwx
 
 - name: install maven settings
@@ -23,8 +27,3 @@
     src: settings.mirror.xml.j2
     dest: "{{ maven_settings_filepath }}"
     mode: u=rw,go-rwx
-
-- name: install maven completions
-  community.general.homebrew:
-    name: maven-completion
-    state: present

@@ -1,0 +1,138 @@
+---
+## -------------- ##
+## Installs Maven ##
+## -------------- ##
+
+- when: maven_installation == "system"
+  block:
+    - when: ansible_facts.system == 'Darwin'
+      block:
+        - name: install maven (MacOS)
+          community.general.homebrew:
+            name: maven
+            state: present
+            # avoids installing openjdk (which may break)
+            # XXX: requires version of Java already installed
+            install_options: ignore-dependencies
+
+    - when: ansible_facts.system == 'Linux'
+      block:
+        - name: "install maven ({{ ansible_facts.os_family }} Linux)"
+          become: true
+          ansible.builtin.package:
+            name: maven
+            state: present
+
+- when: maven_installation == 'home'
+  block:
+    - name: create temp directory to store download
+      ansible.builtin.tempfile:
+        state: directory
+      register: maven_tempdir
+
+    # get the latest officially released version of maven
+    # must strictly follow maven-1.2.3 or maven-1.2, no extra prefix or suffix allowed
+    - name: query for latest officially released maven version
+      when: maven_version | length == 0
+      ansible.builtin.shell: >
+        set -o pipefail
+        && git ls-remote --exit-code --tags https://github.com/apache/maven.git
+        | cut -d'/' -f3
+        | grep -E '^maven-([0-9]+)\.([0-9]+)\.?([0-9]*)$'
+        | awk '{print $1 " " $1}'
+        | sed 's#^[a-z\-]*##g'
+        | sort --version-sort -k 1
+        | tail -n1
+        | awk '{print $1}'
+        | sed 's:.*/::'
+      args:
+        executable: bash
+      changed_when: false
+      register: maven_repo_version
+
+    - vars:
+        maven_target_version: "{{ maven_version if maven_version | length > 0 else maven_repo_version.stdout }}"
+      set_fact:
+        maven_bin_url: "{{ maven_url_prefix }}/{{ maven_target_version }}/binaries/apache-maven-{{ maven_target_version }}-bin.tar.gz"
+
+    - name: get checksum
+      uri:
+        url: "{{ maven_bin_url }}.sha512"
+        return_content: true
+      register: maven_sha512
+
+    - name: "download maven3 ({{ maven_target_version }})"
+      ansible.builtin.get_url:
+        url: "{{ maven_bin_url }}"
+        # XXX: get_url doesn't seem to like the checksum URL for maven
+        checksum: "sha512:{{ maven_sha512.content }}"
+        dest: "{{ maven_tempdir.path }}/maven.tar.gz"
+        mode: u=rx,go-rwx
+        force: true
+
+    - name: delete preexisting maven installation directory
+      when: maven_reset
+      file:
+        path: "{{ maven_home_dir }}"
+        state: absent
+
+    - name: "create maven installation directory: {{ maven_home_dir }}"
+      file:
+        path: "{{ maven_home_dir }}"
+        state: directory
+        mode: u=rwx,go-rwx
+
+    - name: "extract archive to installation directory: {{ maven_home_dir }}"
+      unarchive:
+        remote_src: true
+        src: "{{ maven_tempdir.path }}/maven.tar.gz"
+        dest: "{{ maven_home_dir }}"
+
+  always:
+    - name: delete temporary directory
+      ansible.builtin.file:
+        path: "{{ maven_tempdir.path }}"
+        state: absent
+
+- when: maven_installation != 'system'
+  block:
+    - name: find installed maven executable
+      find:
+        path: "{{ maven_installation if maven_installation != 'home' else maven_home_dir }}"
+        pattern: mvn
+        recurse: true
+      register: mvn_search
+      failed_when: mvn_search.files | length != 1
+
+    - name: record directory with maven executables
+      set_fact:
+        maven_bin: "{{ mvn_search.files[0].path | dirname }}"
+
+    - name: "add maven path to shell initialization script: {{ maven_init_file }}"
+      ansible.builtin.blockinfile:
+        path: "{{ maven_init_file }}"
+        create: true
+        insertbefore: ".*maven\ aliases"
+        marker: "# --- {mark} maven bin path ---"
+        block: |
+          if ! $(echo "$PATH" | tr ":" "\n" | grep -qx "{{ maven_bin }}") ; then
+          	export PATH="{{ maven_bin }}:$PATH"
+          fi
+        state: present
+        mode: u=rw,go=r
+
+- name: "add maven aliases to shell initialization script: {{ maven_init_file }}"
+  ansible.builtin.blockinfile:
+    path: "{{ maven_init_file }}"
+    create: true
+    insertafter: ".*maven\ bin\ path"
+    marker: "# --- {mark} maven aliases ---"
+    block: |
+      # begin aliases and functions
+      alias mvntest_debug='mvn test -Dmaven.surefire.debug'
+      alias mvninstall='mvn clean install'
+      alias mvninstallquick='mvn clean install -DskipTests'
+      alias mvnuprev="mvn versions:set -DgenerateBackupPoms=false"
+      alias mvndeptree='mvn dependency:tree -Dverbose'
+    state: present
+    mode: u=rw,go=r

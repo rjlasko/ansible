@@ -1,17 +1,28 @@
 # Ansible Role: Maven
 
-Installs latest version of Maven, and configures its repository settings.
+Installs Maven, and configures its repository settings. This role provides system or `/home/$USER/bin` installations, as well as user-declared pre-installations. It will also add binaries for home installations and maven completion scripts to the users initialization script.
 
 ## Requirements
 
-- MacOS: Homebrew must be installed
+- MacOS: `brew`, `java`
+- Linux: `git`
+- All:
+  - `git` when performing home installation
+  - `java` when performing home installation
+
 
 ## Role Variables
 
 #### Settable Variables
 ```yaml
-maven_username: # string (optional), username for maven repository
-maven_password: # string (optional), password for maven repository
+maven_installation: # default('home'). Valid values are 'home', 'system', and a previously installed `mvn` filepath
+maven_version: # string, default(<latest>). the Maven version to use for a home installation.  Only used when `maven_home_install=true`.
+maven_reset: # boolean, default(false). will delete `~/.m2` when true. Will also delete preexisting home maven installations when true.
+maven_completions_filepath: # default(<sourced from bash-completion role>). filepath to install maven bash completion script to. Requires override if performing a home installation.
+
+# The following only apply when using authentication for a maven repository
+maven_username: # string (optional), username
+maven_password: # string (optional), password
 maven_mirror_release_url: # string (optional), URL for release mirror
 maven_mirror_snapshot_url: # string (optional), URL for snapshot mirror
 ```
@@ -20,7 +31,7 @@ Note, if either username or password are provided, then all 4 of the variables a
 
 ## Dependencies
 
-None
+`bash-completion` role if using default location non-system or Linux installation of maven-completion
 
 ## Example Playbook
 ```yaml
