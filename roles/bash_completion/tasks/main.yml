@@ -15,7 +15,7 @@
     - name: define expected bash completion paths
       ansible.builtin.set_fact:
         bash_completion_filepath: /usr/share/bash-completion/bash_completion
-        bash_completions_dir: /usr/share/bash-completion/completions
+        bash_completions_dir: /etc/bash_completion.d
 
     - name: assert bash_completion script exists where expected
       ansible.builtin.stat:
