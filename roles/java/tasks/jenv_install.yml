@@ -16,7 +16,7 @@
       register: jenv_root
 
     - name: delete pre-existing jenv config (MacOS)
-      when: java_reset_jenv
+      when: jenv_reset
       ansible.builtin.file:
         path: "{{ jenv_root.stdout }}"
         state: absent
@@ -24,39 +24,40 @@
 - when: ansible_facts.system == 'Linux'
   block:
     - name: delete pre-existing jenv installation (Linux)
-      when: java_reset_jenv
+      when: jenv_reset
       ansible.builtin.file:
-        path: "{{ java_jenv_user_dir }}"
+        path: "{{ jenv_user_dir }}"
         state: absent
 
-    - name: "install jenv package to {{ java_jenv_user_dir }} (Linux)"
+    - name: "install jenv package to {{ jenv_user_dir }} (Linux)"
       ansible.builtin.git:
         repo: https://github.com/jenv/jenv.git
-        dest: "{{ java_jenv_user_dir }}"
+        dest: "{{ jenv_user_dir }}"
 
-    - name: "add jenv path to shell initialization script: {{ java_jenv_init_file }}"
+    - name: "add jenv path to shell initialization script: {{ jenv_init_file }}"
       ansible.builtin.blockinfile:
-        path: "{{ java_jenv_init_file }}"
+        path: "{{ jenv_init_file }}"
         create: true
-        insertbefore: BOF
+        insertbefore: ".*jenv\ completions"
         marker: "# --- {mark} jenv execpath ---"
         block: |
-          if ! $(echo "$PATH" | tr ":" "\n" | grep -qx "{{ java_jenv_user_bin }}") ; then
-              export PATH="{{ java_jenv_user_bin }}:$PATH"
+          if ! $(echo "$PATH" | tr ":" "\n" | grep -qx "{{ jenv_user_bin }}") ; then
+              export PATH="{{ jenv_user_bin }}:$PATH"
           fi
         state: present
         mode: u=rw,go=r
 
     - name: first time init jenv
       environment:
-        PATH: "{{ java_jenv_user_bin }}:{{ ansible_env.PATH }}"
+        PATH: "{{ jenv_user_bin }}:{{ ansible_env.PATH }}"
       ansible.builtin.shell: 'eval "$(jenv init -)"'
       changed_when: false
 
-- name: "add jenv init to shell initialization script: {{ java_jenv_init_file }}"
+- name: "add jenv init to shell initialization script: {{ jenv_init_file }}"
   ansible.builtin.blockinfile:
-    path: "{{ java_jenv_init_file }}"
+    path: "{{ jenv_init_file }}"
     create: true
+    insertafter: ".*jenv\ execpath"
     marker: "# --- {mark} jenv completions ---"
     block: 'eval "$(jenv init -)"'
     state: present

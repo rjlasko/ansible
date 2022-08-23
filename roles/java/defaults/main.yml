@@ -1,20 +1,9 @@
 ---
-java_reset_jenv: false
-java_global_versions: 1.8
-
-java_jenv_init_file: "{{ ansible_user_dir }}/.bashrc"
-java_jenv_user_dir: "{{ ansible_user_dir }}/.jenv"
-java_jenv_user_bin: "{{ java_jenv_user_dir }}/bin"
-
+java_system_versions:
+  - 11
+java_system_packages: []
 java_homes: []
-java_system_versions: "{{ java_package_versions[ansible_facts.os_family] }}"
 
-java_package_versions:
-  Debian:
-    - openjdk-8-jdk
-    - openjdk-11-jdk
-    - openjdk-17-jdk
-  Darwin:
-    - oracle-jdk
-    - adoptopenjdk/openjdk/adoptopenjdk8
-    - adoptopenjdk/openjdk/adoptopenjdk11
+jenv_java_version: 11
+jenv_reset: false
+jenv_init_file: "{{ ansible_user_dir }}/.bashrc"

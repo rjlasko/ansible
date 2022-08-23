@@ -13,7 +13,7 @@
 
 - name: register installed Java versions with jenv
   environment:
-    PATH: "{{ java_jenv_user_bin }}:{{ ansible_env.PATH }}"
+    PATH: "{{ jenv_user_bin }}:{{ ansible_env.PATH }}"
   loop: "{{ java_homes }}"
   loop_control:
     loop_var: java_home
@@ -22,7 +22,7 @@
   changed_when: "'added' in jenv_add_jversion.stdout"
 
 - name: set global Java versions
-  ansible.builtin.command: "jenv global {{ java_global_versions }}"
+  ansible.builtin.command: "jenv global {{ jenv_java_version }}"
   environment:
-    PATH: "{{ java_jenv_user_bin }}:{{ ansible_env.PATH }}"
+    PATH: "{{ jenv_user_bin }}:{{ ansible_env.PATH }}"
   changed_when: true

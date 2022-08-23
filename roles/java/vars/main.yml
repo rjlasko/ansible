@@ -1,0 +1,7 @@
+---
+java_package_pattern:
+  Debian: openjdk-%s-jdk
+  Darwin: adoptopenjdk/openjdk/adoptopenjdk%s
+
+jenv_user_dir: "{{ ansible_user_dir }}/.jenv"
+jenv_user_bin: "{{ jenv_user_dir }}/bin"

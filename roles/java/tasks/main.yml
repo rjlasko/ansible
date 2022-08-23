@@ -3,11 +3,11 @@
 ## Installs Java and jenv to manage Java versions ##
 ## ---------------------------------------------- ##
 
-- name: install jenv
-  ansible.builtin.include_tasks: jenv_install.yml
-
 - name: install java
   ansible.builtin.include_tasks: java_install.yml
+
+- name: install jenv
+  ansible.builtin.include_tasks: jenv_install.yml
 
 - name: install & configure jenv
   ansible.builtin.include_tasks: jenv_configure.yml

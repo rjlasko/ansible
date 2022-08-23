@@ -3,10 +3,17 @@
 ## Installs java ##
 ## ------------- ##
 
+- name: resolve system package names to install
+  loop: "{{ java_system_versions }}"
+  loop_control:
+    loop_var: java_system_version
+  set_fact:
+    java_system_packages: "{{ java_system_packages + [ java_package_pattern[ansible_facts.os_family] | format(java_system_version) ] }}"
+
 - when: ansible_facts.system == 'Darwin'
   block:
     - name: install java versions (MacOS)
-      loop: "{{ java_system_versions }}"
+      loop: "{{ java_system_packages }}"
       loop_control:
         loop_var: brew_target
       community.general.homebrew_cask:
@@ -26,10 +33,9 @@
 - when: ansible_facts.system == 'Linux'
   block:
     - name: "install java versions ({{ ansible_facts.os_family }} Linux)"
-      when: java_system_versions
       become: true
       ansible.builtin.package:
-        name: "{{ java_system_versions }}"
+        name: "{{ java_system_packages }}"
         state: present
 
     - name: query for installed Java versions
