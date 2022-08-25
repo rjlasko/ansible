@@ -1,0 +1,31 @@
+---
+pyenv_user_dir: "{{ ansible_user_dir }}/.pyenv"
+pyenv_user_bin: "{{ pyenv_user_dir }}/bin"
+
+# for OS deps, see: https://github.com/pyenv/pyenv/wiki#suggested-build-environment
+python_build_packages:
+  Debian:
+    - make
+    - build-essential
+    - libssl-dev
+    - zlib1g-dev
+    - libbz2-dev
+    - libreadline-dev
+    - libsqlite3-dev
+    - wget
+    - curl
+    - llvm
+    - libncursesw5-dev
+    - xz-utils
+    - tk-dev
+    - libxml2-dev
+    - libxmlsec1-dev
+    - libffi-dev
+    - liblzma-dev
+  Darwin:
+    - openssl
+    - readline
+    - sqlite3
+    - xz
+    - zlib
+    - tcl-tk

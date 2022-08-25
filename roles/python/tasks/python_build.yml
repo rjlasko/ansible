@@ -5,12 +5,12 @@
 
 - name: find previously installed Python versions
   environment:
-    PATH: "{{ python_pyenv_user_bin }}:{{ ansible_env.PATH }}"
+    PATH: "{{ pyenv_user_bin }}:{{ ansible_env.PATH }}"
   ansible.builtin.command: pyenv versions --bare
   changed_when: false
   register: python_versions_installed
 
-- when: python_system_install_dependencies
+- when: pyenv_install_build_dependencies
   block:
     - name: "install python build dependencies ({{ ansible_facts.os_family }} Linux)"
       become: true
@@ -21,14 +21,17 @@
 
     - name: "install python build dependencies (MacOS)"
       when: ansible_facts.system == 'Darwin'
+      loop: "{{ python_build_packages[ansible_facts.os_family] }}"
+      loop_control:
+        loop_var: brew_target
       community.general.homebrew:
-        name: "{{ python_build_packages[ansible_facts.os_family] }}"
+        name: "{{ brew_target }}"
         state: present
 
 - name: install Python versions via pyenv
   environment:
-    PATH: "{{ python_pyenv_user_bin }}:{{ ansible_env.PATH }}"
-  loop: "{{ python_pyenv_versions }}"
+    PATH: "{{ pyenv_user_bin }}:{{ ansible_env.PATH }}"
+  loop: "{{ python_versions }}"
   loop_control:
     loop_var: python_version
   when: python_version not in python_versions_installed.stdout_lines

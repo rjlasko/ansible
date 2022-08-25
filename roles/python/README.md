@@ -1,6 +1,6 @@
 # Ansible Role: Python
 
-Installs any number of Python versions using `pyenv`, which is also used to manage them.
+Installs any number of Python versions using `pyenv`, which is also used to manage them. `pyenv` is provided as a system installation on MacOS, whereas Linux only supports `/home/$USER/.pyenv` installations. The requested `python` versions are installed under `/home/$USER/.pyenv/versions` for all operating systems.
 
 ## Requirements
 
@@ -11,11 +11,12 @@ Installs any number of Python versions using `pyenv`, which is also used to mana
 
 #### Settable Variables
 ```yaml
-python_reset_pyenv: # boolean, deafult(false), delete preexisting pyenv
-python_pyenv_versions: # list of python versions to install, default([2.7.18, 3.9.11])
-python_global_versions: # string, space separated list of versions to put into PATH, defaults to the same list as `python_versions_installed`
-python_pyenv_init_file: # filepath, default('~/.bashrc'), adds update to PATH with pyenv shims + completions.
-python_system_install_dependencies: # boolean, default(true), will install Python build dependencies.  Requires `sudo` privileges.
+python_versions: # list of exact python versions to install. default([3.9.13])
+python_global_versions: # string, space separated list of versions to put into PATH, defaults to the same list as `python_versions`
+pyenv_install_build_dependencies: # boolean, default(false). will install Python build dependencies. Requires `sudo` privileges.
+
+pyenv_reset: # boolean, default(false), delete preexisting pyenv
+pyenv_init_file: # filepath, default('~/.bashrc'), adds update to PATH with pyenv shims + completions.
 ```
 
 ## Dependencies
@@ -28,11 +29,11 @@ None
   roles:
     - role: python
       vars:
-        python_reset_pyenv: false
-        python_pyenv_versions:
+        pyenv_reset: false
+        python_versions:
           - 2.7.18
-          - 3.9.11
-        python_global_versions: "3.9.11"
+          - 3.9.13
+        python_global_versions: "3.9.13"
 ```
 
 ## License

@@ -8,11 +8,11 @@
 - name: install pyenv
   ansible.builtin.include_tasks: pyenv_install.yml
 
-- name: build/install/manage python versions with pyenv
+- name: build & install python versions with pyenv
   ansible.builtin.include_tasks: python_build.yml
 
-- name: set global Python versions
+- name: set PyEnv global Python version(s)
   environment:
-    PATH: "{{ python_pyenv_user_bin }}:{{ ansible_env.PATH }}"
-  ansible.builtin.command: "pyenv global {{ python_global_versions }}"
+    PATH: "{{ pyenv_user_bin }}:{{ ansible_env.PATH }}"
+  ansible.builtin.command: "pyenv global {{ pyenv_global_versions }}"
   changed_when: true

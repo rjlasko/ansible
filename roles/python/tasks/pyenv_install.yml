@@ -16,7 +16,7 @@
       register: pyenv_root
 
     - name: delete pre-existing pyenv config and python installations (MacOS)
-      when: python_reset_pyenv
+      when: pyenv_reset
       ansible.builtin.file:
         path: "{{ pyenv_root.stdout }}"
         state: absent
@@ -24,33 +24,34 @@
 - when: ansible_facts.system == 'Linux'
   block:
     - name: delete pre-existing pyenv and python installations (Linux)
-      when: python_reset_pyenv
+      when: pyenv_reset
       ansible.builtin.file:
-        path: "{{ python_pyenv_user_dir }}"
+        path: "{{ pyenv_user_dir }}"
         state: absent
 
-    - name: "install pyenv package to {{ python_pyenv_user_dir }} (Linux)"
+    - name: "install pyenv package to {{ pyenv_user_dir }} (Linux)"
       ansible.builtin.git:
         repo: https://github.com/pyenv/pyenv.git
-        dest: "{{ python_pyenv_user_dir }}"
+        dest: "{{ pyenv_user_dir }}"
 
-    - name: "add pyenv path to shell initialization script: {{ python_pyenv_init_file }}"
+    - name: "add pyenv path to shell initialization script: {{ pyenv_init_file }}"
       ansible.builtin.blockinfile:
-        path: "{{ python_pyenv_init_file }}"
+        path: "{{ pyenv_init_file }}"
         create: true
-        insertbefore: BOF
+        insertbefore: ".*pyenv\ shims\ &\ completions"
         marker: "# --- {mark} pyenv execpath ---"
         block: |
-          if ! $(echo "$PATH" | tr ":" "\n" | grep -qx "{{ python_pyenv_user_bin }}") ; then
-              export PATH="{{ python_pyenv_user_bin }}:$PATH"
+          if ! $(echo "$PATH" | tr ":" "\n" | grep -qx "{{ pyenv_user_bin }}") ; then
+              export PATH="{{ pyenv_user_bin }}:$PATH"
           fi
         state: present
         mode: u=rw,go=r
 
-- name: "add pyenv shims & init to shell initialization script: {{ python_pyenv_init_file }}"
+- name: "add pyenv shims & init to shell initialization script: {{ pyenv_init_file }}"
   ansible.builtin.blockinfile:
-    path: "{{ python_pyenv_init_file }}"
+    path: "{{ pyenv_init_file }}"
     create: true
+    insertafter: ".*pyenv\ execpath"
     marker: "# --- {mark} pyenv shims & completions ---"
     block: |
       if ! $(echo "$PATH" | tr ":" "\n" | grep -qx "$(pyenv root)/shims") ; then
