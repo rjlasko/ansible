@@ -13,6 +13,6 @@
 
 - name: set PyEnv global Python version(s)
   environment:
-    PATH: "{{ pyenv_user_bin }}:{{ ansible_env.PATH }}"
+    PATH: "{{ pyenv_bin }}:{{ ansible_env.PATH }}"
   ansible.builtin.command: "pyenv global {{ pyenv_global_versions }}"
   changed_when: true

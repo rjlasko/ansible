@@ -16,7 +16,8 @@ python_global_versions: # string, space separated list of versions to put into P
 pyenv_install_build_dependencies: # boolean, default(false). will install Python build dependencies. Requires `sudo` privileges.
 
 pyenv_reset: # boolean, default(false), delete preexisting pyenv
-pyenv_init_file: # filepath, default('~/.bashrc'), adds update to PATH with pyenv shims + completions.
+pyenv_init_file: # filepath, default('~/.bashrc'), updates PATH with pyenv completions (& executable, for MacOS).
+python_init_file: # filepath, default(<pyenv_init_file>), updates PATH with pyenv shims to installed python binaries
 ```
 
 ## Dependencies

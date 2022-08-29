@@ -5,7 +5,7 @@
 
 - name: find previously installed Python versions
   environment:
-    PATH: "{{ pyenv_user_bin }}:{{ ansible_env.PATH }}"
+    PATH: "{{ pyenv_bin }}:{{ ansible_env.PATH }}"
   ansible.builtin.command: pyenv versions --bare
   changed_when: false
   register: python_versions_installed
@@ -30,9 +30,22 @@
 
 - name: install Python versions via pyenv
   environment:
-    PATH: "{{ pyenv_user_bin }}:{{ ansible_env.PATH }}"
+    PATH: "{{ pyenv_bin }}:{{ ansible_env.PATH }}"
   loop: "{{ python_versions }}"
   loop_control:
     loop_var: python_version
   when: python_version not in python_versions_installed.stdout_lines
   ansible.builtin.shell: "pyenv install {{ python_version }} && pyenv rehash"
+
+- name: "add pyenv shims & init to shell initialization script: {{ pyenv_init_file }}"
+  ansible.builtin.blockinfile:
+    path: "{{ python_init_file }}"
+    create: true
+    insertafter: ".*pyenv\ completions"
+    marker: "# --- {mark} python path ---"
+    block: |
+      if ! $(echo "$PATH" | tr ":" "\n" | grep -qx "{{ pyenv_shims }}") ; then
+        export PATH="{{ pyenv_shims }}:$PATH"
+      fi
+    state: present
+    mode: u=rw,g=r,o-rwx

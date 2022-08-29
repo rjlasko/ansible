@@ -6,3 +6,4 @@ pyenv_install_build_dependencies: false
 
 pyenv_reset: false
 pyenv_init_file: "{{ ansible_user_dir }}/.bashrc"
+python_init_file: "{{ pyenv_init_file }}"

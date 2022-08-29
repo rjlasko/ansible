@@ -13,36 +13,30 @@
     - name: get pyenv root
       ansible.builtin.command: pyenv root
       changed_when: false
-      register: pyenv_root
+      register: pyenv_root_cmd
 
-    - name: delete pre-existing pyenv config and python installations (MacOS)
-      when: pyenv_reset
-      ansible.builtin.file:
-        path: "{{ pyenv_root.stdout }}"
-        state: absent
+- name: delete pre-existing pyenv config and python installations
+  when: pyenv_reset
+  ansible.builtin.file:
+    path: "{{ pyenv_root }}"
+    state: absent
 
 - when: ansible_facts.system == 'Linux'
   block:
-    - name: delete pre-existing pyenv and python installations (Linux)
-      when: pyenv_reset
-      ansible.builtin.file:
-        path: "{{ pyenv_user_dir }}"
-        state: absent
-
-    - name: "install pyenv package to {{ pyenv_user_dir }} (Linux)"
+    - name: "install pyenv package to {{ pyenv_root }} (Linux)"
       ansible.builtin.git:
         repo: https://github.com/pyenv/pyenv.git
-        dest: "{{ pyenv_user_dir }}"
+        dest: "{{ pyenv_root }}"
 
     - name: "add pyenv path to shell initialization script: {{ pyenv_init_file }}"
       ansible.builtin.blockinfile:
         path: "{{ pyenv_init_file }}"
         create: true
-        insertbefore: ".*pyenv\ shims\ &\ completions"
+        insertbefore: ".*pyenv\ completions"
         marker: "# --- {mark} pyenv execpath ---"
         block: |
-          if ! $(echo "$PATH" | tr ":" "\n" | grep -qx "{{ pyenv_user_bin }}") ; then
-              export PATH="{{ pyenv_user_bin }}:$PATH"
+          if ! $(echo "$PATH" | tr ":" "\n" | grep -qx "{{ pyenv_bin }}") ; then
+              export PATH="{{ pyenv_bin }}:$PATH"
           fi
         state: present
         mode: u=rw,go=r
@@ -52,11 +46,7 @@
     path: "{{ pyenv_init_file }}"
     create: true
     insertafter: ".*pyenv\ execpath"
-    marker: "# --- {mark} pyenv shims & completions ---"
-    block: |
-      if ! $(echo "$PATH" | tr ":" "\n" | grep -qx "$(pyenv root)/shims") ; then
-        export PATH="$(pyenv root)/shims:$PATH"
-      fi
-      eval "$(pyenv init -)"
+    marker: "# --- {mark} pyenv completions ---"
+    block: eval "$(pyenv init -)"
     state: present
     mode: u=rw,g=r,o-rwx
