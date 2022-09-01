@@ -1,2 +1,5 @@
 ---
-pipx_ensurepath: true
+pipx_installation: "{{ pipx_system_installation[ansible_facts.system] }}"
+pipx_venv_python: python3
+pipx_venv_command: "{{ pipx_venv_python }} -m venv --copies"
+pipx_init_file: ~/.bashrc

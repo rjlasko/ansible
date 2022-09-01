@@ -1,0 +1,15 @@
+---
+## ------------------------- ##
+## Detects pipx installation ##
+## ------------------------- ##
+
+- name: detect pipx installation
+  ansible.builtin.command: which pipx
+  register: which_pipx_initial
+  ignore_errors: true
+  changed_when: false
+
+- name: set pipx_executable if installed
+  when: which_pipx_initial.rc == 0
+  ansible.builtin.set_fact:
+    pipx_executable: "{{ which_pipx_initial.stdout | mandatory }}"

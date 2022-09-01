@@ -3,17 +3,27 @@
 ## Installs packages from PyPi using pipx ##
 ## -------------------------------------- ##
 
-- name: install pipx
-  # this when condition is to avoid trying to reinstall pipx, because this role
-  # is used to install pipx, and to use pipx to install packages
-  when: pipx_executable is not defined
-  ansible.builtin.include_tasks: install_pipx.yml
+# this when condition is to avoid trying to reinstall pipx, because:
+#   1. this role is used to install pipx, and to use pipx to install packages
+#   2. there can only be one!
+- when: pipx_executable is not defined
+  block:
+    - name: detect pipx
+      ansible.builtin.include_tasks: detect_pipx.yml
 
-- name: configure pip
-  # this when condition is to avoid trying to reconfigure pipx, because this role
-  # is used to install pipx, and to use pipx to install packages
-  when: pip_config_installed is not defined
-  ansible.builtin.include_tasks: configure_pip.yml
+    - name: configure pip
+      ansible.builtin.include_tasks: configure_pip.yml
+
+    - name: install pipx
+      ansible.builtin.include_tasks: install_pipx.yml
+
+    - name: redetect pipx
+      ansible.builtin.include_tasks: detect_pipx.yml
+
+    - name: fail if pipx not found
+      when: pipx_executable is not defined
+      fail:
+        msg: pipx_executable not defined after installation
 
 - name: install pipx packages
   when: pipx_packages is defined

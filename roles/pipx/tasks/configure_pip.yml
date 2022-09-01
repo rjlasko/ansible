@@ -3,19 +3,21 @@
 ## Install PIP configuration ##
 ## ------------------------- ##
 
+# avoid trying to reconfigure pip, if ansible has already configured it once
+- when: pip_config_installed | default(false)
+  block:
+    - name: create pip config directory
+      ansible.builtin.file:
+        state: directory
+        path: "{{ pip_conf_filepath | dirname }}"
+        mode: u=rwX,o-rwx
 
-- name: create pip config directory
-  ansible.builtin.file:
-    state: directory
-    path: "{{ pip_conf_filepath | dirname }}"
-    mode: u=rwX,o-rwx
+    - name: install pip config
+      ansible.builtin.template:
+        src: pip.conf.j2
+        dest: "{{ pip_conf_filepath }}"
+        mode: u=rw,o-rwx
 
-- name: install pip config
-  ansible.builtin.template:
-    src: pip.conf.j2
-    dest: "{{ pip_conf_filepath }}"
-    mode: u=rw,o-rwx
-
-- name: leave an indication that pipx has been configured
-  ansible.builtin.set_fact:
-    pip_config_installed: true
+    - name: leave an indication that pipx has been configured
+      ansible.builtin.set_fact:
+        pip_config_installed: true

@@ -1,47 +1,78 @@
 ---
-## -------------------------------------- ##
-## Installs pipx if not already installed ##
-## -------------------------------------- ##
+## ------------- ##
+## Installs pipx ##
+## ------------- ##
 
-- name: detect pipx installation
-  ansible.builtin.command: which pipx
-  register: which_pipx_initial
-  ignore_errors: true
-  changed_when: false
+- name: install pipx (brew)
+  when: pipx_installation == 'brew'
+  community.general.homebrew:
+    name: pipx
+    state: present
 
-- name: get pipx app directory
-  ansible.builtin.shell: set -o pipefail && pipx list | grep '$PATH'| sed 's#^[^/]*##g'
-  args:
-    executable: bash
-  register: where_pipx_install
-  changed_when: false
-
-- name: set pipx_executable if installed
-  when: which_pipx_initial.rc == 0
-  ansible.builtin.set_fact:
-    pipx_executable: "{{ which_pipx_initial.stdout | mandatory }}"
-    pipx_bin_path: "{{ where_pipx_install.stdout | mandatory }}"
-
-- name: install pipx if not already installed
-  when: which_pipx_initial.rc != 0
+- when: pipx_installation == 'venv'
   block:
-    - name: install pipx
-      community.general.homebrew:
+    - name: clear pipx virtualenv
+      loop:
+        - absent
+        - directory
+      loop_control:
+        loop_var: pipx_venv_state
+      file:
+        path: "{{ pipx_venv }}"
+        state: "{{ pipx_venv_state }}"
+
+    - name: install pipx (venv)
+      ansible.builtin.pip:
         name: pipx
+        virtualenv: "{{ pipx_venv }}"
+        virtualenv_command: "{{ pipx_venv_command }}"
         state: present
 
-    - name: detect pipx installation
-      ansible.builtin.command: which pipx
-      changed_when: false
-      register: which_pipx_retry
+    - name: link to venv pipx
+      file:
+        path: "{{ pipx_symlink }}"
+        src: "{{ pipx_venv }}/bin/pipx"
+        state: link
 
-    - name: get pipx executable path after installation
-      when: which_pipx_retry.changed
-      ansible.builtin.set_fact:
-        pipx_executable: "{{ which_pipx_retry.stdout }}"
+    - name: "add pipx exe path to shell initialization script: {{ pipx_init_file }}"
+      ansible.builtin.blockinfile:
+        path: "{{ pipx_init_file }}"
+        create: true
+        insertbefore: ".*pipx\ apps"
+        marker: "# --- {mark} pipx exe path ---"
+        block: |
+          if ! $(echo "$PATH" | tr ":" "\n" | grep -qx "{{ pipx_symlink | dirname }}") ; then
+          	export PATH="{{ pipx_symlink | dirname }}:$PATH"
+          fi
+        state: present
+        mode: u=rw,go=r
 
-- name: ensure pipx in PATH
-  when: pipx_ensurepath
-  ansible.builtin.command: pipx ensurepath
-  register: pipx_ensurepath_result
-  changed_when: "{{ 'Success' in pipx_ensurepath_result.stdout }}"
+- name: install pipx (python)
+  when: pipx_installation == 'python'
+  ansible.builtin.pip:
+    name: pipx
+    executable: "{{ pipx_pip | default(omit) }}"
+    state: present
+
+- name: "add pipx apps to shell initialization script: {{ pipx_init_file }}"
+  ansible.builtin.blockinfile:
+    path: "{{ pipx_init_file }}"
+    create: true
+    insertafter: ".*pipx\ exe\ path"
+    marker: "# --- {mark} pipx apps ---"
+    block: |
+      if ! $(echo "$PATH" | tr ":" "\n" | grep -qx "{{ pipx_apps_path }}") ; then
+      	export PATH="{{ pipx_apps_path }}:$PATH"
+      fi
+    state: present
+    mode: u=rw,go=r
+
+- name: "add pipx completions to shell initialization script: {{ pipx_init_file }}"
+  ansible.builtin.blockinfile:
+    path: "{{ pipx_init_file }}"
+    create: true
+    insertafter: ".*pipx\ apps"
+    marker: "# --- {mark} pipx completions ---"
+    block: eval "$({{ pipx_bin_prefix }}register-python-argcomplete pipx)"
+    state: present
+    mode: u=rw,go=r

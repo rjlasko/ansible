@@ -4,7 +4,7 @@
 ## ------------------------------- ##
 
 - name: install packages
-  loop: "{{ pipx_packages | default([]) }}"
+  loop: "{{ pipx_packages }}"
   loop_control:
     loop_var: pipx_package
   community.general.pipx:
@@ -13,7 +13,7 @@
     executable: "{{ pipx_executable | default(omit) }}"
 
 - name: upgrade packages
-  loop: "{{ pipx_packages | default([]) }}"
+  loop: "{{ pipx_packages }}"
   loop_control:
     loop_var: pipx_package
   community.general.pipx:
