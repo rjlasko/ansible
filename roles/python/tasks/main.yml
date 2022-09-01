@@ -16,3 +16,8 @@
     PATH: "{{ pyenv_bin }}:{{ ansible_env.PATH }}"
   ansible.builtin.command: "pyenv global {{ pyenv_global_versions }}"
   changed_when: true
+
+- name: configure pip
+  include_role:
+    name: pipx
+    tasks_from: configure_pip
