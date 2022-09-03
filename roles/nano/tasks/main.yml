@@ -3,18 +3,23 @@
 ## Installs and configures nano ##
 ## ---------------------------- ##
 
-- name: install nano (MacOS)
-  when: ansible_facts.system == 'Darwin'
-  community.general.homebrew:
-    name: nano
-    state: present
+- assert:
+    that: (nano_install | type_debug) == 'bool'
 
-- name: "install nano ({{ ansible_facts.os_family }} Linux)"
-  when: ansible_facts.system == 'Linux'
-  become: true
-  ansible.builtin.package:
-    name: nano
-    state: present
+- when: nano_install
+  block:
+    - name: install nano (MacOS)
+      when: ansible_facts.system == 'Darwin'
+      community.general.homebrew:
+        name: nano
+        state: present
+
+    - name: "install nano ({{ ansible_facts.os_family }} Linux)"
+      when: ansible_facts.system == 'Linux'
+      become: true
+      ansible.builtin.package:
+        name: nano
+        state: present
 
 - when: nanorc_reset
   vars:
