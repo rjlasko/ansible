@@ -1,0 +1,10 @@
+---
+bash_completion_filepath: "{{ bash_completion_filepath_os[ansible_facts.system] }}"
+bash_completion_filepath_os:
+  Linux: /usr/share/bash-completion/bash_completion
+  Darwin: /usr/local/etc/bash_completion
+
+bash_completions_dir: "{{ bash_completions_dir_os[ansible_facts.system] }}"
+bash_completions_dir_os:
+  Linux: /etc/bash_completion.d
+  Darwin: /usr/local/etc/bash_completion.d

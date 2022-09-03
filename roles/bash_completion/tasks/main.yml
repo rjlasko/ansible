@@ -3,83 +3,66 @@
 ## Installs bash-completion ##
 ## ------------------------ ##
 
-- name: install for linux
-  when: ansible_facts.system == 'Linux'
+- when: bash_completion_install
   block:
-    - name: install bash-completion
-      when: bash_completion_install | default(true)
+    - name: "install bash-completion ({{ ansible_facts.os_family }} Linux)"
+      when: ansible_facts.system == 'Linux'
+      become: true
       ansible.builtin.package:
         name: bash-completion
         state: present
 
-    - name: define expected bash completion paths
-      ansible.builtin.set_fact:
-        bash_completion_filepath: /usr/share/bash-completion/bash_completion
-        bash_completions_dir: /etc/bash_completion.d
+    - name: install bash_completion (MacOS)
+      when: ansible_facts.system == 'Darwin'
+      block:
+        - name: get bash version
+          ansible.builtin.shell: bash --version | grep -Eo '[0-9]+\.[0-9]+\.[0-9]+'
+          changed_when: false
+          register: bash_version
 
-    - name: assert bash_completion script exists where expected
-      ansible.builtin.stat:
-        path: "{{ bash_completion_filepath }}"
-      register: bash_completion_filepath_check
-      failed_when: not bash_completion_filepath_check.stat.exists
+        - name: install bash-completion for Bash 3.2
+          when: >
+            bash_version.stdout is version('3.2.0', 'ge', version_type='semver')
+            and
+            bash_version.stdout is version('3.3.0', 'lt', version_type='semver')
+            and
+            bash_completion_install
+          community.general.homebrew:
+            name: bash-completion
+            state: present
+          register: bash_3_2_completion_install
 
-    - name: assert bash completions directory exists where expected
-      ansible.builtin.stat:
-        path: "{{ bash_completions_dir }}"
-      register: bash_completions_dir_check
-      failed_when: not bash_completions_dir_check.stat.exists
+        - name: install bash-completion for Bash 4.2+
+          when: >
+            bash_version.stdout is version('4.2.0', 'ge', version_type='semver')
+            and
+            bash_completion_install
+          community.general.homebrew:
+            name: bash-completion@2
+            state: present
+          register: bash_4_2plus_completion_install
 
-- name: install for MacOS
-  when: ansible_facts.system == 'Darwin'
-  block:
-    - name: get bash version
-      ansible.builtin.shell: bash --version | grep -Eo '[0-9]+\.[0-9]+\.[0-9]+'
-      changed_when: false
-      register: bash_version
+        - name: check version of Bash is supported
+          when: >
+            (bash_3_2_completion_install.skipped | default(false))
+            and
+            (bash_4_2plus_completion_install.skipped | default(false))
+          ansible.builtin.fail:
+            msg: "Unsupported Bash version: {{ bash_version.stdout }}"
 
-    - name: install bash-completion for Bash 3.2
-      when: >
-        bash_version.stdout is version('3.2.0', 'ge', version_type='semver')
-        and
-        bash_version.stdout is version('3.3.0', 'lt', version_type='semver')
-        and
-        bash_completion_install | default(true)
-      community.general.homebrew:
-        name: bash-completion
-        state: present
-      register: bash_3_2_completion_install
+- name: assert bash_completion script exists where expected
+  ansible.builtin.stat:
+    path: "{{ bash_completion_filepath }}"
+  register: bash_completion_filepath_check
+  failed_when: not bash_completion_filepath_check.stat.exists
 
-    - name: install bash-completion for Bash 4.2+
-      when: >
-        bash_version.stdout is version('4.2.0', 'ge', version_type='semver')
-        and
-        bash_completion_install | default(true)
-      community.general.homebrew:
-        name: bash-completion@2
-        state: present
-      register: bash_4_2plus_completion_install
+- name: assert bash completions directory exists where expected
+  ansible.builtin.stat:
+    path: "{{ bash_completions_dir }}"
+  register: bash_completions_dir_check
+  failed_when: not bash_completions_dir_check.stat.exists
 
-    - name: check version of Bash is supported
-      when: >
-        (bash_3_2_completion_install.skipped | default(false))
-        and
-        (bash_4_2plus_completion_install.skipped | default(false))
-      ansible.builtin.fail:
-        msg: "Unsupported Bash version: {{ bash_version.stdout }}"
-
-    - name: define expected bash completion paths
-      ansible.builtin.set_fact:
-        bash_completion_filepath: /usr/local/etc/bash_completion
-        bash_completions_dir: /usr/local/etc/bash_completion.d
-
-    - name: assert bash_completion script exists where expected
-      ansible.builtin.stat:
-        path: "{{ bash_completion_filepath }}"
-      register: bash_completion_filepath_check
-      failed_when: not bash_completion_filepath_check.stat.exists
-
-    - name: assert bash completions directory exists where expected
-      ansible.builtin.stat:
-        path: "{{ bash_completions_dir }}"
-      register: bash_completions_dir_check
-      failed_when: not bash_completions_dir_check.stat.exists
+- name: export useful facts about bash_completion
+  ansible.builtin.set_fact:
+    bash_completion_filepath: "{{ bash_completion_filepath }}"
+    bash_completions_dir: "{{ bash_completions_dir }}"
