@@ -1,8 +1,4 @@
 ---
-pipx_system_installation:
-  Darwin: brew
-  Linux: python
-
 pipx_bin_prefix: "{{ (pipx_venv + '/bin/') if pipx_installation == 'venv' else '' }}"
 
 pipx_symlink: "{{ ansible_user_dir }}/bin/pipx"

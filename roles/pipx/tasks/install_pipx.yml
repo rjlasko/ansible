@@ -3,11 +3,18 @@
 ## Installs pipx ##
 ## ------------- ##
 
-- name: install pipx (brew)
-  when: pipx_installation == 'brew'
-  community.general.homebrew:
-    name: pipx
-    state: present
+- assert:
+    that: pipx_installation in ['system', 'python', 'venv', 'none']
+
+- when: pipx_installation == 'system'
+  block:
+    - assert:
+        that: ansible_facts.system == 'Darwin'
+
+    - name: install pipx (MacOS)
+      community.general.homebrew:
+        name: pipx
+        state: present
 
 - when: pipx_installation == 'venv'
   block:

@@ -14,17 +14,23 @@
     - name: configure pip
       ansible.builtin.include_tasks: configure_pip.yml
 
+- when: pipx_executable is not defined
+  block:
     - name: install pipx
       ansible.builtin.include_tasks: install_pipx.yml
 
     - name: redetect pipx
       ansible.builtin.include_tasks: detect_pipx.yml
 
-    - name: fail if pipx not found
-      when: pipx_executable is not defined
-      fail:
-        msg: pipx_executable not defined after installation
+    - assert:
+        that: pipx_executable is defined
 
-- name: install pipx packages
-  when: pipx_packages is defined
+- name: remove all pipx installed apps
+  when: pipx_reset
+  command: pipx uninstall-all
+
+- name: install & upgrade pipx packages
+  loop: "{{ pipx_packages | default([]) }}"
+  loop_control:
+    loop_var: pipx_package
   ansible.builtin.include_tasks: install_packages.yml
