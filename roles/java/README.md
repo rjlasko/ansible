@@ -13,7 +13,7 @@ Installs any number of OpenJDK versions and uses `jenv` to manage them. `java` i
 #### Settable Variables
 ```yaml
 java_versions: # list, default([]). Java (numeric) versions of OpenJDK to install via OS package manager
-java_system_packages: # list, default([]). Packages to install via OS package manager
+java_system_packages: # list, default([]). Additional packages to install via OS package manager
 java_homes: # list, default([]). Suitable JAVA_HOME filepaths of installed JDKs
 
 jenv_java_version: # required. Java version to configure Jenv to use globally. For Java 8 and below, must use 1.x format.

@@ -4,8 +4,9 @@ Installs `neofetch` to the host, and facilitates per-user configuration.
 
 ## Requirements
 
-- `~/bin`: none
-- system
+`~/bin`: none
+
+`system`
   - Linux: `sudo` privileges
   - MacOS: `brew` is installed
 

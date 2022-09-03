@@ -4,12 +4,13 @@ Installs Maven, and configures its repository settings. This role provides syste
 
 ## Requirements
 
-- `~/bin`: `git`
-- system
+`java`!
+
+`home`: `git`
+
+`system`
   - MacOS: `brew` is installed
   - Linux: `sudo` privileges
-- all:
-  - `java`
 
 
 ## Role Variables
