@@ -4,7 +4,7 @@ Installs `nano` to the host, and facilitates per-user configuration.
 
 ## Requirements
 
-- MacOS: `brew` must be installed.
+- MacOS: `brew` is installed.
 - Linux: `sudo` privileges
 
 ## Role Variables

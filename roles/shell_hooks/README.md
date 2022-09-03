@@ -14,7 +14,7 @@ shell_hooks_directory: # default('~/.shell_hooks'), location to install shell ho
 shell_hooks_reset: # boolean, default(false), deletes the ~/.shell_hooks directory when true
 ```
 
-#### Declared Facts
+#### Set Facts
 ```yaml
 shell_hooks_login: "{{ shell_hooks_directory }}/login"
 shell_hooks_startup: "{{ shell_hooks_directory }}/startup"
