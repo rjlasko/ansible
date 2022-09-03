@@ -3,19 +3,26 @@
 ## Installs pyenv to manage and install Python versions ##
 ## ---------------------------------------------------- ##
 
+- assert:
+    that: python_installation in ['system', 'pyenv', 'none']
+
+- when: python_installation == 'system'
+  ansible.builtin.include_tasks: python_install.yml
+
 # XXX: great tutorial see https://wilsonmar.github.io/pyenv/
+- when: python_installation == 'pyenv'
+  block:
+    - name: install pyenv
+      ansible.builtin.include_tasks: pyenv_install.yml
 
-- name: install pyenv
-  ansible.builtin.include_tasks: pyenv_install.yml
+    - name: build & install python versions with pyenv
+      ansible.builtin.include_tasks: python_build.yml
 
-- name: build & install python versions with pyenv
-  ansible.builtin.include_tasks: python_build.yml
-
-- name: set PyEnv global Python version(s)
-  environment:
-    PATH: "{{ pyenv_bin }}:{{ ansible_env.PATH }}"
-  ansible.builtin.command: "pyenv global {{ pyenv_global_versions }}"
-  changed_when: true
+    - name: set PyEnv global Python version(s)
+      environment:
+        PATH: "{{ pyenv_bin }}:{{ ansible_env.PATH }}"
+      ansible.builtin.command: "pyenv global {{ pyenv_global_versions }}"
+      changed_when: true
 
 - name: configure pip
   include_role:

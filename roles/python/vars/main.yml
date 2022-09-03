@@ -1,4 +1,8 @@
 ---
+python_package_pattern:
+  Debian: python%s
+  Darwin: python@%s
+
 pyenv_bin: "{{ pyenv_root }}/bin"
 pyenv_shims: "{{ pyenv_root }}/shims"
 

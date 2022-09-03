@@ -31,12 +31,12 @@
 
 - when: ansible_facts.system == 'Linux'
   block:
-    - name: "install pyenv to {{ pyenv_root }} (Linux)"
+    - name: "install pyenv to {{ pyenv_root }} ({{ ansible_facts.os_family }} Linux)"
       ansible.builtin.git:
         repo: https://github.com/pyenv/pyenv.git
         dest: "{{ pyenv_root }}"
 
-    - name: "install pyenv-virtualenv to {{ pyenv_root }} (Linux)"
+    - name: "install pyenv-virtualenv to {{ pyenv_root }} ({{ ansible_facts.os_family }} Linux)"
       ansible.builtin.git:
         repo: https://github.com/pyenv/pyenv-virtualenv.git
         dest: "{{ pyenv_root }}/plugins/pyenv-virtualenv"

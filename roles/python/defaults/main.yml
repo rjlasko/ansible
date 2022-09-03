@@ -1,6 +1,7 @@
 ---
-python_versions:
-  - 3.9.13
+python_installation: null
+python_versions: []
+python_system_packages: []
 pyenv_global_versions: "{{ python_versions | join(' ') }}"
 pyenv_install_build_dependencies: false
 
