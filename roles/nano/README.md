@@ -5,7 +5,7 @@ Installs `nano` to the host, and facilitates per-user configuration.
 ## Requirements
 
 - MacOS: `brew` must be installed.
-- Linux: none
+- Linux: `sudo` privileges
 
 ## Role Variables
 
@@ -14,7 +14,8 @@ Installs `nano` to the host, and facilitates per-user configuration.
 All the following variables are optional.  If none are specified, this role will simply try to install `nano`. If `nano` is found in the `PATH`, installation will be skipped.
 
 ```yaml
-nanorc_settings: # list, see: https://www.nano-editor.org/dist/latest/nanorc.5.html
+nanorc_settings: # list, default(['set autoindent', 'set tabsize 4']). see: https://www.nano-editor.org/dist/latest/nanorc.5.html
+nanorc_reset: # boolean, default(true). Rebuilds the config
 ```
 
 ## Dependencies

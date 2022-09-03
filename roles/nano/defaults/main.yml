@@ -2,3 +2,4 @@
 nanorc_settings:
   - set autoindent
   - set tabsize 4
+nanorc_reset: true

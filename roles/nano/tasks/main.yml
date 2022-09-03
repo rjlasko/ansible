@@ -3,50 +3,46 @@
 ## Installs and configures nano ##
 ## ---------------------------- ##
 
-- name: check if nano is accessible via path
-  ansible.builtin.shell: command -V nano
-  changed_when: false
-  ignore_errors: true
-  register: nano_exists
+- name: install nano (MacOS)
+  when: ansible_facts.system == 'Darwin'
+  community.general.homebrew:
+    name: nano
+    state: present
 
-- name: install nano
-  when: nano_exists.rc != 0
+- name: "install nano ({{ ansible_facts.os_family }} Linux)"
+  when: ansible_facts.system == 'Linux'
+  become: true
+  ansible.builtin.package:
+    name: nano
+    state: present
+
+- when: nanorc_reset
+  vars:
+    nanorc_filepath: "{{ ansible_user_dir }}/.nanorc"
   block:
-    - name: system install nano
-      when: ansible_facts.system == 'Linux'
-      ansible.builtin.package:
-        name: nano
-        state: present
+    - name: "clear {{ nanorc_filepath }}"
+      ansible.builtin.file:
+        path: "{{ nanorc_filepath }}"
+        state: absent
 
-    - name: brew install nano
-      when: ansible_facts.system == 'Darwin'
-      community.general.homebrew:
-        name: nano
-        state: present
+    - name: find nanorc includes
+      ansible.builtin.find:
+        paths:
+          - /usr/local/Cellar/nano
+          - /usr/share/nano
+        recurse: true
+        patterns: "*.nanorc"
+      register: nanorc_includes
 
-- name: "clear {{ ansible_user_dir }}/.nanorc"
-  ansible.builtin.file:
-    path: "{{ ansible_user_dir }}/.nanorc"
-    state: absent
+    - name: find (sudo-ing) user's group
+      ansible.builtin.command: "id -gn {{ ansible_user }}"
+      changed_when: false
+      register: nano_user_group_name
 
-- name: find nanorc includes
-  ansible.builtin.find:
-    paths:
-      - /usr/local/Cellar/nano
-      - /usr/share/nano
-    recurse: true
-    patterns: "*.nanorc"
-  register: nanorc_includes
-
-- name: find (sudo-ing) user's group
-  ansible.builtin.command: "id -gn {{ ansible_user }}"
-  changed_when: false
-  register: nano_user_group_name
-
-- name: apply nano settings file
-  ansible.builtin.template:
-    src: nanorc.j2
-    dest: "{{ ansible_user_dir }}/.nanorc"
-    owner: "{{ ansible_user }}"
-    group: "{{ nano_user_group_name.stdout }}"
-    mode: u=rw,g=r,o-rwx
+    - name: apply nano settings file
+      ansible.builtin.template:
+        src: nanorc.j2
+        dest: "{{ nanorc_filepath }}"
+        owner: "{{ ansible_user }}"
+        group: "{{ nano_user_group_name.stdout }}"
+        mode: u=rw,g=r,o-rwx
