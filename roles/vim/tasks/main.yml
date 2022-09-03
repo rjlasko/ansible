@@ -1,43 +1,44 @@
 ---
-## ---------------------------- ##
-## Installs and configures nano ##
-## ---------------------------- ##
+## --------------------------- ##
+## Installs and configures vim ##
+## --------------------------- ##
 
-- name: check if nano is accessible via path
-  ansible.builtin.shell: command -V vim
-  changed_when: false
-  ignore_errors: true
-  register: vim_exists
+- assert:
+    that: (vim_install | type_debug) == 'bool'
 
-- name: install vim
-  when: vim_exists.rc != 0
+- when: vim_install
   block:
-    - name: system install vim
-      when: ansible_facts.system == 'Linux'
-      ansible.builtin.package:
-        name: vim
-        state: present
-
-    - name: brew install vim
+    - name: install vim (MacOS)
       when: ansible_facts.system == 'Darwin'
       community.general.homebrew:
         name: vim
         state: present
 
-- name: clear ~/.vimrc
-  ansible.builtin.file:
-    path: "{{ ansible_user_dir }}/.vimrc"
-    state: absent
+    - name: "install vim ({{ ansible_facts.os_family }} Linux)"
+      when: ansible_facts.system == 'Linux'
+      become: true
+      ansible.builtin.package:
+        name: vim
+        state: present
 
-- name: find (sudo-ing) user's group
-  ansible.builtin.command: "id -gn {{ ansible_user }}"
-  changed_when: false
-  register: vim_user_group_name
+- when: vimrc_reset
+  vars:
+    vimrc_filepath: "{{ ansible_user_dir }}/.vimrc"
+  block:
+    - name: clear ~/.vimrc
+      ansible.builtin.file:
+        path: "{{ vimrc_filepath }}"
+        state: absent
 
-- name: apply nano settings file
-  ansible.builtin.template:
-    src: vimrc.j2
-    dest: "{{ ansible_user_dir }}/.vimrc"
-    owner: "{{ ansible_user }}"
-    group: "{{ vim_user_group_name.stdout }}"
-    mode: u=rw,g=r,o-rwx
+    - name: find (sudo-ing) user's group
+      ansible.builtin.command: "id -gn {{ ansible_user }}"
+      changed_when: false
+      register: vim_user_group_name
+
+    - name: apply nano settings file
+      ansible.builtin.template:
+        src: vimrc.j2
+        dest: "{{ vimrc_filepath }}"
+        owner: "{{ ansible_user }}"
+        group: "{{ vim_user_group_name.stdout }}"
+        mode: u=rw,g=r,o-rwx

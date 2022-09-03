@@ -5,16 +5,15 @@ Installs `vim` to the host, and facilitates per-user configuration.
 ## Requirements
 
 - MacOS: `brew` must be installed.
-- Linux: none
+- Linux: `sudo` privileges
 
 ## Role Variables
 
 #### Settable Variables
-
-All the following variables are optional.  If none are specified, this role will simply try to install `vim`. If `vim` is found in the `PATH`, installation will be skipped.
-
 ```yaml
-nanorc_settings: # list, see: http://vimdoc.sourceforge.net/htmldoc/options.html
+vim_install: # required, boolean. installs system package
+vimrc_settings: # list, default(['syntax on', 'set noswapfile']). see: http://vimdoc.sourceforge.net/htmldoc/options.html
+vimrc_reset: # boolean, default(true). Rebuilds the config
 ```
 
 ## Dependencies

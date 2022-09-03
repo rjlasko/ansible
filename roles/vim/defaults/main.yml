@@ -1,4 +1,6 @@
 ---
+vim_install: null
 vimrc_settings:
   - syntax on
   - set noswapfile
+vimrc_reset: true
