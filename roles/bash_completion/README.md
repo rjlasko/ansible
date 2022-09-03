@@ -13,7 +13,7 @@ Installs the `bash-completion` shell utility, to enhance shell usability.
 
 #### Settable Variables
 ```yaml
-bash_completion_install: # boolean, default(true), installs system package
+bash_completion_install: # required, boolean. installs system package
 ```
 
 #### Set Facts
