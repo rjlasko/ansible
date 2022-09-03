@@ -1,0 +1,38 @@
+---
+## ------------------- ##
+## Installs 'neofetch' ##
+## ------------------- ##
+
+- when: neofetch_installation not in ['system', 'home']
+  fail:
+    msg: Must specify installation type
+
+- when: neofetch_installation == 'system'
+  block:
+    - name: install neofetch (MacOS)
+      when: ansible_facts.system == 'Darwin'
+      community.general.homebrew:
+        name: neofetch
+        state: present
+
+    - name: "install neofetch ({{ ansible_facts.os_family }} Linux)"
+      when: ansible_facts.system == 'Linux'
+      become: true
+      ansible.builtin.package:
+        name: neofetch
+        state: present
+
+- when: neofetch_installation == 'home'
+  block:
+    - name: bin directory must exist
+      ansible.builtin.file:
+        path: "{{ neofetch_home_bin | dirname }}"
+        state: directory
+        mode: u=rwx,go-rwx
+
+    - name: get from github
+      ansible.builtin.get_url:
+        url: https://raw.githubusercontent.com/dylanaraps/neofetch/master/neofetch
+        dest: "{{ neofetch_home_bin }}"
+        mode: u=rx,go-rwx
+        force: true

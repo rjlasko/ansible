@@ -1,77 +1,30 @@
 ---
-## ------------------- ##
-## Installs 'neofetch' ##
-## ------------------- ##
+## -------------------------------- ##
+## Installs & configures 'neofetch' ##
+## -------------------------------- ##
 
-- name: check if neofetch is accessible via path
-  ansible.builtin.shell: command -V neofetch
-  changed_when: false
-  ignore_errors: true
-  register: neofetch_exists
+- name: install neofetch
+  ansible.builtin.include_tasks: install_neofetch.yml
 
-- name: local user installation
-  when: >
-    neofetch_exists.rc != 0
-    and (neofetch_install_home_bin | default(false))
+- when: neofetch_reset
   block:
-    - name: bin directory must exist
-      ansible.builtin.file:
-        path: "{{ ansible_user_dir }}/bin"
-        state: directory
-        mode: u=rwx
-
-    - name: remove neofetch exe for replacement
-      ansible.builtin.file:
-        path: "{{ ansible_user_dir }}/bin/neofetch"
+    - name: delete preexisting neofetch configuration
+      file:
+        path: "{{ neofetch_config_file }}"
         state: absent
 
-    - name: get from github
-      ansible.builtin.get_url:
-        url: https://raw.githubusercontent.com/dylanaraps/neofetch/master/neofetch
-        dest: "{{ ansible_user_dir }}/bin/neofetch"
-        mode: u=rx
-        force: true
-
-- name: check if neofetch is accessible via path
-  ansible.builtin.shell: command -V neofetch
-  environment:
-    PATH: "{{ ansible_user_dir }}/bin:{{ ansible_env.PATH }}"
-  changed_when: false
-  ignore_errors: true
-  register: neofetch_exists
-
-- name: install if not already installed
-  when: neofetch_exists.rc != 0
-  block:
-    - name: system install neofetch
-      when: ansible_facts.system == 'Linux'
-      ansible.builtin.package:
-        name: neofetch
-        state: present
-
-    - name: brew install neofetch
-      when: ansible_facts.system == 'Darwin'
-      community.general.homebrew:
-        name: neofetch
-        state: present
-
-- name: delete preexisting neofetch configuration
-  file:
-    path: "{{ ansible_user_dir }}/.config/neofetch/config.conf"
-    state: absent
-
-- name: test command and autogenerate config
-  become: false
-  command: neofetch
-  environment:
-    PATH: "{{ ansible_user_dir }}/bin:{{ ansible_env.PATH }}"
+    - name: test command and autogenerate config
+      command: neofetch
+      # the path is modified in case of home installation
+      environment:
+        PATH: ""{{ neofetch_home_bin | dirname }}":{{ ansible_env.PATH }}"
 
 - name: update configuration
-  loop: "{{ neofetch_configs | default([]) }}"
+  loop: "{{ neofetch_configs }}"
   loop_control:
     loop_var: neofetch_config
   community.general.ini_file:
-    path: "{{ ansible_user_dir }}/.config/neofetch/config.conf"
+    path: "{{ neofetch_config_file }}"
     create: false
     no_extra_spaces: true
     option: "{{ neofetch_config[0] }}"
