@@ -12,9 +12,8 @@ Installs `neofetch` to the host, and facilitates per-user configuration.
 ## Role Variables
 
 #### Settable Variables
-
 ```yaml
-neofetch_installation: # required. Valid values are 'home', 'system'.
+neofetch_installation: # required. Valid values are 'home', 'system', 'none'
 neofetch_reset: # boolean, default(true). Rebuilds the config
 neofetch_configs: # list of 2-element lists, default([]). configs to update in neofetch config file
 ```

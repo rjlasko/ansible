@@ -17,7 +17,7 @@
       command: neofetch
       # the path is modified in case of home installation
       environment:
-        PATH: ""{{ neofetch_home_bin | dirname }}":{{ ansible_env.PATH }}"
+        PATH: "{{ neofetch_home_bin | dirname }}:{{ ansible_env.PATH }}"
 
 - name: update configuration
   loop: "{{ neofetch_configs }}"

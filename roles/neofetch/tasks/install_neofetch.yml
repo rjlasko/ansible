@@ -3,9 +3,8 @@
 ## Installs 'neofetch' ##
 ## ------------------- ##
 
-- when: neofetch_installation not in ['system', 'home']
-  fail:
-    msg: Must specify installation type
+- assert:
+    that: neofetch_installation in ['system', 'home', 'none']
 
 - when: neofetch_installation == 'system'
   block:
