@@ -1,9 +1,8 @@
 ---
-java_system_versions:
-  - 11
+java_versions: []
 java_system_packages: []
 java_homes: []
 
-jenv_java_version: 11
-jenv_reset: false
+jenv_java_version: null
+jenv_reset: true
 jenv_init_file: "{{ ansible_user_dir }}/.bashrc"
