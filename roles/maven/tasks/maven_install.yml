@@ -3,25 +3,27 @@
 ## Installs Maven ##
 ## -------------- ##
 
+- assert:
+    that: (maven_installation in ['system', 'home', 'none']) != ((maven_home | length) > 0)
+    msg: must specify a valid maven_installation XOR maven_home
+
 - when: maven_installation == "system"
   block:
-    - when: ansible_facts.system == 'Darwin'
-      block:
-        - name: install maven (MacOS)
-          community.general.homebrew:
-            name: maven
-            state: present
-            # avoids installing openjdk (which may break)
-            # XXX: requires version of Java already installed
-            install_options: ignore-dependencies
+    - name: install maven (MacOS)
+      when: ansible_facts.system == 'Darwin'
+      community.general.homebrew:
+        name: maven
+        state: present
+        # avoids installing openjdk (which may break)
+        # XXX: requires existing Java installation
+        install_options: ignore-dependencies
 
-    - when: ansible_facts.system == 'Linux'
-      block:
-        - name: "install maven ({{ ansible_facts.os_family }} Linux)"
-          become: true
-          ansible.builtin.package:
-            name: maven
-            state: present
+    - name: "install maven ({{ ansible_facts.os_family }} Linux)"
+      when: ansible_facts.system == 'Linux'
+      become: true
+      ansible.builtin.package:
+        name: maven
+        state: present
 
 - when: maven_installation == 'home'
   block:
@@ -94,7 +96,7 @@
         path: "{{ maven_tempdir.path }}"
         state: absent
 
-- when: maven_installation != 'system'
+- when: maven_home | length > 0
   block:
     - name: find installed maven executable
       find:

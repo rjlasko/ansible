@@ -4,20 +4,22 @@ Installs Maven, and configures its repository settings. This role provides syste
 
 ## Requirements
 
-- MacOS: `brew`, `java`
-- Linux: `git`
-- All:
-  - `git` when performing home installation
-  - `java` when performing home installation
+- `~/bin`: `git`
+- system
+  - MacOS: `brew` is installed
+  - Linux: `sudo` privileges
+- all:
+  - `java`
 
 
 ## Role Variables
 
 #### Settable Variables
 ```yaml
-maven_installation: # default('home'). Valid values are 'home', 'system', and a previously installed `mvn` filepath
+maven_installation: # required. Valid values are 'home', 'system', 'none'.
+maven_home: # pathname, optional. The path to a previously installed `mvn` home directory
 maven_version: # string, default(<latest>). the Maven version to use for a home installation.  Only used when `maven_home_install=true`.
-maven_reset: # boolean, default(false). will delete `~/.m2` when true. Will also delete preexisting home maven installations when true.
+maven_reset: # boolean, default(false). will delete `~/.m2` when true. Will also delete preexisting home maven installation when true.
 maven_completions_filepath: # default(<sourced from bash-completion role>). filepath to install maven bash completion script to. Requires override if performing a home installation.
 
 # The following only apply when using authentication for a maven repository
