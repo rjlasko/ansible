@@ -16,50 +16,38 @@
         name: pipx
         state: present
 
-- when: pipx_installation == 'venv'
-  block:
-    - name: clear pipx virtualenv
-      loop:
-        - absent
-        - directory
-      loop_control:
-        loop_var: pipx_venv_state
-      file:
-        path: "{{ pipx_venv }}"
-        state: "{{ pipx_venv_state }}"
-
-    - name: install pipx (venv)
-      ansible.builtin.pip:
-        name: pipx
-        virtualenv: "{{ pipx_venv }}"
-        virtualenv_command: "{{ pipx_venv_command }}"
-        state: present
-
-    - name: link to venv pipx
-      file:
-        path: "{{ pipx_symlink }}"
-        src: "{{ pipx_venv }}/bin/pipx"
-        state: link
-
-    - name: "add pipx exe path to shell initialization script: {{ pipx_init_file }}"
-      ansible.builtin.blockinfile:
-        path: "{{ pipx_init_file }}"
-        create: true
-        insertbefore: ".*pipx\ apps"
-        marker: "# --- {mark} pipx exe path ---"
-        block: |
-          if ! $(echo "$PATH" | tr ":" "\n" | grep -qx "{{ pipx_symlink | dirname }}") ; then
-          	export PATH="{{ pipx_symlink | dirname }}:$PATH"
-          fi
-        state: present
-        mode: u=rw,go=r
-
 - name: install pipx (python)
   when: pipx_installation == 'python'
   ansible.builtin.pip:
     name: pipx
     executable: "{{ pipx_pip | default(omit) }}"
     state: present
+
+- when: pipx_installation == 'venv'
+  block:
+    - name: install pipx (venv)
+      include_role:
+        name: pipv
+      vars:
+        pipv_package: pipx
+        pipv_package_version: "{{ pipx_version | default(omit) }}"
+        pipv_copies: true
+        pipv_executables:
+          - pipx
+          - register-python-argcomplete
+
+    - name: "add pipx bin path to shell initialization script: {{ pipx_init_file }}"
+      ansible.builtin.blockinfile:
+        path: "{{ pipx_init_file }}"
+        create: true
+        insertbefore: ".*pipx\ apps"
+        marker: "# --- {mark} pipx exe path ---"
+        block: |
+          if ! $(echo "$PATH" | tr ":" "\n" | grep -qx "{{ pipv_bin_path }}") ; then
+          	export PATH="{{ pipv_bin_path }}:$PATH"
+          fi
+        state: present
+        mode: u=rw,go=r
 
 - name: "add pipx apps to shell initialization script: {{ pipx_init_file }}"
   ansible.builtin.blockinfile:
@@ -80,6 +68,6 @@
     create: true
     insertafter: ".*pipx\ apps"
     marker: "# --- {mark} pipx completions ---"
-    block: eval "$({{ pipx_bin_prefix }}register-python-argcomplete pipx)"
+    block: eval "$(register-python-argcomplete pipx)"
     state: present
     mode: u=rw,go=r

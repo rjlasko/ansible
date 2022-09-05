@@ -7,28 +7,24 @@ Also configures `pip`.
 ## Requirements
 
 `system`
-  - MacOS: `brew` or `pip` must be installed
+  - MacOS: `brew` must be installed
   - Linux: ***unsupported***
 
 `python`
-  - MacOS: `python3` & `pip` must be installed
-  - Linux: `python3` & `pip` must be installed
+  - All: `python3` & `pip` must be installed
 
 `venv`
-  - MacOS: `brew` or `pip` must be installed
-  - Linux: `python` and `pip` must be installed
+  - All: `python3` & `pip` must be installed
 
 ## Role Variables
 
 #### Settable Variables
 ```yaml
 pipx_installation: # required. How to install `pipx`. One of ['python', 'venv', 'system', 'none'].
-pipx_pip: # string, optional. Enables explicit specification of pip executable to use.
-pipx_venv_python: # string, default('python3'). Python interpreter to use to install `pipx` and optional venv. Resolved via PATH, unless absolute filepath is given.
-pipx_venv_command: # default('<pipx_python> -m venv --copies'). see: https://docs.ansible.com/ansible/latest/collections/ansible/builtin/pip_module.html#parameter-virtualenv_command
+pipx_pip: # string, optional. Enables explicit specification of pip executable to use, when `pipx_installation == 'python'`
+pipx_reset: # boolean, default(false). will uninstall all pipx managed applications.
 pipx_init_file: # filepath, default('~/.bashrc'), adds `pipx` executable to PATH, for venv installation.
 pipx_interactive_file: # filepath, default(<pipx_init_file>). adds `pipx` completions & apps to PATH.
-pipx_reset: # boolean, default(false). will uninstall all pipx managed applications.
 
 # If pip_extra_index_url is provided, then all 3 of the below variables above must be provided.
 pip_extra_index_url: # string (optional), URL for PyPi repository
@@ -52,6 +48,7 @@ None
   roles:
     - role: pipx
       vars:
+        pipx_installation: venv
         pip_username: "{{ vault.username }}"
         pip_password: "{{ vault.password }}"
         pip_extra_index_endpoint: company.jfrog.io/artifactory/api/pypi/pypi/simple

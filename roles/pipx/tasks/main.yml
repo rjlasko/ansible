@@ -6,13 +6,13 @@
 # this when condition is to avoid trying to reinstall pipx, because:
 #   1. this role is used to install pipx, and to use pipx to install packages
 #   2. there can only be one!
-- when: pipx_executable is not defined
-  block:
-    - name: detect pipx
-      ansible.builtin.include_tasks: detect_pipx.yml
+- name: detect pipx
+  when: pipx_executable is not defined
+  ansible.builtin.include_tasks: detect_pipx.yml
 
-    - name: configure pip
-      ansible.builtin.include_tasks: configure_pip.yml
+- name: configure pip
+  when: pip_config_installed | default(false)
+  ansible.builtin.include_tasks: configure_pip.yml
 
 - when: pipx_executable is not defined
   block:
