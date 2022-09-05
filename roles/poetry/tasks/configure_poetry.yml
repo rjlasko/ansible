@@ -1,0 +1,31 @@
+---
+## ---------------- ##
+## Configure poetry ##
+## ---------------- ##
+
+- name: poetry configuration
+  environment:
+    PATH: "{{ poetry_bin_env }}"
+  block:
+    - name: handle custom mirror
+      when: poetry_pip_url is defined
+      block:
+        - name: set URL for custom-mirror
+          ansible.builtin.command: "poetry config repositories.custom-mirror {{ poetry_pip_url }}"
+          changed_when: true
+
+        - name: set credentials for custom-mirror
+          ansible.builtin.command: "poetry config http-basic.custom-mirror {{ poetry_pip_username | mandatory }} {{ poetry_pip_password | mandatory }}"
+          changed_when: true
+
+    - name: apply poetry global configs
+      loop: "{{ poetry_extra_configs | default([]) }}"
+      loop_control:
+        loop_var: poetry_config
+      ansible.builtin.command: "poetry config {{ poetry_config }}"
+      changed_when: true
+
+    - name: get poetry configs
+      ansible.builtin.command: poetry config --list
+      changed_when: false
+      register: poetry_config_list

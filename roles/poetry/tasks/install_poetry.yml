@@ -1,0 +1,91 @@
+---
+## -------------------------------- ##
+## Installs `poetry` packaging tool ##
+## -------------------------------- ##
+
+- assert:
+    that: poetry_installation in ['system', 'python', 'venv', 'pipx', 'poetry', 'none']
+
+- when: poetry_installation == 'system'
+  block:
+    - assert:
+        that: ansible_facts.system == 'Darwin'
+
+    - name: install poetry (MacOS)
+      community.general.homebrew:
+        name: poetry
+        state: present
+
+- name: install poetry (pipx)
+  when: poetry_installation == 'pipx'
+  ansible.builtin.include_role:
+    name: pipx
+  vars:
+    pipx_packages:
+      - poetry
+
+- name: install poetry (python)
+  when: poetry_installation == 'python'
+  ansible.builtin.pip:
+    name: poetry
+    version: "{{ poetry_version | default(omit) }}"
+    executable: "{{ poetry_pip | default(omit) }}"
+    state: present
+
+- when: poetry_installation == 'venv'
+  block:
+    - name: install poetry (venv)
+      include_role:
+        name: pipv
+      vars:
+        pipv_package: poetry
+        pipv_package_version: "{{ poetry_version | default(omit) }}"
+        pipv_copies: true
+
+- when: poetry_installation == 'poetry'
+  block:
+    - name: clear prior installation
+      file:
+        path: "{{ poetry_installed_path['poetry'] }}"
+        state: absent
+
+    - name: install poetry (official installer)
+      ansible.builtin.shell: >
+        set -o pipefail
+        && curl -sSL https://install.python-poetry.org | {{ poetry_installer_vars }} python3 -
+      args:
+        executable: bash
+      changed_when: true
+
+- name: "add poetry exe path to shell initialization script: {{ poetry_init_file }}"
+  when: poetry_installation in ['venv', 'poetry']
+  ansible.builtin.blockinfile:
+    path: "{{ poetry_init_file }}"
+    create: true
+    insertbefore: ".*poetry\ completions"
+    marker: "# --- {mark} poetry exe path ---"
+    block: |
+      if ! $(echo "$PATH" | tr ":" "\n" | grep -qx "{{ poetry_bin_path }}") ; then
+      	export PATH="{{ poetry_bin_path }}:$PATH"
+      fi
+    state: present
+    mode: u=rw,go=r
+
+- name: generate and install poetry completions
+  environment:
+    PATH: "{{ poetry_bin_env }}"
+  block:
+    - name: generate poetry completion script
+      ansible.builtin.command: "poetry completions {{ ansible_facts.user_shell | split('/') | last }}"
+      changed_when: true
+      register: poetry_completions_generator
+
+    - name: "add poetry completions to shell initialization script: {{ poetry_completions_filepath }}"
+      ansible.builtin.blockinfile:
+        path: "{{ poetry_completions_filepath }}"
+        create: true
+        insertafter: ".*poetry\ exe\ path"
+        marker: "# --- {mark} poetry completions ---"
+        block: "{{ poetry_completions_generator.stdout }}"
+        state: present
+        mode: u=rw,g=r,o-rwx

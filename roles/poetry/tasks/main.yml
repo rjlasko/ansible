@@ -3,51 +3,8 @@
 ## Installs Poetry package manager for Python ##
 ## ------------------------------------------ ##
 
+- name: install poetry
+  ansible.builtin.include_tasks: install_poetry.yml
 
-- name: install packages with pipx
-  ansible.builtin.include_role:
-    name: pipx
-  vars:
-    pipx_packages:
-      - poetry
-
-- name: load pipx app directory into PATH
-  environment:
-    PATH: "{{ pipx_bin_path }}:{{ ansible_env.PATH }}"
-  block:
-    - name: handle custom mirror
-      when: poetry_pip_url is defined
-      block:
-        - name: set URL for custom-mirror
-          ansible.builtin.command: "poetry config repositories.custom-mirror {{ poetry_pip_url }}"
-          changed_when: true
-
-        - name: set credentials for custom-mirror
-          ansible.builtin.command: "poetry config http-basic.custom-mirror {{ poetry_pip_username | mandatory }} {{ poetry_pip_password | mandatory }}"
-          changed_when: true
-
-    - name: apply poetry global configs
-      loop: "{{ poetry_extra_configs | default([]) }}"
-      loop_control:
-        loop_var: poetry_config
-      ansible.builtin.command: "poetry config {{ poetry_config }}"
-      changed_when: true
-
-    - name: get poetry configs
-      ansible.builtin.command: poetry config --list
-      changed_when: false
-      register: poetry_config_list
-
-    - name: generate poetry completion script
-      ansible.builtin.command: "poetry completions {{ ansible_facts.user_shell | split('/') | last }}"
-      changed_when: true
-      register: poetry_completions_generator
-
-    - name: "add poetry completions to shell initialization script: {{ poetry_completions_filepath }}"
-      ansible.builtin.blockinfile:
-        path: "{{ poetry_completions_filepath }}"
-        create: true
-        marker: "# --- {mark} poetry Completions ---"
-        block: "{{ poetry_completions_generator.stdout }}"
-        state: present
-        mode: u=rw,g=r,o-rwx
+- name: configure poetry
+  ansible.builtin.include_tasks: configure_poetry.yml
