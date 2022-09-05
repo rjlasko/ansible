@@ -72,6 +72,7 @@
 #### Software Development
 - [`rjlasko.ansible.aws_utils`](https://github.com/rjlasko/ansible/blob/master/roles/aws_utils/README.md)
 - [`rjlasko.ansible.git`](https://github.com/rjlasko/ansible/blob/master/roles/git/README.md)
+- [`rjlasko.ansible.icdiff`](https://github.com/rjlasko/ansible/blob/master/roles/icdiff/README.md)
 - [`rjlasko.ansible.java`](https://github.com/rjlasko/ansible/blob/master/roles/java/README.md)
 - [`rjlasko.ansible.maven`](https://github.com/rjlasko/ansible/blob/master/roles/maven/README.md)
 - [`rjlasko.ansible.poetry`](https://github.com/rjlasko/ansible/blob/master/roles/poetry/README.md)
