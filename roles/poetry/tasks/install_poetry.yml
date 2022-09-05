@@ -4,7 +4,7 @@
 ## -------------------------------- ##
 
 - assert:
-    that: poetry_installation in ['system', 'python', 'venv', 'pipx', 'poetry', 'none']
+    that: poetry_installation in ['system', 'venv', 'pipx', 'poetry', 'none']
 
 - when: poetry_installation == 'system'
   block:
@@ -24,23 +24,14 @@
     pipx_packages:
       - poetry
 
-- name: install poetry (python)
-  when: poetry_installation == 'python'
-  ansible.builtin.pip:
-    name: poetry
-    version: "{{ poetry_version | default(omit) }}"
-    executable: "{{ poetry_pip | default(omit) }}"
-    state: present
-
-- when: poetry_installation == 'venv'
-  block:
-    - name: install poetry (venv)
-      include_role:
-        name: pipv
-      vars:
-        pipv_package: poetry
-        pipv_package_version: "{{ poetry_version | default(omit) }}"
-        pipv_copies: true
+- name: install poetry (venv)
+  when: poetry_installation == 'venv'
+  include_role:
+    name: pipv
+  vars:
+    pipv_package: poetry
+    pipv_package_version: "{{ poetry_version | default(omit) }}"
+    pipv_copies: true
 
 - when: poetry_installation == 'poetry'
   block:

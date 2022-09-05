@@ -10,9 +10,6 @@ Also configures `pip`.
   - MacOS: `brew` must be installed
   - Linux: ***unsupported***
 
-`python`
-  - All: `python3` & `pip` must be installed
-
 `venv`
   - All: `python3` & `pip` must be installed
 
@@ -20,8 +17,7 @@ Also configures `pip`.
 
 #### Settable Variables
 ```yaml
-pipx_installation: # required. How to install `pipx`. One of ['python', 'venv', 'system', 'none'].
-pipx_pip: # string, optional. Enables explicit specification of pip executable to use, when `pipx_installation == 'python'`
+pipx_installation: # required. How to install `pipx`. One of ['venv', 'system', 'none'].
 pipx_reset: # boolean, default(false). will uninstall all pipx managed applications.
 pipx_init_file: # filepath, default('~/.bashrc'), adds `pipx` executable to PATH, for venv installation.
 pipx_interactive_file: # filepath, default(<pipx_init_file>). adds `pipx` completions & apps to PATH.

@@ -10,8 +10,6 @@ Installs and configures the latest version of `poetry`.
 
 `pipx`: `pipx` must be installed
 
-`python`: `python3` & `pip` must be installed
-
 `venv`: `python3` & `pip` must be installed
 
 `poetry`: none
@@ -20,11 +18,10 @@ Installs and configures the latest version of `poetry`.
 
 #### Settable Variables
 ```yaml
-poetry_installation: # required. How to install `pipx`. One of ['system', 'python', 'venv', 'pipx', 'poetry', 'none'].
+poetry_installation: # required. How to install `pipx`. One of ['system', 'venv', 'pipx', 'poetry', 'none'].
 poetry_version: # optional, default(~latest~). version of poetry to install.
-poetry_pip: # string, optional. Enables explicit specification of pip executable to use, when `poetry_installation == 'python'`
 
-poetry_init_file: # filepath, default('~/.bashrc'). adds `poetry` executable to PATH, when `poetry_installation in ['python', 'venv']`
+poetry_init_file: # filepath, default('~/.bashrc'). adds `poetry` executable to PATH, when `poetry_installation == 'venv'`
 poetry_completions_filepath: # filepath, default('~/.bashrc'). where to drop scripts that load poetry completions
 
 poetry_pip_url: # string (optional), URL for PyPi repository

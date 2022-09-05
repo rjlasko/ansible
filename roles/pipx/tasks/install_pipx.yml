@@ -4,7 +4,7 @@
 ## ------------- ##
 
 - assert:
-    that: pipx_installation in ['system', 'python', 'venv', 'none']
+    that: pipx_installation in ['system', 'venv', 'none']
 
 - when: pipx_installation == 'system'
   block:
@@ -15,13 +15,6 @@
       community.general.homebrew:
         name: pipx
         state: present
-
-- name: install pipx (python)
-  when: pipx_installation == 'python'
-  ansible.builtin.pip:
-    name: pipx
-    executable: "{{ pipx_pip | default(omit) }}"
-    state: present
 
 - when: pipx_installation == 'venv'
   block:
