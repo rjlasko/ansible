@@ -57,6 +57,7 @@
 - `rjlasko.ansible.hostname`
 - `rjlasko.ansible.nvidia`
 - [`rjlasko.ansible.package_upgrades`]((https://github.com/rjlasko/ansible/blob/master/roles/package_upgrades/README.md))
+- [`rjlasko.ansible.pipv`](https://github.com/rjlasko/ansible/blob/master/roles/pipv/README.md)
 - [`rjlasko.ansible.pipx`](https://github.com/rjlasko/ansible/blob/master/roles/pipx/README.md)
 - [`rjlasko.ansible.timezone`]((https://github.com/rjlasko/ansible/blob/master/roles/timezone/README.md))
 

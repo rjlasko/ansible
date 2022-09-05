@@ -1,0 +1,3 @@
+pipv_home: "{{ ansible_user_dir }}/bin/{{ pipv_package }}"
+pipv_venv: "{{ pipv_home }}/venv"
+pipv_bin: "{{ pipv_home }}/bin"

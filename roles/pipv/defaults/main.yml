@@ -1,0 +1,6 @@
+---
+pipv_executables: "{{ pipv_package }}"
+pipv_copies: false
+pipv_python: python3
+# XXX: see: https://docs.ansible.com/ansible/latest/collections/ansible/builtin/pip_module.html#parameter-virtualenv_command
+pipv_command: "{{ pipv_python }} -m venv {{ '--copies' if pipv_copies else '' }}"

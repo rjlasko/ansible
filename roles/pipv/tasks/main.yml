@@ -1,0 +1,39 @@
+---
+## ------------------------------------------------- ##
+## Create virtualenv and install python apps into it ##
+## ------------------------------------------------- ##
+- name: "clear {{ pipv_home }}"
+  loop:
+    - absent
+    - directory
+  loop_control:
+    loop_var: pipv_state
+  file:
+    path: "{{ pipv_home }}"
+    state: "{{ pipv_state }}"
+
+- name: "install package into virtualenv: {{ pipv_package }}:{{ pipv_package_version | default('latest') }} => {{ pipv_venv }}"
+  ansible.builtin.pip:
+    name: "{{ pipv_package | mandatory }}"
+    version: "{{ pipv_package_version | default(omit) }}"
+    virtualenv: "{{ pipv_venv }}"
+    virtualenv_command: "{{ pipv_command }}"
+    state: present
+
+- name: "create {{ pipv_bin }}"
+  file:
+    path: "{{ pipv_bin }}"
+    state: directory
+
+- name: "create symlink for executables: {{ pipv_executables }}"
+  loop: "{{ pipv_executables if (pipv_executables | type_debug == 'list') else [pipv_executables] }}"
+  loop_control:
+    loop_var: pipv_executable
+  file:
+    path: "{{ pipv_bin }}/{{ pipv_executable }}"
+    src: "{{ pipv_venv }}/bin/{{ pipv_executable }}"
+    state: link
+
+- name: export facts
+  set_fact:
+    pipv_bin_path: "{{ pipv_bin }}"
