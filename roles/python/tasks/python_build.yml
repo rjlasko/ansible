@@ -21,11 +21,8 @@
 
     - name: "install python build dependencies (MacOS)"
       when: ansible_facts.system == 'Darwin'
-      loop: "{{ python_build_packages[ansible_facts.os_family] }}"
-      loop_control:
-        loop_var: brew_target
       community.general.homebrew:
-        name: "{{ brew_target }}"
+        name: "{{ python_build_packages[ansible_facts.os_family] }}"
         state: present
 
 - name: install Python versions via pyenv

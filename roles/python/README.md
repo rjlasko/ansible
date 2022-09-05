@@ -6,10 +6,11 @@ Also configures `pip`.
 
 ## Requirements
 
-- system
+`system`
   - MacOS: `brew` is installed
   - Linux: `sudo` privileges
-- pyenv
+
+`pyenv`
   - MacOS: `brew` is installed
   - Linux: `git` is installed, `sudo` if `pyenv_install_build_dependencies == true`
 
