@@ -6,7 +6,8 @@ Installs Maven, and configures its repository settings. This role provides syste
 
 `java`!
 
-`home`: `git`
+`home`
+  - All: `git`
 
 `system`
   - MacOS: `brew` is installed

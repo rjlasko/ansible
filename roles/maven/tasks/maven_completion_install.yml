@@ -9,6 +9,10 @@
     name: maven-completion
     state: present
 
+- name: load `bash_completion_dir` var from adjacent role
+  ansible.builtin.include_vars:
+    file: ../../bash_completion/vars/main.yml
+
 - when: maven_installation == "home" or ansible_facts.system == 'Linux'
   block:
     - name: create temp directory to store clone
@@ -44,6 +48,7 @@
         state: absent
 
 # XXX: this will intentionally fail if the user does not supply a writable `maven_completions_filepath`
+# XXX: MacOS doesn't need this because its `bash_completions_dir` should be loaded automatically
 - when: "{{ maven_installation == 'home' and ansible_facts.system == 'Linux' }}"
   ansible.builtin.blockinfile:
     path: "{{ maven_init_file }}"

@@ -4,8 +4,7 @@
 ## -------------- ##
 
 - assert:
-    that: (maven_installation in ['system', 'home', 'none']) != ((maven_home | length) > 0)
-    msg: must specify a valid maven_installation XOR maven_home
+    that: (maven_installation in ['system', 'home', 'none']) or ((maven_home | length) > 0)
 
 - when: maven_installation == "system"
   block:
@@ -52,11 +51,6 @@
       changed_when: false
       register: maven_repo_version
 
-    - vars:
-        maven_target_version: "{{ maven_version if maven_version | length > 0 else maven_repo_version.stdout }}"
-      set_fact:
-        maven_bin_url: "{{ maven_url_prefix }}/{{ maven_target_version }}/binaries/apache-maven-{{ maven_target_version }}-bin.tar.gz"
-
     - name: get checksum
       uri:
         url: "{{ maven_bin_url }}.sha512"
@@ -96,6 +90,8 @@
         path: "{{ maven_tempdir.path }}"
         state: absent
 
+# XXX: note that this does double duty for user-provided and `home` installations, by way
+# of the conditional used to pick the default value of `maven_home`
 - when: maven_home | length > 0
   block:
     - name: find installed maven executable
