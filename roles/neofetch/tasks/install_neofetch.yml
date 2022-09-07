@@ -33,5 +33,5 @@
       ansible.builtin.get_url:
         url: https://raw.githubusercontent.com/dylanaraps/neofetch/master/neofetch
         dest: "{{ neofetch_home_bin }}"
-        mode: u=rx,go-rwx
+        mode: u=rwx,go-rwx
         force: true

@@ -38,7 +38,9 @@
         state: present
 
     - name: query for installed Java versions
-      ansible.builtin.shell: set -o pipefail && update-alternatives --list java | sed 's#/bin.*##'
+      environment:
+        PATH: "/sbin:{{ ansible_env.PATH }}"
+      ansible.builtin.shell: set -o pipefail && update-alternatives --display java | grep priority | sed 's#/bin.*##'
       args:
         executable: bash
       register: java_homes_installed

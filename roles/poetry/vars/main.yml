@@ -5,4 +5,4 @@ poetry_installed_path:
   poetry: "{{ ansible_user_dir }}/.local/bin"
 
 poetry_bin_path: "{{ poetry_installed_path[poetry_installation] }}"
-poetry_bin_env: "{{ (poetry_bin_path + ':') if poetry_installation in ['venv', 'poetry'] else '' }}{{ poetry_bin_path }}"
+poetry_bin_env: "{{ (poetry_bin_path + ':') if poetry_installation in ['venv', 'poetry'] else '' }}{{ ansible_env.PATH }}"
