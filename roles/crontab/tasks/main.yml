@@ -17,7 +17,7 @@
       register: crontab_staging_dir
 
     - name: stage provided crontab
-      ansible.builtin.template:
+      ansible.builtin.copy:
         src: "{{ crontab.file }}"
         dest: "{{ crontab_staging_dir.path }}/cron.tab"
         force: true
