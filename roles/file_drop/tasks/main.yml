@@ -22,19 +22,19 @@
     force: "{{ fd_file.force | default(omit) }}"
     owner: "{{ fd_file.owner | default(omit) }}"
     group: "{{ fd_file.group | default(omit) }}"
-    mode: "{{ fd_file.mode | default('u=r,g-rwx,o-rwx') }}"
+    mode: "{{ fd_file.mode | default(omit if (fd_file.state in ['link', 'hard', 'absent']) else 'u=r,g-rwx,o-rwx') }}"
 
 - name: transfer files/templates
-  loop: "{{ file_drop.transfers | default([]) }}"
+  loop: "{{ file_drop.templates | default([]) }}"
   loop_control:
-    loop_var: fd_transfer
+    loop_var: fd_template
   ansible.builtin.template:
-    src: "{{ fd_transfer.src }}"
-    dest: "{{ fd_transfer.dest }}"
-    owner: "{{ fd_transfer.owner | default(omit) }}"
-    group: "{{ fd_transfer.group | default(omit) }}"
-    force: "{{ fd_transfer.force | default(omit) }}"
-    mode: "{{ fd_transfer.mode | default('u=r,g-rwx,o-rwx') }}"
+    src: "{{ fd_template.src | mandatory }}"
+    dest: "{{ fd_template.dest | mandatory }}"
+    owner: "{{ fd_template.owner | default(omit) }}"
+    group: "{{ fd_template.group | default(omit) }}"
+    force: "{{ fd_template.force | default(omit) }}"
+    mode: "{{ fd_template.mode | default('u=r,g-rwx,o-rwx') }}"
 
 - name: copy files
   loop: "{{ file_drop.copies | default([]) }}"
@@ -42,8 +42,8 @@
     loop_var: fd_copy
   ansible.builtin.copy:
     remote_src: "{{ fd_copy.remote_src | default(omit) }}"
-    src: "{{ fd_copy.src }}"
-    dest: "{{ fd_copy.dest }}"
+    src: "{{ fd_copy.src | mandatory }}"
+    dest: "{{ fd_copy.dest | mandatory }}"
     owner: "{{ fd_copy.owner | default(omit) }}"
     group: "{{ fd_copy.group | default(omit) }}"
     force: "{{ fd_copy.force | default(omit) }}"

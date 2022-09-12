@@ -90,7 +90,7 @@
 #### Other
 - [`rjlasko.ansible.backup_restore`](https://github.com/rjlasko/ansible/blob/master/roles/backup_restore/README.md)
 - `rjlasko.ansible.envsubst`
-- `rjlasko.ansible.file_drop`
+- [`rjlasko.ansible.file_drop`](https://github.com/rjlasko/ansible/blob/master/roles/file_drop/README.md)
 
 ## License
 
