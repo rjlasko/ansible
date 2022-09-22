@@ -23,6 +23,7 @@ maven_home: # pathname, optional. The path to a previously installed `mvn` home 
 maven_version: # string, default(<latest>). the Maven version to use for a home installation.  Only used when `maven_home_install=true`.
 maven_reset: # boolean, default(false). will delete `~/.m2` when true. Will also delete preexisting home maven installation when true.
 maven_completions_filepath: # default(<sourced from bash-completion role>). filepath to install maven bash completion script to. Requires override if performing a home installation.
+maven_init_file: # default('~/.bashrc'), filepath to update PATH with maven when not a system installation
 
 # The following only apply when using authentication for a maven repository
 maven_username: # string (optional), username

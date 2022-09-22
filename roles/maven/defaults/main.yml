@@ -4,3 +4,4 @@ maven_home: "{{ maven_home_dir if maven_installation == 'home' else '' }}"
 maven_version: ''
 maven_reset: false
 maven_completions_filepath: "{{ bash_completions_dir | mandatory }}/maven"
+maven_init_file: "{{ ansible_user_dir }}/.bashrc"
