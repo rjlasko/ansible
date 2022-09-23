@@ -14,6 +14,8 @@ Installs the `bash-completion` shell utility, to enhance shell usability.
 #### Settable Variables
 ```yaml
 bash_completion_install: # required, boolean. installs system package
+bash_completion_init_file: # default('~/.bashrc'). filepath to invoke bash_completion when `bash_completion_on_start=true
+bash_completion_on_start: # boolean, default(false). enable bash_completions on start of interactive shell
 ```
 
 #### Set Facts

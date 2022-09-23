@@ -1,2 +1,3 @@
 ---
 bash_completion_install: null
+bash_completion_on_start: false

@@ -65,6 +65,17 @@
   register: bash_completions_dir_check
   failed_when: not bash_completions_dir_check.stat.exists
 
+- name: "Add bash_completion to shell initialization script: {{ bash_completion_init_file }}"
+  when: bash_completion_on_start
+  ansible.builtin.blockinfile:
+    path: "{{ bash_completion_init_file }}"
+    create: true
+    marker: "# --- {mark} bash_completion startup ---"
+    block: |
+      . "{{ bash_completion_filepath }}"
+    state: present
+    mode: u=rw,go=r
+
 - name: export useful facts about bash_completion
   ansible.builtin.set_fact:
     bash_completion_filepath: "{{ bash_completion_filepath }}"
