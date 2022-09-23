@@ -35,3 +35,26 @@
         dest: "{{ neofetch_home_bin }}"
         mode: u=rwx,go-rwx
         force: true
+
+    - name: "add neofetch path to shell initialization script: {{ neofetch_init_file }}"
+      ansible.builtin.blockinfile:
+        path: "{{ neofetch_init_file }}"
+        create: true
+        marker: "# --- {mark} neofetch home bin ---"
+        block: |
+          if ! $(echo "$PATH" | tr ":" "\n" | grep -qx "{{ neofetch_home_bin }}") ; then
+              export PATH="{{ neofetch_home_bin }}:$PATH"
+          fi
+        state: present
+        mode: u=rw,go=r
+
+- name: "Add neofetch to shell initialization script: {{ neofetch_home_bin }}"
+  when: neofetch_on_start
+  ansible.builtin.blockinfile:
+    path: "{{ neofetch_init_file }}"
+    create: true
+    insertafter: ".*neofetch\ home\ bin"
+    marker: "# --- {mark} neofetch startup ---"
+    block: neofetch
+    state: present
+    mode: u=rw,go=r

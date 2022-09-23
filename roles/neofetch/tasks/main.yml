@@ -19,8 +19,17 @@
       environment:
         PATH: "{{ neofetch_home_bin | dirname }}:{{ ansible_env.PATH }}"
 
+- name: copy image source
+  when: neofetch_image_source is defined
+  ansible.builtin.copy:
+    src: "{{ neofetch_image_source.src | mandatory }}"
+    dest: "{{ neofetch_image_source.dest }}"
+    mode: "{{ neofetch_image_source.mode | default('u=r,go-rwx') }}"
+
 - name: update configuration
-  loop: "{{ neofetch_configs }}"
+  vars:
+    neofetch_image_cfg: "{{ [['image_source', neofetch_image_source.dest]] if neofetch_image_source is defined else [] }}"
+  loop: "{{ neofetch_configs + neofetch_image_cfg }}"
   loop_control:
     loop_var: neofetch_config
   community.general.ini_file:

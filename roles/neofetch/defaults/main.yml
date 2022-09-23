@@ -2,3 +2,5 @@
 neofetch_installation: null
 neofetch_reset: true
 neofetch_configs: []
+neofetch_init_file: "{{ ansible_user_dir }}/.bashrc"
+neofetch_on_start: false

@@ -17,6 +17,12 @@ Installs `neofetch` to the host, and facilitates per-user configuration.
 neofetch_installation: # required. Valid values are 'home', 'system', 'none'
 neofetch_reset: # boolean, default(true). Rebuilds the config
 neofetch_configs: # list of 2-element lists, default([]). configs to update in neofetch config file
+neofetch_image_source: # define image for neofetch to use instead of default
+  src: # required, filepath for source image on controller
+  dest: # required, filepath for image to be saved on target
+  mode: # file permissions string, default('u=r,go-rwx').
+neofetch_init_file: # default('~/.bashrc'), filepath to update PATH with neofetch when not a system installation, and place to install neofetch command when `neofetch_on_start=true`
+neofetch_on_start: # boolean, default(false). run neofetch on start of interactive shell
 ```
 
 ## Dependencies
