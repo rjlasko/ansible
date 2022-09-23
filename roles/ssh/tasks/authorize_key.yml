@@ -3,15 +3,13 @@
 ## Authorizes SSH login with the given public key ##
 ## ---------------------------------------------- ##
 
-- name: extract SSH key comment and use as key ID
-  ansible.builtin.shell: >
-    set -o pipefail
-    && echo {{ authorized_key | mandatory }}
-    | awk '{print $NF}'
-  args:
-    executable: bash
-  changed_when: false
-  register: key_comment
+- name: using comment as key ID, remove preexisting keys with same ID
+  ansible.builtin.lineinfile:
+    path: "~/.ssh/authorized_keys"
+    create: true
+    mode: u=rw,go-rwx
+    search_string: "{{ authorized_key.split(' ')[2:] }}"
+    state: absent
 
 - name: write authorized public key
   ansible.builtin.lineinfile:
@@ -19,5 +17,4 @@
     create: true
     mode: u=rw,go-rwx
     state: present
-    regexp: ".*{{ key_comment.stdout }}"
     line: "{{ authorized_key }}"
