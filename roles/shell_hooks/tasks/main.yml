@@ -27,11 +27,8 @@
 
 - name: delete shell-hooks directories
   when: shell_hooks_reset
-  loop: "{{ shell_hooks_directories }}"
-  loop_control:
-    loop_var: shell_hooks_dir
   ansible.builtin.file:
-    path: "{{ shell_hooks_dir }}"
+    path: "{{ shell_hooks_directory }}"
     state: absent
 
 - name: create shell-hooks directories

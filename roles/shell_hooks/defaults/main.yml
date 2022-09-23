@@ -1,0 +1,3 @@
+---
+shell_hooks_directory: "{{ ansible_user_dir }}/.shell_hooks"
+shell_hooks_reset: false
