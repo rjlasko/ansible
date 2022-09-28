@@ -21,11 +21,9 @@
         name: vim
         state: present
 
-- when: vimrc_reset
-  vars:
-    vimrc_filepath: "{{ ansible_user_dir }}/.vimrc"
+- when: vimrc_user_cfg
   block:
-    - name: clear ~/.vimrc
+    - name: "clear {{ vimrc_filepath }}"
       ansible.builtin.file:
         path: "{{ vimrc_filepath }}"
         state: absent
@@ -42,3 +40,11 @@
         owner: "{{ ansible_user }}"
         group: "{{ vim_user_group_name.stdout }}"
         mode: u=rw,g=r,o-rwx
+
+- name: set vim default editor for user
+  when: vim_default_editor
+  ansible.builtin.lineinfile:
+    dest: "{{ vim_init_file }}"
+    state: present
+    regexp: '^#?EDITOR'
+    line: 'EDITOR=vim'

@@ -21,9 +21,7 @@
         name: nano
         state: present
 
-- when: nanorc_reset
-  vars:
-    nanorc_filepath: "{{ ansible_user_dir }}/.nanorc"
+- when: nanorc_user_cfg
   block:
     - name: "clear {{ nanorc_filepath }}"
       ansible.builtin.file:
@@ -51,3 +49,11 @@
         owner: "{{ ansible_user }}"
         group: "{{ nano_user_group_name.stdout }}"
         mode: u=rw,g=r,o-rwx
+
+- name: set nano default editor for user
+  when: nano_default_editor
+  ansible.builtin.lineinfile:
+    dest: "{{ nano_init_file }}"
+    state: present
+    regexp: '^#?EDITOR'
+    line: 'EDITOR=nano'

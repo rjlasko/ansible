@@ -1,0 +1,2 @@
+---
+vimrc_filepath: "{{ ansible_user_dir }}/.vimrc"
