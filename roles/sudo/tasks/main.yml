@@ -10,45 +10,30 @@
     name: sudo
     state: present
 
-# determine default group with sudo privileges
-- name: get all groups
-  ansible.builtin.shell: set -o pipefail && getent group | awk -F":" '{print $1}'
-  args:
-    executable: bash
-  changed_when: false
-  register: getent_groups
-
-- name: find default sudoers group
-  # XXX: in ascending order of precedence
-  # see: https://wiki.archlinux.org/index.php/Sudo#Example_entries
-  loop:
-    - sudo
-    - wheel
-  loop_control:
-    loop_var: sudoer_group
-  when: sudoer_group in getent_groups.stdout_lines
-  ansible.builtin.set_fact:
-    default_sudoers_group: "{{ sudoer_group }}"
-
-- name: find preexisting custom sudoers files
-  ansible.builtin.find:
-    paths: "/etc/sudoers.d"
-    patterns: "custom_*"
-  register: find_custom_sudoers
-
-- name: reset custom sudoers files
-  when: find_custom_sudoers.files
-  loop: "{{ find_custom_sudoers.files }}"
-  loop_control:
-    loop_var: custom_sudoer_file
+- name: clear custom sudoers file
   ansible.builtin.file:
-    path: "{{ custom_sudoer_file.path }}"
+    path: "{{ sudoer_nologin_filepath }}"
     state: absent
 
-- name: add custom sudoers file
-  community.general.sudoers:
-    name: custom_nologin
-    state: present
-    group: "{{ default_sudoers_group }}"
-    commands: ALL
-    nopassword: true
+- when: sudoer_nologin
+  block:
+    # determine default group with sudo privileges
+    - name: get all groups
+      ansible.builtin.getent:
+        database: group
+
+    - name: add sudoers groups to nologin
+      # XXX: in ascending order of precedence
+      # see: https://wiki.archlinux.org/index.php/Sudo#Example_entries
+      loop:
+        - sudo
+        - wheel
+      loop_control:
+        loop_var: sudoer_group
+      when: sudoer_group in ansible_facts.getent_group
+      community.general.sudoers:
+        name: "{{ sudoer_nologin_filepath | basename }}"
+        state: present
+        group: "{{ sudoer_group }}"
+        commands: ALL
+        nopassword: true

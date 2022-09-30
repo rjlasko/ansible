@@ -1,0 +1,3 @@
+---
+sudoer_nologin: false
+sudoer_nologin_filepath: /etc/sudoers.d/custom_nologin
