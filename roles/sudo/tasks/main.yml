@@ -19,7 +19,6 @@
   register: getent_groups
 
 - name: find default sudoers group
-  when: item in getent_groups.stdout_lines
   # XXX: in ascending order of precedence
   # see: https://wiki.archlinux.org/index.php/Sudo#Example_entries
   loop:
@@ -27,6 +26,7 @@
     - wheel
   loop_control:
     loop_var: sudoer_group
+  when: sudoer_group in getent_groups.stdout_lines
   ansible.builtin.set_fact:
     default_sudoers_group: "{{ sudoer_group }}"
 
