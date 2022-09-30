@@ -3,22 +3,16 @@
 ## Installs Git ##
 ## ------------ ##
 
-- name: check if git is accessible via path
-  ansible.builtin.shell: command -V git
-  changed_when: false
-  ignore_errors: true
-  register: git_exists
-
 - name: system install git
-  when: git_exists.rc != 0
   block:
-    - name: Linux install Git
+    - name: "install git ({{ ansible_facts.os_family }} Linux)"
       when: ansible_facts.system == 'Linux'
+      become: true
       ansible.builtin.package:
         name: git
         state: present
 
-    - name: Homebrew install Git
+    - name: install git (MacOS)
       when: ansible_facts.system == 'Darwin'
       community.general.homebrew:
         name: git

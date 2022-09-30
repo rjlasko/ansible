@@ -1,0 +1,26 @@
+---
+## ----------------------------------------------- ##
+## Configures environment variables for git prompt ##
+## ----------------------------------------------- ##
+
+- name: "verify exists: {{ git_prompt_filepath }}"
+  stat:
+    path: "{{ git_prompt_filepath }}"
+  register: git_prompt_script_exists
+  failed_when: not git_prompt_script_exists.stat.exists
+
+- name: "Add git prompt configurations to shell initialization script: {{ git_prompt_init_file }}"
+  vars:
+    git_prompt_vars_merged: "{{ git_prompt_vars | combine(git_prompt_defaults) | dict2items }}"
+  ansible.builtin.blockinfile:
+    path: "{{ git_prompt_init_file }}"
+    create: true
+    marker: "# --- {mark} git prompt ---"
+    block: |
+      {% for git_ps1 in git_prompt_vars_merged %}
+      {{ git_ps1.key }}={{ git_ps1.value }}
+      {% endfor %}
+      . "{{ git_prompt_filepath }}"
+      GIT_PS1='$(__git_ps1)'
+    state: present
+    mode: u=rw,go=r

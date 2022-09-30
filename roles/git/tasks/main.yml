@@ -3,25 +3,30 @@
 ## Installs Git, and clones, configures and pushes repositories ##
 ## ------------------------------------------------------------ ##
 
-- name: check if git is accessible via path
+- name: install git
+  when: git_install
   ansible.builtin.include_tasks: install_git.yml
 
+- name: install git prompt configuration
+  when: git_prompt
+  ansible.builtin.include_tasks: configure_prompt.yml
+
 - name: git global config
-  loop: "{{ git.global | default({}) | dict2items }}"
+  loop: "{{ git_global_config | dict2items }}"
   loop_control:
     loop_var: git_global_config_item
   ansible.builtin.include_tasks: git_config.yml
   vars:
-    git_config: "{{ git_global_config_item | combine({'scope': 'global'}) }}"
+    git_config: "{{ git_global_config_item | combine(git_global_scope) }}"
 
-- name: push repositories
-  loop: "{{ git.pushes | default([]) }}"
+- name: seed repositories
+  loop: "{{ git_seeds }}"
   loop_control:
-    loop_var: git_push
-  ansible.builtin.include_tasks: git_push.yml
+    loop_var: git_seed
+  ansible.builtin.include_tasks: git_seed.yml
 
 - name: clone repositories
-  loop: "{{ git.clones | default([]) }}"
+  loop: "{{ git_clones }}"
   loop_control:
     loop_var: git_clone
   ansible.builtin.include_tasks: git_clone.yml

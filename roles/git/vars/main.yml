@@ -1,0 +1,21 @@
+---
+git_global_scope:
+  scope: global
+
+git_local_scope:
+  scope: local
+
+git_seed_host: "{{ ansible_host }}"
+
+git_prompt_os_filepath:
+  Darwin: /usr/local/etc/bash_completion.d/git-prompt.sh
+  Debian: /usr/lib/git-core/git-sh-prompt
+  RedHat: /usr/share/git-core/contrib/completion/git-prompt.sh
+
+git_prompt_defaults:
+  GIT_PS1_SHOWDIRTYSTATE: true
+  GIT_PS1_SHOWSTASHSTATE: true
+  GIT_PS1_SHOWUNTRACKEDFILES: true
+  GIT_PS1_SHOWUPSTREAM: '"auto"'
+  GIT_PS1_SHOWCOLORHINTS: '"yes"'
+  GIT_PS1_SHOWCONFLICTSTATE: '"yes"'

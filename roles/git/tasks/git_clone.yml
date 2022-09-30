@@ -18,4 +18,4 @@
     loop_var: git_local_config_item
   ansible.builtin.include_tasks: git_config.yml
   vars:
-    git_config: "{{ git_local_config_item | combine({'scope': 'local', 'repo': git_clone.dest}) }}"
+    git_config: "{{ git_local_config_item | combine(git_local_scope) | combine({'repo': git_clone.dest}) }}"

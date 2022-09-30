@@ -1,6 +1,6 @@
 # Ansible Role: Git
 
-Installs `git` to the host, facilitates per-user configuration, and supports cloning and pushing of repositories to the target.
+Installs `git` to the host, facilitates per-user configuration, and supports cloning and seeding of repositories to the target.
 
 ## Requirements
 
@@ -14,23 +14,20 @@ Installs `git` to the host, facilitates per-user configuration, and supports clo
 All the following variables are optional.  If none are specified, this role will simply try to install `git`. If `git` is found in the `PATH`, installation will be skipped.
 
 ```yaml
-git:
-  global:
-    user.name: # The user's git global username
-    user.email: # The user's git global email address
-  clones: # list of repos to clone and destinations on target
-    - src: # the URL of the source (origin) git repo
-      dest: # the target repository folder path
-      config:
-        user.name: # The local username for this repo
-        user.email: # The local email address for this repo
-  pushes: # list of repos to create on the target from the host
-    - src: # the source folder path on the controller
-      dest: # the target repository folder path
-      config:
-        user.name: # The local username for this repo
-        user.email: # The local email address for this repo
-  utils_path: # location to install git_utils.sh to
+git_install: # boolean, default(false). Installs system package
+git_global_config: # default({}). object declaring user's global configuration key-value pairs
+git_clones: # default([]). list of repositories to clone
+  - src: # required. URL of repository to clone
+    dest: # required. location repository will be cloned to
+    config: # default({}). object declaring repository's local configuration key-value pairs
+git_seeds: # default([]). list of repositories on host to clone to target
+  - src: # required. location of repository on host to clone from
+    dest: # required. location repository will be cloned to
+    config: # default({}). object declaring repository's local configuration key-value pairs
+git_prompt: # boolean, default(false). install git prompt configuration
+git_prompt_init_file: # default('~/.bashrc'). Location to install prompt configuration into
+git_prompt_vars: # default({}). object declaring ENV key-value pairs for git prompt
+git_prompt_filepath: # default(<system default>). location of git-prompt.sh
 ```
 
 ## Dependencies
@@ -43,20 +40,18 @@ None
   roles:
     - role: git
       vars:
-        git:
-          bin_path: /opt/git/bin
-          global:
-            user.name: First Last
-            user.email: first.last@service.com
-          clones:
-            - src: ssh://user@host:/path/to/repo
-              dest: ~/workspace/repo
-              config:
-                user.name: nickname
-          pushes:
-            - src: ~/workspace/another_repo
-              dest: ~/workspace/another_repo
-          utils_path: ~/.shell_hooks/interactive/99_git_utils.sh
+        git_global_config:
+          user.name: First Last
+          user.email: first.last@service.com
+        git_clones:
+          - src: ssh://user@host:/path/to/repo
+            dest: ~/workspace/repo
+            config:
+              user.name: nickname
+        git_seeds:
+          - src: ~/workspace/another_repo
+            dest: ~/workspace/another_repo
+        git_prompt: true
 ```
 
 ## License

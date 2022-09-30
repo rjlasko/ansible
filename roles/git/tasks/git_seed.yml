@@ -1,42 +1,42 @@
 ---
-## ----------------------- ##
-## Pushes a Git repository ##
-## ----------------------- ##
+## ---------------------- ##
+## Seeds a Git repository ##
+## ---------------------- ##
 
 # TODO: if already exists, then put into a mode where branches and commits can be obliterated, instead of deleting
 # FIXME: it seems that remote branches, that have a different history than the local, are not being overwritten
 
 - name: check that directory exists
   ansible.builtin.stat:
-    path: "{{ git_push.dest | mandatory }}/.git"
+    path: "{{ git_seed.dest | mandatory }}/.git"
   register: preexist_repo_dir
 
 - name: convert dest to bare, if pre-exists
   when: preexist_repo_dir.stat.exists and preexist_repo_dir.stat.isdir
   block:
     - name: move .git dir
-      ansible.builtin.command: "mv {{ git_push.dest }}/.git {{ git_push.dest }}.git"
+      ansible.builtin.command: "mv {{ git_seed.dest }}/.git {{ git_seed.dest }}.git"
       changed_when: true
 
     - name: clear old directory
       ansible.builtin.file:
-        path: "{{ git_push.dest }}"
+        path: "{{ git_seed.dest }}"
         state: absent
 
     - name: create user space directory
       ansible.builtin.file:
         state: directory
-        path: "{{ git_push.dest }}"
-        mode: u=rw,go-rwx
+        path: "{{ git_seed.dest }}"
+        mode: u=rwX,go-rwx
 
     - name: move .git dir
-      ansible.builtin.command: "mv {{ git_push.dest }}.git {{ git_push.dest }}/.git"
+      ansible.builtin.command: "mv {{ git_seed.dest }}.git {{ git_seed.dest }}/.git"
       changed_when: true
 
     - name: convert to bare repo
       ansible.builtin.command: "git config --bool core.bare true"
       args:
-        chdir: "{{ git_push.dest }}/.git"
+        chdir: "{{ git_seed.dest }}/.git"
       changed_when: true
 
 - name: create new dest, if not pre-exists
@@ -45,23 +45,19 @@
     - name: create .git directory
       ansible.builtin.file:
         state: directory
-        path: "{{ git_push.dest | mandatory }}"
-        mode: u=rw,go-rwx
+        path: "{{ git_seed.dest | mandatory }}"
+        mode: u=rwX,go-rwx
 
     - name: Create the bare repo
-      ansible.builtin.command: "git init --bare {{ git_push.dest }}/.git"
+      ansible.builtin.command: "git init --bare {{ git_seed.dest }}/.git"
       changed_when: true
 
-- name: host to push repo to
-  ansible.builtin.set_fact:
-    gitpush_host: "{{ ansible_host }}"
-
-- name: Push that repo!
+- name: Seed (push) local repo to target
   local_action: >
     command git
-    --git-dir={{ git_push.src | mandatory }}/.git
+    --git-dir={{ git_seed.src | mandatory }}/.git
     push
-    {{ ansible_facts['user_id'] }}@{{ gitpush_host }}:{{ git_push.dest }}/.git
+    {{ ansible_facts['user_id'] }}@{{ git_seed_host }}:{{ git_seed.dest }}/.git
     --mirror
     --prune
   changed_when: push_response.stderr != "Everything up-to-date"
@@ -73,13 +69,13 @@
 - name: convert to non-bare repository
   ansible.builtin.command: "git config --local --bool core.bare false"
   args:
-    chdir: "{{ git_push.dest }}"
+    chdir: "{{ git_seed.dest }}"
   changed_when: true
 
 - name: Determine local checkout branch
   local_action: >
     command git
-    --git-dir={{ git_push.src | mandatory }}/.git
+    --git-dir={{ git_seed.src | mandatory }}/.git
     rev-parse
     --abbrev-ref HEAD
   changed_when: false
@@ -88,11 +84,20 @@
 - name: Remote checkout current_branch
   ansible.builtin.command: "git checkout {{ current_branch.stdout }}"
   args:
-    chdir: "{{ git_push.dest }}"
+    chdir: "{{ git_seed.dest }}"
   changed_when: true
 
 - name: reset repo
   ansible.builtin.command: git reset --hard
   args:
-    chdir: "{{ git_push.dest }}"
+    chdir: "{{ git_seed.dest }}"
   changed_when: true
+
+- name: apply local configurations
+  when: git_seed.config is defined
+  loop: "{{ git_seed.config | default({}) | dict2items }}"
+  loop_control:
+    loop_var: git_local_config_item
+  ansible.builtin.include_tasks: git_config.yml
+  vars:
+    git_config: "{{ git_local_config_item | combine(git_local_scope) | combine({'repo': git_seed.dest}) }}"

@@ -1,0 +1,9 @@
+---
+git_install: false
+git_global_config: {}
+git_clones: []
+git_seeds: []
+git_prompt: false
+git_prompt_filepath: "{{ git_prompt_os_filepath[ansible_facts.os_family] }}"
+git_prompt_vars: {}
+git_prompt_init_file: "{{ ansible_user_dir }}/.bashrc"
