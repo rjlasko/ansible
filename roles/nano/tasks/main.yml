@@ -54,6 +54,7 @@
   when: nano_default_editor
   ansible.builtin.lineinfile:
     dest: "{{ nano_init_file }}"
+    create: true
     state: present
     regexp: '^#?EDITOR'
     line: 'EDITOR=nano'
