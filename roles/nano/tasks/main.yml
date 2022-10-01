@@ -3,9 +3,6 @@
 ## Installs and configures nano ##
 ## ---------------------------- ##
 
-- assert:
-    that: (nano_install | type_debug) == 'bool'
-
 - when: nano_install
   block:
     - name: install nano (MacOS)

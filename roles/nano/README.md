@@ -11,7 +11,7 @@ Installs `nano` to the host, and facilitates per-user configuration.
 
 #### Settable Variables
 ```yaml
-nano_install: # required, boolean. installs system package
+nano_install: # boolean, default(false). installs system package
 nano_default_editor: # boolean, default(false). Set nano as default shell text editor
 nano_init_file: # default('~/.bashrc'), filepath to update when 'nano_default_editor=true'
 nanorc_settings: # list, default(['set autoindent', 'set tabsize 4']). see: https://www.nano-editor.org/dist/latest/nanorc.5.html

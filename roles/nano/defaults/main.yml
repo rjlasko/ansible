@@ -1,5 +1,5 @@
 ---
-nano_install: null
+nano_install: false
 nanorc_settings:
   - set autoindent
   - set tabsize 4

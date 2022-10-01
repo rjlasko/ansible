@@ -3,9 +3,6 @@
 ## Installs bash-completion ##
 ## ------------------------ ##
 
-- assert:
-    that: (bash_completion_install | type_debug) == 'bool'
-
 - when: bash_completion_install
   block:
     - name: "install bash-completion ({{ ansible_facts.os_family }} Linux)"

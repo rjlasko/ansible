@@ -3,9 +3,6 @@
 ## Installs and configures vim ##
 ## --------------------------- ##
 
-- assert:
-    that: (vim_install | type_debug) == 'bool'
-
 - when: vim_install
   block:
     - name: install vim (MacOS)

@@ -1,5 +1,5 @@
 ---
-vim_install: null
+vim_install: false
 vim_default_editor: false
 vim_init_file: "{{ ansible_user_dir }}/.bashrc"
 vimrc_settings:
