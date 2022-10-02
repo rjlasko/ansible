@@ -12,8 +12,7 @@ Installs `nano` to the host, and facilitates per-user configuration.
 #### Settable Variables
 ```yaml
 nano_install: # boolean, default(false). installs system package
-nano_default_editor: # boolean, default(false). Set nano as default shell text editor
-nano_init_file: # default('~/.bashrc'), filepath to update when 'nano_default_editor=true'
+nano_init_file: # filepath, optional. filepath to add `EDITOR=nano` to shell environment
 nanorc_settings: # list, default(['set autoindent', 'set tabsize 4']). see: https://www.nano-editor.org/dist/latest/nanorc.5.html
 nanorc_user_cfg: # boolean, default(false). Builds the user's config
 ```
@@ -30,6 +29,7 @@ None
     - role: nano
       vars:
         nano_install: true
+        nano_init_file: ~/.bashrc
         nanorc_user_cfg: true
         nanorc_settings:
           - set smooth

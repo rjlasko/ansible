@@ -1,7 +1,6 @@
 ---
 vim_install: false
-vim_default_editor: false
-vim_init_file: "{{ ansible_user_dir }}/.bashrc"
+vim_init_file: null
 vimrc_settings:
   - syntax on
   - set noswapfile

@@ -37,6 +37,7 @@
         force: true
 
     - name: "add neofetch path to shell initialization script: {{ neofetch_init_file }}"
+      when: neofetch_init_file
       ansible.builtin.blockinfile:
         path: "{{ neofetch_init_file }}"
         create: true
@@ -49,7 +50,7 @@
         mode: u=rw,go=r
 
 - name: "Add neofetch to shell initialization script: {{ neofetch_home_bin }}"
-  when: neofetch_on_start
+  when: neofetch_init_file and neofetch_init_start
   ansible.builtin.blockinfile:
     path: "{{ neofetch_init_file }}"
     create: true

@@ -24,8 +24,7 @@ git_seeds: # default([]). list of repositories on host to clone to target
   - src: # required. location of repository on host to clone from
     dest: # required. location repository will be cloned to
     config: # default({}). object declaring repository's local configuration key-value pairs
-git_prompt: # boolean, default(false). install git prompt configuration
-git_prompt_init_file: # default('~/.bashrc'). Location to install prompt configuration into
+git_prompt_init_file: # filepath, optional. filepath to add git prompt configurations to shell environment
 git_prompt_vars: # default({}). object declaring ENV key-value pairs for git prompt
 git_prompt_filepath: # default(<system default>). location of git-prompt.sh
 ```
@@ -51,7 +50,7 @@ None
         git_seeds:
           - src: ~/workspace/another_repo
             dest: ~/workspace/another_repo
-        git_prompt: true
+        git_prompt_init_file: ~/.bashrc
 ```
 
 ## License

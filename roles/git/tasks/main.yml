@@ -8,7 +8,7 @@
   ansible.builtin.include_tasks: install_git.yml
 
 - name: install git prompt configuration
-  when: git_prompt
+  when: git_prompt_init_file
   ansible.builtin.include_tasks: configure_prompt.yml
 
 - name: git global config

@@ -63,7 +63,7 @@
   failed_when: not bash_completions_dir_check.stat.exists
 
 - name: "Add bash_completion to shell initialization script: {{ bash_completion_init_file }}"
-  when: bash_completion_on_start
+  when: bash_completion_init_file
   ansible.builtin.blockinfile:
     path: "{{ bash_completion_init_file }}"
     create: true

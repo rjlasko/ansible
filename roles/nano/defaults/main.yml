@@ -1,8 +1,7 @@
 ---
 nano_install: false
+nano_init_file: null
 nanorc_settings:
   - set autoindent
   - set tabsize 4
 nanorc_user_cfg: false
-nano_default_editor: false
-nano_init_file: "{{ ansible_user_dir }}/.bashrc"

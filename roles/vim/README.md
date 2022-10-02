@@ -12,8 +12,7 @@ Installs `vim` to the host, and facilitates per-user configuration.
 #### Settable Variables
 ```yaml
 vim_install: # boolean, default(false). installs system package
-vim_default_editor: # boolean, default(false). Set vim as default shell text editor
-vim_init_file: # default('~/.bashrc'), filepath to update when 'vim_default_editor=true'
+vim_init_file: # filepath, optional. filepath to add `EDITOR=vim` to shell environment
 vimrc_settings: # list, default(['syntax on', 'set noswapfile']). see: http://vimdoc.sourceforge.net/htmldoc/options.html
 vimrc_user_cfg: # boolean, default(false). Builds the user's config
 ```
@@ -29,9 +28,9 @@ None
   roles:
     - role: vim
       vars:
-        vimrc_settings:
-          - syntax on
-          - set noswapfile
+        vim_install: system
+        vim_init_file: ~/.bashrc
+        vimrc_user_cfg: true
 ```
 
 ## License

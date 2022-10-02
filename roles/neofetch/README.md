@@ -21,8 +21,8 @@ neofetch_image_source: # define image for neofetch to use instead of default
   src: # required, filepath for source image on controller
   dest: # required, filepath for image to be saved on target
   mode: # file permissions string, default('u=r,go-rwx').
-neofetch_init_file: # default('~/.bashrc'), filepath to update PATH with neofetch when not a system installation, and place to install neofetch command when `neofetch_on_start=true`
-neofetch_on_start: # boolean, default(false). run neofetch on start of interactive shell
+neofetch_init_file: # filepath, optional. filepath to add neofetch to PATH for home installation, and place to install neofetch command when `neofetch_init_start=true`
+neofetch_init_start: # boolean, default(false). run neofetch on start of user's interactive shell
 ```
 
 ## Dependencies
@@ -36,9 +36,11 @@ None
   roles:
     - role: neofetch
       vars:
-        neofetch_installation: system
+        neofetch_installation: home
         neofetch_configs:
           - ['color_blocks', '"off"']
+        neofetch_init_file: ~/.bashrc
+        neofetch_init_start: true
 ```
 
 ## License

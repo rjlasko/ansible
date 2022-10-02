@@ -48,7 +48,7 @@
         mode: u=rw,g=r,o-rwx
 
 - name: set nano default editor for user
-  when: nano_default_editor
+  when: nano_init_file
   ansible.builtin.lineinfile:
     dest: "{{ nano_init_file }}"
     create: true

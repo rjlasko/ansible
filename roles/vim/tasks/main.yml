@@ -39,7 +39,7 @@
         mode: u=rw,g=r,o-rwx
 
 - name: set vim default editor for user
-  when: vim_default_editor
+  when: vim_init_file
   ansible.builtin.lineinfile:
     dest: "{{ vim_init_file }}"
     state: present
