@@ -49,7 +49,7 @@
       changed_when: true
 
 - name: "add poetry exe path to shell initialization script: {{ poetry_init_file }}"
-  when: poetry_installation in ['venv', 'poetry']
+  when: poetry_init_file and poetry_installation in ['venv', 'poetry']
   ansible.builtin.blockinfile:
     path: "{{ poetry_init_file }}"
     create: true
@@ -63,17 +63,18 @@
     mode: u=rw,go=r
 
 - name: generate and install poetry completions
+  when: poetry_init_file
   environment:
     PATH: "{{ poetry_bin_env }}"
   block:
     - name: generate poetry completion script
-      ansible.builtin.command: "poetry completions {{ ansible_facts.user_shell | split('/') | last }}"
-      changed_when: true
+      ansible.builtin.command: "poetry completions {{ ansible_facts.user_shell | basename }}"
+      changed_when: false
       register: poetry_completions_generator
 
-    - name: "add poetry completions to shell initialization script: {{ poetry_completions_filepath }}"
+    - name: "add poetry completions to shell initialization script: {{ poetry_init_file }}"
       ansible.builtin.blockinfile:
-        path: "{{ poetry_completions_filepath }}"
+        path: "{{ poetry_init_file }}"
         create: true
         insertafter: ".*poetry\ exe\ path"
         marker: "# --- {mark} poetry completions ---"

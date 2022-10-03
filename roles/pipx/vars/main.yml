@@ -1,3 +1,2 @@
 ---
 pipx_apps_path: "{{ ansible_user_dir }}/.local/bin"
-pip_conf_filepath: ~/.config/pip/pip.conf

@@ -25,6 +25,5 @@
       changed_when: true
 
 - name: configure pip
-  include_role:
-    name: pipx
-    tasks_from: configure_pip
+  when: pip_user_cfg and not (pip_config_installed | default(false))
+  ansible.builtin.include_tasks: configure_pip.yml

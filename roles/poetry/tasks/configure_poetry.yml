@@ -24,8 +24,3 @@
         loop_var: poetry_config
       ansible.builtin.command: "poetry config {{ poetry_config }}"
       changed_when: true
-
-    - name: get poetry configs
-      ansible.builtin.command: poetry config --list
-      changed_when: false
-      register: poetry_config_list

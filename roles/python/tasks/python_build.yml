@@ -35,8 +35,9 @@
   ansible.builtin.shell: "pyenv install {{ python_version }} && pyenv rehash"
 
 - name: "add pyenv shims & init to shell initialization script: {{ pyenv_init_file }}"
+  when: pyenv_python_init_file
   ansible.builtin.blockinfile:
-    path: "{{ python_init_file }}"
+    path: "{{ pyenv_python_init_file }}"
     create: true
     insertafter: ".*pyenv\ completions"
     marker: "# --- {mark} python path ---"

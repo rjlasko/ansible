@@ -19,11 +19,12 @@ Also configures `pip`.
 ```yaml
 pipx_installation: # required. How to install `pipx`. One of ['venv', 'system', 'none'].
 pipx_reset: # boolean, default(false). will uninstall all pipx managed applications.
-pipx_init_file: # filepath, default('~/.bashrc'), adds `pipx` executable to PATH, for venv installation.
-pipx_interactive_file: # filepath, default(<pipx_init_file>). adds `pipx` completions & apps to PATH.
+pipx_init_file: # filepath, optional. adds `pipx` apps to PATH, and executable for venv installation.
+pipx_completions_file: # filepath, default(<pipx_init_file>). adds `pipx` completions to PATH.
 
-# If pip_extra_index_url is provided, then all 3 of the below variables above must be provided.
+pip_user_cfg: # boolean, default(false). installs pip user config
 pip_extra_index_url: # string (optional), URL for PyPi repository
+# If pip_extra_index_url is provided, then both of the below variables above must be provided.
 pip_username: # string (optional), username for PyPi repository
 pip_password: # string (optional), password for PyPi repository
 ```
@@ -45,9 +46,12 @@ None
     - role: pipx
       vars:
         pipx_installation: venv
+        pipx_init_file: ~/.bash_profile
+        pipx_completions_file: ~/.bashrc
+        pip_user_cfg: true
+        pip_extra_index_endpoint: company.jfrog.io/artifactory/api/pypi/pypi/simple
         pip_username: "{{ vault.username }}"
         pip_password: "{{ vault.password }}"
-        pip_extra_index_endpoint: company.jfrog.io/artifactory/api/pypi/pypi/simple
 ```
 
 ## License

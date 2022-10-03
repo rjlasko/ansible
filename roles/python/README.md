@@ -25,18 +25,18 @@ python_system_packages: # list, default([]). Additional packages to install via 
 pyenv_global_versions: # string, space separated list of versions to put into PATH, defaults to the same list as `python_versions`
 pyenv_install_build_dependencies: # boolean, default(false). will install Python build dependencies. Requires `sudo` privileges.
 pyenv_reset: # boolean, default(false), delete preexisting pyenv
-pyenv_init_file: # filepath, default('~/.bashrc'), updates PATH with pyenv completions (& executable, for MacOS).
-python_init_file: # filepath, default(<pyenv_init_file>), updates PATH with pyenv shims to installed python binaries
+pyenv_init_file: # filepath, optional. filepath to add pyenv completions to shell environment
+pyenv_python_init_file: # filepath, default(<pyenv_init_file>). filepath to add (pyenv shims to) installed python binaries to shell environment
 
-# If pip_extra_index_url is provided, then all 3 of the below variables above must be provided.
+pip_user_cfg: # boolean, default(false). installs pip user config
 pip_extra_index_url: # string (optional), URL for PyPi repository
+# If pip_extra_index_url is provided, then both of the below variables above must be provided.
 pip_username: # string (optional), username for PyPi repository
 pip_password: # string (optional), password for PyPi repository
 ```
 
 #### Set Facts
 ```yaml
-pyenv_root: # path to pyenv configuration directory
 pip_config_installed: # indicates pip config has been installed
 ```
 
@@ -50,11 +50,15 @@ None
   roles:
     - role: python
       vars:
+        python_installation: pyenv
         pyenv_reset: false
         python_versions:
           - 2.7.18
           - 3.9.13
+        pip_user_cfg: true
         python_global_versions: "3.9.13"
+        pyenv_init_file: ~/.bashrc
+        pyenv_python_init_file: ~/.bash_profile
 ```
 
 ## License

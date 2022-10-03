@@ -11,8 +11,10 @@
   ansible.builtin.include_tasks: detect_pipx.yml
 
 - name: configure pip
-  when: pip_config_installed | default(false)
-  ansible.builtin.include_tasks: configure_pip.yml
+  when: pip_user_cfg and not (pip_config_installed | default(false))
+  include_role:
+    name: python
+    tasks_from: configure_pip
 
 - when: pipx_executable is not defined
   block:

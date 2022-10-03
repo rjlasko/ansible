@@ -20,9 +20,6 @@
       changed_when: false
       register: pyenv_root_cmd
 
-- set_fact:
-    pyenv_root: "{{ pyenv_root_cmd.stdout | default(ansible_user_dir + '/.pyenv') }}"
-
 - name: delete pre-existing pyenv config and python installations
   when: pyenv_reset
   ansible.builtin.file:
@@ -42,6 +39,7 @@
         dest: "{{ pyenv_root }}/plugins/pyenv-virtualenv"
 
     - name: "add pyenv path to shell initialization script: {{ pyenv_init_file }}"
+      when: pyenv_init_file
       ansible.builtin.blockinfile:
         path: "{{ pyenv_init_file }}"
         create: true
@@ -55,6 +53,7 @@
         mode: u=rw,go=r
 
 - name: "add pyenv shims & init to shell initialization script: {{ pyenv_init_file }}"
+  when: pyenv_init_file
   ansible.builtin.blockinfile:
     path: "{{ pyenv_init_file }}"
     create: true

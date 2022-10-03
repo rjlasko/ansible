@@ -3,6 +3,7 @@ python_package_pattern:
   Debian: python%s
   Darwin: python@%s
 
+pyenv_root: "{{ pyenv_root_cmd.stdout | default(ansible_user_dir + '/.pyenv') }}"
 pyenv_bin: "{{ pyenv_root }}/bin"
 pyenv_shims: "{{ pyenv_root }}/shims"
 
@@ -33,3 +34,5 @@ python_build_packages:
     - xz
     - zlib
     - tcl-tk
+
+pip_conf_filepath: ~/.config/pip/pip.conf

@@ -4,7 +4,7 @@
 ## ------------------------- ##
 
 # avoid trying to reconfigure pip, if ansible has already configured it once
-- when: pip_config_installed | default(false)
+- when: not (pip_config_installed | default(false))
   block:
     - name: create pip config directory
       ansible.builtin.file:

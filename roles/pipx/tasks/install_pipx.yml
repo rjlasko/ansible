@@ -30,6 +30,7 @@
           - register-python-argcomplete
 
     - name: "add pipx bin path to shell initialization script: {{ pipx_init_file }}"
+      when: pipx_init_file
       ansible.builtin.blockinfile:
         path: "{{ pipx_init_file }}"
         create: true
@@ -43,11 +44,12 @@
         mode: u=rw,go=r
 
 - name: "add pipx apps to shell initialization script: {{ pipx_init_file }}"
+  when: pipx_init_file
   ansible.builtin.blockinfile:
     path: "{{ pipx_init_file }}"
     create: true
     insertafter: ".*pipx\ exe\ path"
-    marker: "# --- {mark} pipx apps ---"
+    marker: "# --- {mark} pipx apps---"
     block: |
       if ! $(echo "$PATH" | tr ":" "\n" | grep -qx "{{ pipx_apps_path }}") ; then
       	export PATH="{{ pipx_apps_path }}:$PATH"
@@ -56,8 +58,9 @@
     mode: u=rw,go=r
 
 - name: "add pipx completions to shell initialization script: {{ pipx_init_file }}"
+  when: pipx_completions_file
   ansible.builtin.blockinfile:
-    path: "{{ pipx_init_file }}"
+    path: "{{ pipx_completions_file }}"
     create: true
     insertafter: ".*pipx\ apps"
     marker: "# --- {mark} pipx completions ---"

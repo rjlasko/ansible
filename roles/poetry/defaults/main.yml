@@ -1,4 +1,5 @@
 ---
 poetry_installation: null
-poetry_init_file: "{{ ansible_user_dir }}/.bashrc"
-poetry_completions_filepath: "{{ poetry_init_file }}"
+poetry_init_file: null
+poetry_completions_file: "{{ poetry_init_file }}"
+poetry_extra_configs: []
