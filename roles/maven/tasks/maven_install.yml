@@ -108,6 +108,7 @@
         maven_bin: "{{ mvn_search.files[0].path | dirname }}"
 
     - name: "add maven path to shell initialization script: {{ maven_init_file }}"
+      when: maven_init_file
       ansible.builtin.blockinfile:
         path: "{{ maven_init_file }}"
         create: true
@@ -121,6 +122,7 @@
         mode: u=rw,go=r
 
 - name: "add maven aliases to shell initialization script: {{ maven_init_file }}"
+  when: maven_init_file and maven_init_aliases
   ansible.builtin.blockinfile:
     path: "{{ maven_init_file }}"
     create: true

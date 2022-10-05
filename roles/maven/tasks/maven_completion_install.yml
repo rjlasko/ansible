@@ -49,7 +49,7 @@
 
 # XXX: this will intentionally fail if the user does not supply a writable `maven_completions_filepath`
 # XXX: MacOS doesn't need this because its `bash_completions_dir` should be loaded automatically
-- when: "{{ maven_installation == 'home' and ansible_facts.system == 'Linux' }}"
+- when: maven_init_file and maven_installation == 'home' and ansible_facts.system == 'Linux'
   ansible.builtin.blockinfile:
     path: "{{ maven_init_file }}"
     create: true

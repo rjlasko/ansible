@@ -14,7 +14,7 @@
 - name: register installed Java versions with jenv
   environment:
     PATH: "{{ jenv_user_bin }}:{{ ansible_env.PATH }}"
-  loop: "{{ java_homes }}"
+  loop: "{{ java_homes_combined }}"
   loop_control:
     loop_var: java_home
   ansible.builtin.shell: "jenv add {{ java_home }}"

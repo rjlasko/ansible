@@ -35,6 +35,7 @@
         dest: "{{ jenv_user_dir }}"
 
     - name: "add jenv path to shell initialization script: {{ jenv_init_file }}"
+      when: jenv_init_file
       ansible.builtin.blockinfile:
         path: "{{ jenv_init_file }}"
         create: true
@@ -54,6 +55,7 @@
       changed_when: false
 
 - name: "add jenv init to shell initialization script: {{ jenv_init_file }}"
+  when: jenv_init_file
   ansible.builtin.blockinfile:
     path: "{{ jenv_init_file }}"
     create: true

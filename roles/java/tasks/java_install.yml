@@ -3,17 +3,10 @@
 ## Installs java ##
 ## ------------- ##
 
-- name: resolve system package names to install
-  loop: "{{ java_versions }}"
-  loop_control:
-    loop_var: java_system_version
-  set_fact:
-    java_system_packages: "{{ java_system_packages + [ java_package_pattern[ansible_facts.os_family] | format(java_system_version) ] }}"
-
 - when: ansible_facts.system == 'Darwin'
   block:
     - name: install java versions (MacOS)
-      when: java_system_packages | length > 0
+      when: java_install and (java_system_packages | length > 0)
       community.general.homebrew_cask:
         name: "{{ java_system_packages }}"
         state: present
@@ -25,13 +18,10 @@
       register: java_homes_installed
       changed_when: false
 
-    - set_fact:
-        java_homes: "{{ java_homes + java_homes_installed.stdout_lines }}"
-
 - when: ansible_facts.system == 'Linux'
   block:
     - name: "install java versions ({{ ansible_facts.os_family }} Linux)"
-      when: java_system_packages | length > 0
+      when: java_install and (java_system_packages | length > 0)
       become: true
       ansible.builtin.package:
         name: "{{ java_system_packages }}"
@@ -46,8 +36,5 @@
       register: java_homes_installed
       changed_when: false
 
-    - set_fact:
-        java_homes: "{{ java_homes + java_homes_installed.stdout_lines }}"
-
 - assert:
-    that: java_homes | length > 0
+    that: java_homes_combined | length > 0

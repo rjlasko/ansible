@@ -15,15 +15,16 @@
     path: "{{ maven_settings_filepath | dirname }}"
     state: absent
 
-- name: create maven configuration directory
-  ansible.builtin.file:
-    path: "{{ maven_settings_filepath | dirname }}"
-    state: directory
-    mode: u=rwX,go-rwx
+- when: maven_username is defined or maven_password is defined
+  block:
+    - name: create maven configuration directory
+      ansible.builtin.file:
+        path: "{{ maven_settings_filepath | dirname }}"
+        state: directory
+        mode: u=rwX,go-rwx
 
-- name: install maven settings
-  when: maven_username is defined or maven_password is defined
-  ansible.builtin.template:
-    src: settings.mirror.xml.j2
-    dest: "{{ maven_settings_filepath }}"
-    mode: u=rw,go-rwx
+    - name: install maven settings
+      ansible.builtin.template:
+        src: settings.mirror.xml.j2
+        dest: "{{ maven_settings_filepath }}"
+        mode: u=rw,go-rwx

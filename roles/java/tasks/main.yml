@@ -7,7 +7,9 @@
   ansible.builtin.include_tasks: java_install.yml
 
 - name: install jenv
+  when: jenv_install
   ansible.builtin.include_tasks: jenv_install.yml
 
 - name: install & configure jenv
+  when: jenv_install
   ansible.builtin.include_tasks: jenv_configure.yml

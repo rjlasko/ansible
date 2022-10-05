@@ -1,8 +1,9 @@
 ---
+java_install: false
 java_versions: []
-java_system_packages: []
+java_extra_system_packages: []
 java_homes: []
-
+jenv_install: false
 jenv_java_version: null
 jenv_reset: true
-jenv_init_file: "{{ ansible_user_dir }}/.bashrc"
+jenv_init_file: null
