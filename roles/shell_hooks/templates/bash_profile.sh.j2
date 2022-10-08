@@ -1,7 +1,7 @@
 #!/usr/bin/env sh
 
 if [ -n "${SHK_DEBUG}" ] ; then
-	echo "${USER}@$(hostname) sourcing: ${HOME}/.bash_profile"
+	echo "[$(date +'%Y/%m/%d %T %z')]: ${HOME}/.bash_profile"
 fi
 
 if [ -f "${HOME}/.bashrc" ] ; then

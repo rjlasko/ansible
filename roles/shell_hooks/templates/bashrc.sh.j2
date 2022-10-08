@@ -1,7 +1,7 @@
 #!/usr/bin/env sh
 
 if [ -n "${SHK_DEBUG}" ] ; then
-	echo "${USER}@$(hostname) sourcing: ${HOME}/.bashrc"
+	echo "[$(date +'%Y/%m/%d %T %z')]: ${HOME}/.bashrc"
 fi
 
 # only run shell hooks on shell start, or if reset is requested
@@ -16,7 +16,7 @@ if [ -z "${SHK_ROOT}" ] ; then
 
 	debug() {
 		if [ -n "${SHK_DEBUG}" ] ; then
-			>&2 echo "${1}"
+			>&2 echo "[$(date +'%Y/%m/%d %T %z')]: ${1}"
 		fi
 	}
 
@@ -24,7 +24,7 @@ if [ -z "${SHK_ROOT}" ] ; then
 	rebash() {
 		unset SHK_ROOT SHK_LOGIN
 		export PATH="${SHK_INHERITED_PATH}"
-		if [ "${1:-}" == '-v' ] ; then
+		if [ "${1:-}" = "-v" ] ; then
 			SHK_DEBUG=1 . "${HOME}/.bash_profile"
 		else
 			. "${HOME}/.bash_profile"
@@ -36,7 +36,7 @@ if [ -z "${SHK_ROOT}" ] ; then
 		hook_dir="$(cd "$(dirname "${hook_filepath}")" && pwd -P)"
 		hook_name="$(basename "${hook_filepath}")"
 		start_dir="$(pwd)"
-		debug "${USER}@$(hostname) sourcing: ${hook_dir}/${hook_name}"
+		debug "${hook_dir}/${hook_name}"
 		cd "${hook_dir}"
 		. "${hook_name}"
 		cd "${start_dir}"
