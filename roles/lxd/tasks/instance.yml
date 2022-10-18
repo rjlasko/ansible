@@ -1,58 +1,31 @@
 ---
-## -------------------------- ##
-## Build or Restore Instance ##
-## -------------------------- ##
+## ----------------------- ##
+## Build or restore guests ##
+## ----------------------- ##
 
-- name: check invalid create mode
-  when: lxd.instance.create_mode | mandatory not in ['skip', 'build']
-  ansible.builtin.fail:
-    msg: "invalid lxd.instance.create_mode: {{ lxd.instance.create_mode }}"
+- name: clear selected guests
+  ansible.builtin.include_tasks: clear_guests.yml
 
-- name: handle create instance
-  when: lxd.instance.create_mode == 'build'
-  block:
+- name: get /proc/cpuinfo
+  ansible.builtin.command: cat /proc/cpuinfo
+  changed_when: false
+  register: proc_cpuinfo
 
-    - name: clear pre-existing instance
-      with_items:
-        - container
-        - virtual-machine
-      community.general.lxd_container:
-        name: "{{ lxd.instance.name | mandatory }}"
-        type: "{{ item }}"
-        state: absent
-        force_stop: true
-        # XXX: ansible will always indicate a change when volatile options are present in the LXD config
-        ignore_volatile_options: false
+- name: load UID map
+  ansible.builtin.getent:
+    database: passwd
 
-    - name: define custom instance configuration 'lxd_custom_config'
-      ansible.builtin.include_tasks: instance_config.yml
+- name: load GID map
+  ansible.builtin.getent:
+    database: group
 
-    - name: merge and override instance base config with custom config
-      when: lxd.instance.config is defined
-      ansible.builtin.set_fact:
-        lxd_custom_config: "{{ ( lxd.instance.config ) | combine(lxd_custom_config | default({}), recursive=True) }}"
+- name: clear selected guests
+  ansible.builtin.include_tasks: start_guests.yml
 
-    - name: create & (re)start instance
-      community.general.lxd_container:
-        name: "{{ lxd.instance.name }}"
-        type: "{{ lxd.instance.type | default(omit) }}"
-        state: restarted
-        source:
-          server: "{{ lxd.instance.server | default('https://images.linuxcontainers.org') }}"
-          alias: "{{ lxd.instance.alias | mandatory }}"
-          # 'simplestreams' seems more reliable than the default protocol 'lxd'
-          protocol: "{{ lxd.instance.protocol | default('simplestreams') }}"
-          type: image
-          mode: pull
-        # XXX: ansible will always indicate a change when volatile options are present in the LXD config
-        ignore_volatile_options: false
-        config: "{{ lxd_custom_config | default(omit) }}"
-        devices: "{{ lxd.instance.devices | default(omit) }}"
-        profiles: "{{ lxd.instance.profiles | default(omit) }}"
-        wait_for_ipv4_addresses: true
-        timeout: 600
-
-- name: "wait for {{ lxd.instance.name }} to respond with SSHd"
+- name: "wait for guest(s) to respond with SSHd"
+  loop: "{{ lxd_guests }}"
+  loop_control:
+    loop_var: lxd_guest
   ansible.builtin.wait_for:
-    host: "{{ lxd.instance.dns_address | mandatory }}"
+    host: "{{ lxd_guest.dns_address | mandatory }}"
     port: 22

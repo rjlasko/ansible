@@ -1,0 +1,94 @@
+---
+lxd_guests_idmap: >
+  [
+  {% for lxd_guest in lxd_guests %}
+    {% set idmap_both = lxd_guest.host_idmap.both | default([]) %}
+    {% set idmap_users = lxd_guest.host_idmap.users | default([]) %}
+    {% set idmap_groups = lxd_guest.host_idmap.groups | default([]) %}
+    {
+      {% if idmap_both %}
+        'both': [
+          {% for user_name in idmap_both %}
+            {{ ansible_facts.getent_passwd[user_name][1] }},
+          {% endfor %}
+        ],
+      {% endif %}
+
+      {% if idmap_users %}
+        'uid': [
+          {% for user_name in idmap_users %}
+            {{ ansible_facts.getent_passwd[user_name][1] }},
+          {% endfor %}
+        ],
+      {% endif %}
+
+      {% if idmap_groups %}
+        'gid': [
+          {% for group_name in idmap_groups %}
+            {{ ansible_facts.getent_group[group_name][1] }},
+          {% endfor %}
+        ],
+      {% endif %}
+    },
+  {% endfor %}
+  ]
+
+lxd_guests_idmap_sorted: >
+  [
+  {% for guest_idmap in lxd_guests_idmap %}
+    [
+    {% for id in (guest_idmap.both | default([]) | sort ) %}
+      'both {{ id }} {{ id }}',
+    {% endfor %}
+    {% for id in (guest_idmap.uid | default([]) | sort ) %}
+      'uid {{ id }} {{ id }}',
+    {% endfor %}
+    {% for id in (guest_idmap.gid | default([]) | sort ) %}
+      'gid {{ id }} {{ id }}',
+    {% endfor %}
+    ],
+  {% endfor %}
+  ]
+
+lxd_custom_config: >
+  [
+  {% for guest_i in range(lxd_guests | length) %}
+    {% set lxd_guest = lxd_guests[guest_i] %}
+    {% set limits_cpu = lxd_guest.cpu_mem.cpus | default([]) | asNative(proc_cpuinfo.stdout_lines) | sort | unique %}
+    {% set limits_priority = lxd_guest.cpu_mem.cpu_priority | default('') %}
+    {% set limits_memory = lxd_guest.cpu_mem.memory | default('') %}
+    {% set limits_hugepages = lxd_guest.cpu_mem.hugepages | default('') %}
+    {% set guest_idmap = lxd_guests_idmap_sorted[guest_i] | default(false) %}
+    {
+      {% if limits_cpu | length > 1 %}
+        'limits.cpu': '{{ limits_cpu | join(',') }}',
+      {% elif limits_cpu | length == 1 %}
+        'limits.cpu': '{{ limits_cpu[0] }}-{{ limits_cpu[0] }}',
+      {% endif %}
+
+      {% if limits_priority %}
+        'limits.cpu.priority': '{{ limits_priority }}',
+      {% endif %}
+
+      {% if limits_memory %}
+        'limits.memory': '{{ limits_memory }}',
+      {% endif %}
+
+      {% if limits_hugepages %}
+        'limits.memory.hugepages': '{{ limits_hugepages | string }}',
+      {% endif %}
+
+      {% if guest_idmap %}
+        'raw.idmap': '{{ guest_idmap | join('\n') }}'
+      {% endif %}
+
+    },
+  {% endfor %}
+  ]
+
+lxd_guests_configd: >
+  [
+  {% for guest_i in range(lxd_guests | length) %}
+    {{ lxd_guests[guest_i] | combine({'config': lxd_custom_config[guest_i]} ,recursive=True) }},
+  {% endfor %}
+  ]

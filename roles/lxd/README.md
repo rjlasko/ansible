@@ -19,39 +19,39 @@ lxd:
     extra_profiles: # list of profile objects
       ... # see: https://docs.ansible.com/ansible/latest/collections/community/general/lxd_profile_module.html#parameters
 
-  instance: # targets a LXD container/VM installation
-    create_mode: # mandatory, one of ['skip','build']
-    name: # the name of the lxc instance
-    dns_address: # DNS or IP address of the instance
-    type: # see: https://docs.ansible.com/ansible/latest/collections/community/general/lxd_container_module.html#parameter-type
-    server: # URL of LXC image host, defaults to https://images.linuxcontainers.org
-    alias: # as listed when running command `lxc image list images:`
-    protocol: # defaults to 'simplestreams', one of ['simplestreams','lxd']
-    devices:
-      ... # see: https://linuxcontainers.org/lxd/docs/master/instances/#devices-configuration
-      ... # see: https://docs.ansible.com/ansible/latest/collections/community/general/lxd_container_module.html#parameter-devices
-    profiles: # list of the names of profile names declared on the host
-    config:
-      ... # see: https://linuxcontainers.org/lxd/docs/master/instances/#key-value-configuration
-      ... # see: https://docs.ansible.com/ansible/latest/collections/community/general/lxd_container_module.html#parameter-config
+  guests: # list of targets for LXD container/virtual-machine installation
+    - create_mode: # mandatory, one of ['skip','build']
+      name: # the name of the lxc instance
+      dns_address: # DNS or IP address of the instance
+      type: # see: https://docs.ansible.com/ansible/latest/collections/community/general/lxd_container_module.html#parameter-type
+      server: # URL of LXC image host, defaults to https://images.linuxcontainers.org
+      alias: # as listed when running command `lxc image list images:`
+      protocol: # defaults to 'simplestreams', one of ['simplestreams','lxd']
+      devices:
+        ... # see: https://linuxcontainers.org/lxd/docs/master/instances/#devices-configuration
+        ... # see: https://docs.ansible.com/ansible/latest/collections/community/general/lxd_container_module.html#parameter-devices
+      profiles: # list of the names of profile names declared on the host
+      config:
+        ... # see: https://linuxcontainers.org/lxd/docs/master/instances/#key-value-configuration
+        ... # see: https://docs.ansible.com/ansible/latest/collections/community/general/lxd_container_module.html#parameter-config
 
-    # note that the following fields are mapped onto the above `config`, after converted from human-intuitive description.  Any preexisting `config` value will be overridden.
-    cpu_mem:
-       cpus: # list of logical core ids
-         # becomes: `config.limits.cpu`
-         # ids increment by logical cores, grouped by physical core
-         # ie. [P0L0,P0L1,P1L0,P1L1] = [0,1,2,3]
-       memory: # human friendly amount, eg 4GiB
-         # becomes: `config.limits.memory`
-       hugepages: # boolean, source memory from hugepages reservation
-         # becomes: `config.limits.memory.hugepages`
-       priority: # 1-10, shared CPU scheduling priority
-         # becomes: `config.limits.cpu.priority`
-    host_idmap: # names of user and group IDs to map from host to guest
-      # becomes: `config.raw.idmap`
-      both: # only for when user and group ID are same  value
-      users: # for just user names
-      groups: # for just group names
+      # note that the following fields are mapped onto the above `config`, after converted from human-intuitive description.  Any preexisting `config` value will be overridden.
+      cpu_mem:
+         cpus: # list of logical core ids
+           # becomes: `config.limits.cpu`
+           # ids increment by logical cores, grouped by physical core
+           # ie. [P0L0,P0L1,P1L0,P1L1] = [0,1,2,3]
+         memory: # human friendly amount, eg 4GiB
+           # becomes: `config.limits.memory`
+         hugepages: # boolean, source memory from hugepages reservation
+           # becomes: `config.limits.memory.hugepages`
+         priority: # 1-10, shared CPU scheduling priority
+           # becomes: `config.limits.cpu.priority`
+      host_idmap: # names of user and group IDs to map from host to guest
+        # becomes: `config.raw.idmap`
+        both: # only for when user and group ID are same  value
+        users: # for just user names
+        groups: # for just group names
 ```
 
 Note: for any pre-existing `lxd.host.preseed.storage_pools` declared, having `driver == 'zfs'`, the entire dataset will be destroyed and recreated in the parent zpool.
@@ -70,8 +70,6 @@ ansible-galaxy collection install community.general --upgrade
 ```
 ansible-doc community.general.lxd_container
 ```
-
-
 
 ## Example Playbook
 Host example
@@ -110,6 +108,7 @@ Host example
                 config:
                   security.nesting: "true"
 ```
+
 Instance example
 ```yaml
 - hosts: lxd_containers
@@ -117,26 +116,26 @@ Instance example
     - role: lxd
       vars:
         lxd:
-          instance:
-            create_mode: build
-            name: mylxc
-            dns_address: mylxc.home.lan
-            alias: ubuntu/focal/cloud/amd64
-            devices:
-              eth0:
-                name: eth0
-                nictype: bridged
-                parent: br0
-                type: nic
-                hwaddr: F1-09-CE-07-C0-70
-            profiles:
-              - default
-              - docker_support
-            config:
-              boot.autostart: "true"
-            host_idmap:
-              both:
-                - root
+          guests:
+            - create_mode: build
+              name: mylxc
+              dns_address: mylxc.home.lan
+              alias: ubuntu/focal/cloud/amd64
+              devices:
+                eth0:
+                  name: eth0
+                  nictype: bridged
+                  parent: br0
+                  type: nic
+                  hwaddr: F1-09-CE-07-C0-70
+              profiles:
+                - default
+                - docker_support
+              config:
+                boot.autostart: "true"
+              host_idmap:
+                both:
+                  - root
 ```
 
 ## License

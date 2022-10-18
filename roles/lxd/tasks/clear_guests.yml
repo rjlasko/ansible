@@ -1,0 +1,41 @@
+---
+## ------------------------- ##
+## Clear pre-existing guests ##
+## ------------------------- ##
+
+- name: clear pre-existing instance
+  async: 10
+  poll: 0
+  vars:
+    guest_types:
+      - container
+      - virtual-machine
+  loop: "{{ lxd_guests | product(guest_types) | list }}"
+  loop_control:
+    loop_var: lxd_guest_type
+  community.general.lxd_container:
+    name: "{{ lxd_guest_type.0.name | mandatory }}"
+    type: "{{ lxd_guest_type.1 }}"
+    state: absent
+    force_stop: true # FIXME: this is a bummer
+    # XXX: ansible will always indicate a change when volatile options are present in the LXD config
+    ignore_volatile_options: false
+  register: lxd_async_clear
+
+- name: Check sync status
+  loop: "{{ lxd_async_clear.results }}"
+  loop_control:
+    loop_var: "lxd_async_clear_result"
+  ansible.builtin.async_status:
+    jid: "{{ lxd_async_clear_result.ansible_job_id }}"
+  register: async_poll_results
+  until: async_poll_results.finished
+  retries: 30
+
+- name: Clear sync status
+  loop: "{{ lxd_async_clear.results }}"
+  loop_control:
+    loop_var: "lxd_async_clear_result"
+  ansible.builtin.async_status:
+    jid: "{{ lxd_async_clear_result.ansible_job_id }}"
+    mode: cleanup

@@ -1,0 +1,48 @@
+---
+## ------------------------- ##
+## Create & start new guests ##
+## ------------------------- ##
+
+- name: create & start instance
+  async: 10
+  poll: 0
+  loop: "{{ lxd_guests_configd }}"
+  loop_control:
+    loop_var: lxd_guest
+  community.general.lxd_container:
+    name: "{{ lxd_guest.name }}"
+    type: "{{ lxd_guest.type | default(omit) }}"
+    state: restarted
+    source:
+      server: "{{ lxd_guest.server | default('https://images.linuxcontainers.org') }}"
+      alias: "{{ lxd_guest.alias | mandatory }}"
+      # 'simplestreams' seems more reliable than the default protocol 'lxd'
+      protocol: "{{ lxd_guest.protocol | default('simplestreams') }}"
+      type: image
+      mode: pull
+    # XXX: ansible will always indicate a change when volatile options are present in the LXD config
+    ignore_volatile_options: false
+    config: "{{ lxd_guest.config | default(omit) }}"
+    devices: "{{ lxd_guest.devices | default(omit) }}"
+    profiles: "{{ lxd_guest.profiles | default(omit) }}"
+    wait_for_ipv4_addresses: true
+    timeout: 600
+  register: lxd_async_start
+
+- name: Check sync status
+  loop: "{{ lxd_async_start.results }}"
+  loop_control:
+    loop_var: "lxd_async_start_result"
+  ansible.builtin.async_status:
+    jid: "{{ lxd_async_start_result.ansible_job_id }}"
+  register: async_poll_results
+  until: async_poll_results.finished
+  retries: 30
+
+- name: Clear sync status
+  loop: "{{ lxd_async_start.results }}"
+  loop_control:
+    loop_var: "lxd_async_start_result"
+  ansible.builtin.async_status:
+    jid: "{{ lxd_async_start_result.ansible_job_id }}"
+    mode: cleanup
