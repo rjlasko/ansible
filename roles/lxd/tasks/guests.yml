@@ -1,0 +1,17 @@
+---
+## ------------------- ##
+## Installs LXD guests ##
+## ------------------- ##
+
+- name: check invalid create mode
+  loop: "{{ lxd.guests }}"
+  loop_control:
+    loop_var: lxd_guest
+  ansible.builtin.assert:
+    that: lxd_guest.create_mode in ['skip', 'build']
+    quiet: true
+
+- name: (re)build guests
+  vars:
+    lxd_guests: "{{ lxd.guests | selectattr('create_mode', 'eq', 'build') }}"
+  ansible.builtin.include_tasks: instance.yml

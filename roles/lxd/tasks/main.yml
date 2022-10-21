@@ -13,19 +13,9 @@
 # TODO: where is the default backing storage located? ZFS dataset?
 # TODO: permissions supporting running docker in LXC
 
-- name: check invalid create mode
-  loop: "{{ lxd.guests }}"
-  loop_control:
-    loop_var: lxd_guest
-  ansible.builtin.assert:
-    that: lxd_guest.create_mode in ['skip', 'build']
-    quiet: true
-
-- name: (re)build guests
-  vars:
-    lxd_guests: "{{ lxd.guests | selectattr('create_mode', 'eq', 'build') }}"
+- name: install LXD guests
   when: lxd.guests is defined
-  ansible.builtin.include_tasks: instance.yml
+  ansible.builtin.include_tasks: guests.yml
 
 # TODO: https://lxd.readthedocs.io/en/latest/backup/#container-backup-and-restore
 
