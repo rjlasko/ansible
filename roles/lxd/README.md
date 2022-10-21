@@ -23,6 +23,7 @@ lxd:
     - create_mode: # mandatory, one of ['skip','build']
       name: # the name of the lxc instance
       dns_address: # DNS or IP address of the instance
+      force_stop: # boolean, default(false). Used when clearing any preexisting guest of same name
       type: # see: https://docs.ansible.com/ansible/latest/collections/community/general/lxd_container_module.html#parameter-type
       server: # URL of LXC image host, defaults to https://images.linuxcontainers.org
       alias: # as listed when running command `lxc image list images:`

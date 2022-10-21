@@ -17,7 +17,7 @@
     name: "{{ lxd_guest_type.0.name | mandatory }}"
     type: "{{ lxd_guest_type.1 }}"
     state: absent
-    force_stop: true # FIXME: this is a bummer
+    force_stop: "{{ lxd_guest_type.0.force_stop | default(false) }}"
     # XXX: ansible will always indicate a change when volatile options are present in the LXD config
     ignore_volatile_options: false
   register: lxd_async_clear
