@@ -33,7 +33,7 @@ None
         nut:
           mode: standalone
           user: monuser
-          email: admin@rjlasko.com
+          email: admin@mysite.com
 ```
 
 ## License

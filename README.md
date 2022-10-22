@@ -51,7 +51,7 @@
 #### OS Configuration
 - [`rjlasko.ansible.bash_completion`](https://github.com/rjlasko/ansible/blob/master/roles/bash_completion/README.md)
 - [`rjlasko.ansible.boot_manager`](https://github.com/rjlasko/ansible/blob/master/roles/boot_manager/README.md)
-- `rjlasko.ansible.crontab`
+- [`rjlasko.ansible.crontab`](https://github.com/rjlasko/ansible/blob/master/roles/crontab/README.md)
 - `rjlasko.ansible.cronic`
 - `rjlasko.ansible.global_environment`
 - `rjlasko.ansible.hostname`
