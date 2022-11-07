@@ -13,11 +13,11 @@
         path: "{{ neofetch_config_file }}"
         state: absent
 
-    - name: test command and autogenerate config
-      command: neofetch
-      # the path is modified in case of home installation
-      environment:
-        PATH: "{{ neofetch_home_bin | dirname }}:{{ ansible_env.PATH }}"
+- name: test command and autogenerate config
+  # the path is modified in case of home installation
+  environment:
+    PATH: "{{ neofetch_bin }}:{{ ansible_env.PATH }}"
+  ansible.builtin.command: neofetch
 
 - name: copy image source
   when: neofetch_image_source is defined

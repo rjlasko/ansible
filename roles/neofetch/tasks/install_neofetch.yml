@@ -25,14 +25,14 @@
   block:
     - name: bin directory must exist
       ansible.builtin.file:
-        path: "{{ neofetch_home_bin | dirname }}"
+        path: "{{ neofetch_bin }}" # TODO: is ~/.local/bin better nowadays?
         state: directory
         mode: u=rwx,go-rwx
 
     - name: get from github
       ansible.builtin.get_url:
         url: https://raw.githubusercontent.com/dylanaraps/neofetch/master/neofetch
-        dest: "{{ neofetch_home_bin }}"
+        dest: "{{ neofetch_bin }}/neofetch"
         mode: u=rwx,go-rwx
         force: true
 
@@ -43,13 +43,13 @@
         create: true
         marker: "# --- {mark} neofetch home bin ---"
         block: |
-          if ! $(echo "$PATH" | tr ":" "\n" | grep -qx "{{ neofetch_home_bin }}") ; then
-              export PATH="{{ neofetch_home_bin }}:$PATH"
+          if ! $(echo "$PATH" | tr ":" "\n" | grep -qx "{{ neofetch_bin }}") ; then
+              export PATH="{{ neofetch_bin }}:$PATH"
           fi
         state: present
         mode: u=rw,go=r
 
-- name: "Add neofetch to shell initialization script: {{ neofetch_home_bin }}"
+- name: "Add neofetch to shell initialization script: {{ neofetch_init_file }}"
   when: neofetch_init_file and neofetch_init_start
   ansible.builtin.blockinfile:
     path: "{{ neofetch_init_file }}"
