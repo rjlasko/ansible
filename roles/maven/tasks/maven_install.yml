@@ -63,26 +63,26 @@
         # XXX: get_url doesn't seem to like the checksum URL for maven
         # checksum: "sha512:{{ maven_bin_url }}.sha512"
         checksum: "sha512:{{ maven_sha512.content }}"
-        dest: "{{ maven_tempdir.path }}/maven.tar.gz"
+        dest: "{{ maven_tempdir.path }}/maven.zip"
         mode: u=rx,go-rwx
         force: true
 
     - name: delete preexisting maven installation directory
       when: maven_reset
-      file:
+      ansible.builtin.file:
         path: "{{ maven_home_dir }}"
         state: absent
 
     - name: "create maven installation directory: {{ maven_home_dir }}"
-      file:
+      ansible.builtin.file:
         path: "{{ maven_home_dir }}"
         state: directory
         mode: u=rwx,go-rwx
 
     - name: "extract archive to installation directory: {{ maven_home_dir }}"
-      unarchive:
+      ansible.builtin.unarchive:
         remote_src: true
-        src: "{{ maven_tempdir.path }}/maven.tar.gz"
+        src: "{{ maven_tempdir.path }}/maven.zip"
         dest: "{{ maven_home_dir }}"
 
   always:
