@@ -7,13 +7,13 @@
   block:
     - name: create jenv config directory
       ansible.builtin.file:
-        path: "{{ jenv_root.stdout }}"
+        path: "{{ jenv_home }}"
         state: directory
         mode: u=rwX,g=rX,o-rwx
 
 - name: register installed Java versions with jenv
   environment:
-    PATH: "{{ jenv_user_bin }}:{{ ansible_env.PATH }}"
+    PATH: "{{ jenv_bin }}:{{ ansible_env.PATH }}"
   loop: "{{ java_homes_combined }}"
   loop_control:
     loop_var: java_home
@@ -22,7 +22,7 @@
   changed_when: "'added' in jenv_add_jversion.stdout"
 
 - name: set global Java versions
-  ansible.builtin.command: "jenv global {{ jenv_java_version }}"
   environment:
-    PATH: "{{ jenv_user_bin }}:{{ ansible_env.PATH }}"
+    PATH: "{{ jenv_bin }}:{{ ansible_env.PATH }}"
+  ansible.builtin.command: "jenv global {{ jenv_java_version }}"
   changed_when: true

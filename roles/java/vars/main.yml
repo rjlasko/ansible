@@ -2,9 +2,18 @@
 java_package_pattern:
   Debian: openjdk-%s-jdk
   Darwin: adoptopenjdk/openjdk/adoptopenjdk%s
-jenv_user_dir: "{{ ansible_user_dir }}/.jenv"
-jenv_user_bin: "{{ jenv_user_dir }}/bin"
-java_homes_combined: "{{ java_homes + java_homes_installed.stdout_lines }}"
+
+jenv_home: "{{ ansible_user_dir }}/.jenv"
+jenv_os_bin:
+  Linux: "{{ jenv_home }}/bin"
+  Darwin: /usr/local/bin
+jenv_bin: "{{ jenv_os_bin[ansible_facts.system] }}"
+
+java_homes_installed:
+  Darwin: "{{ java_homes_installed_darwin }}"
+  Linux: "{{ java_homes_installed_linux }}"
+
+java_homes_combined: "{{ java_homes + java_homes_installed[ansible_facts.system].stdout_lines }}"
 java_system_version_packages: >
   [{% for jv in java_versions %}
   '{{ java_package_pattern[ansible_facts.os_family] | format(jv) }}',

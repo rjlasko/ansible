@@ -10,29 +10,18 @@
         name: jenv
         state: present
 
-    - name: get jenv root
-      ansible.builtin.command: jenv root
-      changed_when: false
-      register: jenv_root
-
-    - name: delete pre-existing jenv config (MacOS)
-      when: jenv_reset
-      ansible.builtin.file:
-        path: "{{ jenv_root.stdout }}"
-        state: absent
+- name: delete pre-existing jenv config
+  when: jenv_reset
+  ansible.builtin.file:
+    path: "{{ jenv_home }}"
+    state: absent
 
 - when: ansible_facts.system == 'Linux'
   block:
-    - name: delete pre-existing jenv installation (Linux)
-      when: jenv_reset
-      ansible.builtin.file:
-        path: "{{ jenv_user_dir }}"
-        state: absent
-
-    - name: "install jenv package to {{ jenv_user_dir }} (Linux)"
+    - name: "install jenv package to {{ jenv_home }} ({{ ansible_facts.os_family }} Linux)"
       ansible.builtin.git:
         repo: https://github.com/jenv/jenv.git
-        dest: "{{ jenv_user_dir }}"
+        dest: "{{ jenv_home }}"
 
     - name: "add jenv path to shell initialization script: {{ jenv_init_file }}"
       when: jenv_init_file
@@ -42,17 +31,17 @@
         insertbefore: ".*jenv\ completions"
         marker: "# --- {mark} jenv execpath ---"
         block: |
-          if ! $(echo "$PATH" | tr ":" "\n" | grep -qx "{{ jenv_user_bin }}") ; then
-              export PATH="{{ jenv_user_bin }}:$PATH"
+          if ! $(echo "$PATH" | tr ":" "\n" | grep -qx "{{ jenv_bin }}") ; then
+              export PATH="{{ jenv_bin }}:$PATH"
           fi
         state: present
         mode: u=rw,go=r
 
-    - name: first time init jenv
-      environment:
-        PATH: "{{ jenv_user_bin }}:{{ ansible_env.PATH }}"
-      ansible.builtin.shell: 'eval "$(jenv init -)"'
-      changed_when: false
+- name: first time init jenv
+  environment:
+    PATH: "{{ jenv_bin }}:{{ ansible_env.PATH }}"
+  ansible.builtin.shell: 'eval "$(jenv init -)"'
+  changed_when: false
 
 - name: "add jenv init to shell initialization script: {{ jenv_init_file }}"
   when: jenv_init_file
