@@ -1,3 +1,4 @@
 ---
-aws_login_filepath: "{{ ansible_facts.user_dir }}/bin/aws-login"
 aws_completions_filepath: "{{ ansible_user_dir }}/.bashrc"
+aws_login_installation: null
+aws_login_bin: "{{ ansible_facts.user_dir }}/bin/aws-login"

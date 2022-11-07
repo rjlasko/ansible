@@ -16,5 +16,5 @@ if ! {{ aws_gimme_creds_pretest }} ; then
 fi
 {% endif %}
 
-export PATH="{{ aws_bin_path }}:$PATH"
+export PATH="{{ aws_bin_path }}:{{ aws_creds_bin_path }}:$PATH"
 gimme-aws-creds $@

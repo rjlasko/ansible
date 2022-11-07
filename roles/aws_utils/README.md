@@ -20,24 +20,27 @@ The following file is created upon running `aws-login` for the first time, and w
 - `~/.aws/credentials`
 
 ## Requirements
-User provides an AWS `config` file.
 MacOSx
+User provides an AWS `config` file.
 
 ## Role Variables
 
 #### Settable Variables
-```yaml
-aws_config_file: # path of file to copy over ~/.aws/config
-aws_gimme_creds_plist_domain: # string, a unique string to include in plist filename and other XML attribute
-aws_gimme_creds_pretest: # (optional) string, a bash command predicate for login
 
+```yaml
+aws_login_installation: # required, one of ['venv', 'pipx', 'none']. How to install AWS login automation service.
+aws_config_src: # required. source file to copy over ~/.aws/config
+aws_login_bin: # filepath, default('~/bin/aws-login'). Location to install `aws-login` script to.
+aws_login_init: # filepath, default('~/.bashrc'). Adds aws-login script to PATH
+aws_completions_filepath: # filepath, default('~/.bashrc'). Script that loads aws completions.
+
+# the below are required if aws_login_installation is not 'none', unless otherwise stated as optional
+aws_gimme_creds_plist_domain: # string. A unique string to include in plist filename and other XML attribute
+aws_gimme_creds_pretest: # (optional) string, a bash command predicate for login
 aws_login_rolename: # The ARN of the role you want temporary AWS credentials for. The reserved word 'all' can be used to get and store credentials for every role the user is permissioned for.
 aws_okta_app_url: # the url to the aws application configured in Okta.
 okta_org_url: # Okta organization url, which is typically something like https://companyname.okta.com
 okta_username: # (optional), username for Okta to authenticate. default: host's $USER
-
-aws_login_filepath: # (optional) string, location to install `aws-login` script to. default: ~/bin/aws-login
-aws_completions_filepath: # filepath to load aws completions. default: ~/.bashrc
 ```
 
 ## Example Playbook
@@ -48,9 +51,10 @@ aws_completions_filepath: # filepath to load aws completions. default: ~/.bashrc
   roles:
     - role: aws_utils
       vars:
+        aws_login_installation: venv
+        aws_config_src: "~/path/to/aws_config.ini"
         aws_gimme_creds_plist_domain: beep.boop
         aws_gimme_creds_pretest: ping -o -c 1 robot.beep.boop
-        aws_config_file: "~/path/to/aws_config.ini"
 ```
 
 #### Initiate periodic automatic login

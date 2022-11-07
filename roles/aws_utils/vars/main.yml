@@ -1,12 +1,15 @@
 ---
-aws_creds:
-  aws_creds_path: "{{ ansible_facts.user_dir }}/.aws/credentials"
-  aws_cfg_path: "{{ ansible_facts.user_dir }}/.aws/config"
-  log_err: "{{ ansible_facts.user_dir }}/.aws/aws_login.launchd.stderr"
-  log_out: "{{ ansible_facts.user_dir }}/.aws/aws_login.launchd.stdout"
+okta_aws_login_config: "{{ ansible_facts.user_dir }}/.okta_aws_login_config"
+aws_config: "{{ ansible_facts.user_dir }}/.aws/config"
+aws_credentials: "{{ ansible_facts.user_dir }}/.aws/credentials"
 
-  gimme_creds_login_config_path: "{{ ansible_facts.user_dir }}/.okta_aws_login_config"
+aws_bin_path: /usr/local/bin
+aws_creds_installation_path:
+  venv: "{{ pipv_bin_path }}"
+  pipx: "{{ ansible_facts.user_dir }}/.local/bin"
+aws_creds_bin_path: "{{ aws_creds_installation_path[aws_login_installation] }}"
 
-  plist_filepath: "{{ ansible_facts.user_dir }}/Library/LaunchAgents/{{ aws_gimme_creds_plist_domain }}.aws_login.plist"
-  plist_domain: "{{ aws_gimme_creds_plist_domain | mandatory }}"
-  launchd_service_name: "{{ aws_gimme_creds_plist_domain | mandatory }}.aws_login"
+aws_creds_launchd_service_name: "{{ aws_gimme_creds_plist_domain | mandatory }}.aws_login"
+aws_login_plist: "{{ ansible_facts.user_dir }}/Library/LaunchAgents/{{ aws_gimme_creds_plist_domain }}.aws_login.plist"
+aws_creds_log_out: "{{ ansible_facts.user_dir }}/.aws/aws_login.launchd.stdout"
+aws_creds_log_err: "{{ ansible_facts.user_dir }}/.aws/aws_login.launchd.stderr"

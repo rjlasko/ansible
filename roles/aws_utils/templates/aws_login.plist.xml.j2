@@ -6,18 +6,18 @@
 
 <dict>
 	<key>Label</key>
-	<string>{{ aws_creds.plist_domain }}</string>
+	<string>{{ aws_gimme_creds_plist_domain }}</string>
 	<key>ProgramArguments</key>
 	<array>
 		<string>bash</string>
 		<string>-c</string>
-		<string>{{ aws_login_filepath }}</string>
+		<string>{{ aws_login_bin }}</string>
 	</array>
 <!--
 	<key>StandardOutPath</key>
-	<string>{{ aws_creds.log_out }}</string>
+	<string>{{ aws_creds_log_out }}</string>
 	<key>StandardErrorPath</key>
-	<string>{{ aws_creds.log_err }}</string>
+	<string>{{ aws_creds_log_err }}</string>
  -->
 	<key>StartInterval</key>
 	<integer>1800</integer>
