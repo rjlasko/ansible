@@ -18,6 +18,6 @@
         dest: "{{ pip_conf_filepath }}"
         mode: u=rw,o-rwx
 
-    - name: leave an indication that pipx has been configured
+    - name: leave an indication that pip has been configured
       ansible.builtin.set_fact:
         pip_config_installed: true
