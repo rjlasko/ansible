@@ -27,7 +27,7 @@
 - when: icdiff_installation == 'venv'
   block:
     - name: install icdiff (venv)
-      include_role:
+      ansible.builtin.include_role:
         name: pipv
       vars:
         pipv_package: icdiff
