@@ -31,7 +31,6 @@
   vars:
     pipv_package: poetry
     pipv_package_version: "{{ poetry_version | default(omit) }}"
-    pipv_copies: true
 
 - when: poetry_installation == 'poetry'
   block:

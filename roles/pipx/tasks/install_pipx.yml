@@ -24,7 +24,6 @@
       vars:
         pipv_package: pipx
         pipv_package_version: "{{ pipx_version | default(omit) }}"
-        pipv_copies: true
         pipv_executables:
           - pipx
           - register-python-argcomplete

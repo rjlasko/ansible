@@ -80,7 +80,6 @@
             name: pipv
           vars:
             pipv_package: gimme-aws-creds
-            pipv_copies: true
 
         - name: "add gimme-aws-creds exe path to shell initialization script: {{ aws_login_init }}"
           when: aws_login_init
