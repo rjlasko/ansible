@@ -2,38 +2,45 @@
 ## ------------------------------------------------- ##
 ## Create virtualenv and install python apps into it ##
 ## ------------------------------------------------- ##
-- name: "clear {{ pipv_home }}"
+
+- name: "clear {{ pipv_app_home }}"
   loop:
     - absent
     - directory
   loop_control:
     loop_var: pipv_state
   file:
-    path: "{{ pipv_home }}"
+    path: "{{ pipv_app_home }}"
     state: "{{ pipv_state }}"
 
-- name: "install package into virtualenv: {{ pipv_package }}:{{ pipv_package_version | default('latest') }} => {{ pipv_venv }}"
+- name: "install virtualenv: {{ pipv_app_venv }}"
   ansible.builtin.pip:
-    name: "{{ pipv_package | mandatory }}"
-    version: "{{ pipv_package_version | default(omit) }}"
-    virtualenv: "{{ pipv_venv }}"
+    name: "{{ pipv_package_specs }}"
+    virtualenv: "{{ pipv_app_venv }}"
     virtualenv_command: "{{ pipv_command }}"
     state: present
 
-- name: "create {{ pipv_bin }}"
-  file:
-    path: "{{ pipv_bin }}"
-    state: directory
-
-- name: "create symlink for executables: {{ pipv_executables }}"
-  loop: "{{ pipv_executables if (pipv_executables | type_debug == 'list') else [pipv_executables] }}"
+- name: create symlink for package executable
+  loop: "{{ pipv_package_specs }}"
   loop_control:
-    loop_var: pipv_executable
+    loop_var: pipv_package_spec
+  vars:
+    pipv_package_name: "{{ pipv_package_spec | regex_replace('([<=>!,]+)', ',') | split(',') | first }}"
   file:
-    path: "{{ pipv_bin }}/{{ pipv_executable }}"
-    src: "{{ pipv_venv }}/bin/{{ pipv_executable }}"
+    path: "{{ pipv_app_home }}/{{ pipv_package_name }}"
+    src: "{{ pipv_app_venv }}/bin/{{ pipv_package_name }}"
+    state: link
+  failed_when: false
+
+- name: create symlink for expected additional executables
+  loop: "{{ pipv_executable if (pipv_executable | type_debug == 'list') else [pipv_executable] }}"
+  loop_control:
+    loop_var: pipv_additional_exe
+  file:
+    path: "{{ pipv_app_home }}/{{ pipv_additional_exe }}"
+    src: "{{ pipv_app_venv }}/bin/{{ pipv_additional_exe }}"
     state: link
 
 - name: export facts
   set_fact:
-    pipv_bin_path: "{{ pipv_bin }}"
+    pipv_app_bin: "{{ pipv_app_home }}"
