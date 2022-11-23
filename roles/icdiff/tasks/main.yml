@@ -21,5 +21,4 @@
   ansible.builtin.include_role:
     name: pipx
   vars:
-    pipx_packages:
-      - icdiff
+    pipx_packages: icdiff

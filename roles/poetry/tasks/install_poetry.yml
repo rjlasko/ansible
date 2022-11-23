@@ -21,8 +21,7 @@
   ansible.builtin.include_role:
     name: pipx
   vars:
-    pipx_packages:
-      - "poetry{{ ('==' + poetry_version) if (poetry_version is defined) else '' }}"
+    pipx_packages: "poetry{{ ('==' + poetry_version) if (poetry_version is defined) else '' }}"
 
 - when: poetry_installation == 'poetry'
   block:

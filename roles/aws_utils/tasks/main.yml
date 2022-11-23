@@ -70,8 +70,7 @@
       ansible.builtin.include_role:
         name: pipx
       vars:
-        pipx_packages:
-          - gimme-aws-creds
+        pipx_packages: gimme-aws-creds
 
     - name: delete preexisting files created by this role
       with_items:

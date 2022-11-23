@@ -4,7 +4,7 @@
 ## ------------- ##
 
 - assert:
-    that: pipx_installation in ['system', 'venv', 'none']
+    that: pipx_installation in ['system', 'pipv', 'none']
 
 - when: pipx_installation == 'system'
   block:
@@ -16,9 +16,9 @@
         name: pipx
         state: present
 
-- when: pipx_installation == 'venv'
+- when: pipx_installation == 'pipv'
   block:
-    - name: install pipx (venv)
+    - name: install pipx (pipv)
       include_role:
         name: pipv
       vars:
