@@ -10,17 +10,15 @@ Installs and configures the latest version of `poetry`.
 
 `pipx`: `pipx` must be installed
 
-`venv`: `python3` & `pip` must be installed
-
 `poetry`: none
 
 ## Role Variables
 
 #### Settable Variables
 ```yaml
-poetry_installation: # required. How to install `pipx`. One of ['system', 'venv', 'pipx', 'poetry', 'none'].
-poetry_version: # optional, default(~latest~). version of poetry to install.
-poetry_init_file: # filepath, optional. adds `poetry` completions to shell environment. adds `poetry` executable to PATH, when `poetry_installation == 'venv'`
+poetry_installation: # required. How to install `pipx`. One of ['system', 'pipx', 'poetry', 'none'].
+poetry_version: # string, default(~latest~). Version of poetry to install, when `poetry_installation == 'pipx'`, otherwise ignored.
+poetry_init_file: # filepath, optional. adds `poetry` completions to shell environment. adds `poetry` executable to PATH, when `poetry_installation == 'poetry'`
 
 # a user configuration will be created if `poetry_extra_configs` or `poetry_pip_url` is provided
 poetry_extra_configs: # list, default([])
@@ -40,7 +38,7 @@ None
   roles:
     - role: poetry
       vars:
-        poetry_installation: venv
+        poetry_installation: pipx
         poetry_version: 1.1.15 # XXX: 1.2.0 has a problem with its completions script
         poetry_init_file: ~/.bashrc
         poetry_pip_username: "{{ vault.username }}"
