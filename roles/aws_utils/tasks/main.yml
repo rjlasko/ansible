@@ -61,9 +61,9 @@
   ignore_errors: true
 
 - assert:
-    that: aws_login_installation in ['venv', 'pipx', 'none']
+    that: aws_login_installation in ['pipx', 'none']
 
-- when: aws_login_installation in ['venv', 'pipx']
+- when: aws_login_installation in ['pipx']
   block:
     - name: install gimme-aws-creds (pipx)
       when: aws_login_installation == 'pipx'
@@ -72,27 +72,6 @@
       vars:
         pipx_packages:
           - gimme-aws-creds
-
-    - when: aws_login_installation == 'venv'
-      block:
-        - name: install gimme-aws-creds (venv)
-          ansible.builtin.include_role:
-            name: pipv
-          vars:
-            pipv_package: gimme-aws-creds
-
-        - name: "add gimme-aws-creds exe path to shell initialization script: {{ aws_login_init }}"
-          when: aws_login_init
-          ansible.builtin.blockinfile:
-            path: "{{ aws_login_init }}"
-            create: true
-            marker: "# --- {mark} aws login path ---"
-            block: |
-              if ! $(echo "$PATH" | tr ":" "\n" | grep -qx "{{ aws_login_bin | dirname }}") ; then
-                export PATH="{{ aws_login_bin | dirname }}:$PATH"
-              fi
-            state: present
-            mode: u=rw,go=r
 
     - name: delete preexisting files created by this role
       with_items:
@@ -110,8 +89,6 @@
         mode: u=r,go-rwx
 
     - name: "generate from template: {{ aws_login_bin }}"
-#      vars:
-#        aws_bin_path: "{{ pipx_bin_path | mandatory }}"
       ansible.builtin.template:
         src: aws-login.sh.j2
         dest: "{{ aws_login_bin }}"

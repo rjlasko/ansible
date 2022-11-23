@@ -5,7 +5,6 @@ aws_credentials: "{{ ansible_facts.user_dir }}/.aws/credentials"
 
 aws_bin_path: /usr/local/bin
 aws_creds_installation_path:
-  venv: "{{ pipv_bin_path }}"
   pipx: "{{ ansible_facts.user_dir }}/.local/bin"
 aws_creds_bin_path: "{{ aws_creds_installation_path[aws_login_installation] }}"
 
