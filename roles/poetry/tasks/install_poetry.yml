@@ -54,6 +54,7 @@
 
 - name: generate and install poetry completions
   when: poetry_init_file
+  # XXX: add poetry to PATH when not in an interactive shell
   environment:
     PATH: "{{ poetry_bin_env }}"
   block:

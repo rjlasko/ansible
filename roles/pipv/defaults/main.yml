@@ -2,7 +2,7 @@
 pipv_home: "{{ ansible_user_dir }}/bin"
 pipv_python: "{{ discovered_interpreter_python }}"
 # XXX: see: https://docs.ansible.com/ansible/latest/collections/ansible/builtin/pip_module.html#parameter-virtualenv_command
-pipv_command: "{{ pipv_python }} -m venv {{ '--copies' if pipv_copies else '' }}"
+pipv_command: "{{ pipv_python }} -m venv{{ ' --copies' if pipv_copies else '' }}"
 pipv_copies: false
 
 pipv_name: "{{ pipv_package_specs[0] | regex_replace('([<=>!,]+)', ',') | split(',') | first }}"

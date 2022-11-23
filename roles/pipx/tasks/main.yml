@@ -31,8 +31,6 @@
   when: pipx_reset
   command: pipx uninstall-all
 
-- name: install & upgrade pipx packages
-  loop: "{{ pipx_packages | default([]) }}"
-  loop_control:
-    loop_var: pipx_package
+- name: install pipx application and packages
+  when: pipx_packages is defined
   ansible.builtin.include_tasks: install_packages.yml

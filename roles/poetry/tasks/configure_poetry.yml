@@ -4,6 +4,7 @@
 ## ---------------- ##
 
 - name: poetry configuration
+  # XXX: add poetry to PATH when not in an interactive shell
   environment:
     PATH: "{{ poetry_bin_env }}"
   block:

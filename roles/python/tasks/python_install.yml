@@ -10,14 +10,14 @@
   set_fact:
     python_system_packages: "{{ python_system_packages + [ python_package_pattern[ansible_facts.os_family] | format(python_system_version) ] }}"
 
-- name: install python versions (MacOS)
-  when: ansible_facts.system == 'Darwin'
+- name: install python system packages (MacOS)
+  when: ansible_facts.system == 'Darwin' and python_system_packages
   community.general.homebrew:
     name: "{{ python_system_packages }}"
     state: present
 
-- name: "install python versions ({{ ansible_facts.os_family }} Linux)"
-  when: ansible_facts.system == 'Linux'
+- name: "install python system packages ({{ ansible_facts.os_family }} Linux)"
+  when: ansible_facts.system == 'Linux' and python_system_packages
   become: true
   ansible.builtin.package:
     name: "{{ python_system_packages }}"

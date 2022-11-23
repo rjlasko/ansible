@@ -27,6 +27,7 @@
 
     - name: find aws_completer
       environment:
+        # FIXME: need to remove things like this that are expected to appear in the PATH from here on out
         PATH: "{{ aws_bin_path }}:{{ ansible_env.PATH }}"
       ansible.builtin.shell: command -v aws_completer
       changed_when: false
