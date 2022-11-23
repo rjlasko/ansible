@@ -5,7 +5,7 @@
 
 - when: ansible_facts.system == 'Darwin'
   block:
-    - name: "install {{ brew_target }} (MacOS)"
+    - name: "install pyenv (MacOS)"
       loop:
         - pyenv
         - pyenv-virtualenv
@@ -15,6 +15,7 @@
         name: "{{ brew_target }}"
         state: present
 
+# XXX: disabled because hardcoding via variables
 #    - name: get pyenv root
 #      environment:
 #        PATH: "{{ pyenv_bin }}:{{ ansible_env.PATH }}"
