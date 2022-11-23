@@ -1,3 +1,2 @@
 ---
 icdiff_installation: null
-icdiff_init_file: "{{ ansible_user_dir }}/.bashrc"
