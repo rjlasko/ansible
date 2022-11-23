@@ -1,2 +1,4 @@
 ---
 pipx_apps_path: "{{ ansible_user_dir }}/.local/bin"
+pipx_package_specs: "{{ pipx_packages if ( pipx_packages | mandatory | type_debug == 'list') else [pipx_packages] }}"
+pipx_app_name: "{{ pipx_package_specs[0] | regex_replace('([<=>!,]+)', ',') | split(',') | first }}"

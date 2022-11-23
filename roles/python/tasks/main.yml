@@ -19,6 +19,7 @@
       ansible.builtin.include_tasks: python_build.yml
 
     - name: set PyEnv global Python version(s)
+      # XXX: add pyenv to PATH when not in an interactive shell
       environment:
         PATH: "{{ pyenv_bin }}:{{ ansible_env.PATH }}"
       ansible.builtin.command: "pyenv global {{ pyenv_global_versions }}"

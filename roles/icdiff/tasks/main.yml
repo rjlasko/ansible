@@ -4,7 +4,7 @@
 ## ----------------- ##
 
 - assert:
-    that: icdiff_installation in ['system', 'venv', 'pipx']
+    that: icdiff_installation in ['system', 'pipx']
 
 - when: icdiff_installation == 'system'
   block:
@@ -21,30 +21,4 @@
   ansible.builtin.include_role:
     name: pipx
   vars:
-    pipx_packages:
-      - icdiff
-
-- when: icdiff_installation == 'venv'
-  block:
-    - name: install icdiff (venv)
-      ansible.builtin.include_role:
-        name: pipv
-      vars:
-        pipv_package: icdiff
-        pipv_executables:
-          - icdiff
-          - git-icdiff
-        pipv_package_version: "{{ icdiff_version | default(omit) }}"
-
-    - name: "add icdiff exe path to shell initialization script: {{ icdiff_init_file }}"
-      when: icdiff_init_file
-      ansible.builtin.blockinfile:
-        path: "{{ icdiff_init_file }}"
-        create: true
-        marker: "# --- {mark} icdiff exe path ---"
-        block: |
-          if ! $(echo "$PATH" | tr ":" "\n" | grep -qx "{{ icdiff_bin_path }}") ; then
-          	export PATH="{{ icdiff_bin_path }}:$PATH"
-          fi
-        state: present
-        mode: u=rw,go=r
+    pipx_packages: "icdiff{{ ('==' + icdiff_version) if (icdiff_version is defined) else '' }}"

@@ -1,8 +1,8 @@
 ---
 poetry_installer_vars: "{{ ('POETRY_VERSION=' + poetry_version) if (poetry_version | length > 0) else '' }}"
 poetry_installed_path:
-  venv: "{{ pipv_bin_path }}"
   poetry: "{{ ansible_user_dir }}/.local/bin"
+  pipx: "{{ ansible_user_dir }}/.local/bin"
 
 poetry_bin_path: "{{ poetry_installed_path[poetry_installation] }}"
-poetry_bin_env: "{{ (poetry_bin_path + ':') if poetry_installation in ['venv', 'poetry'] else '' }}{{ ansible_env.PATH }}"
+poetry_bin_env: "{{ (poetry_bin_path + ':') if poetry_installation in poetry_installed_path else '' }}{{ ansible_env.PATH }}"

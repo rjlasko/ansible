@@ -1,2 +1,0 @@
----
-icdiff_bin_path: "{{ pipv_bin_path }}"

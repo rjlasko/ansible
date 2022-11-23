@@ -51,18 +51,10 @@
       changed_when: false
       register: maven_repo_version
 
-    - name: get checksum
-      ansible.builtin.uri:
-        url: "{{ maven_bin_url }}.sha512"
-        return_content: true
-      register: maven_sha512
-
     - name: "download maven3 ({{ maven_target_version }})"
       ansible.builtin.get_url:
         url: "{{ maven_bin_url }}"
-        # XXX: get_url doesn't seem to like the checksum URL for maven
-        # checksum: "sha512:{{ maven_bin_url }}.sha512"
-        checksum: "sha512:{{ maven_sha512.content }}"
+        checksum: "sha512:{{ maven_bin_url }}.sha512"
         dest: "{{ maven_tempdir.path }}/maven.zip"
         mode: u=rx,go-rwx
         force: true

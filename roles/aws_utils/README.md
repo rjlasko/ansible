@@ -28,10 +28,9 @@ User provides an AWS `config` file.
 #### Settable Variables
 
 ```yaml
-aws_login_installation: # required, one of ['venv', 'pipx', 'none']. How to install AWS login automation service.
+aws_login_installation: # required, one of ['pipx', 'none']. How to install AWS login automation service.
 aws_config_src: # required. source file to copy over ~/.aws/config
 aws_login_bin: # filepath, default('~/bin/aws-login'). Location to install `aws-login` script to.
-aws_login_init: # filepath, default('~/.bashrc'). Adds aws-login script to PATH
 aws_completions_filepath: # filepath, default('~/.bashrc'). Script that loads aws completions.
 
 # the below are required if aws_login_installation is not 'none', unless otherwise stated as optional
@@ -51,7 +50,7 @@ okta_username: # (optional), username for Okta to authenticate. default: host's 
   roles:
     - role: aws_utils
       vars:
-        aws_login_installation: venv
+        aws_login_installation: pipx
         aws_config_src: "~/path/to/aws_config.ini"
         aws_gimme_creds_plist_domain: beep.boop
         aws_gimme_creds_pretest: ping -o -c 1 robot.beep.boop

@@ -1,6 +1,6 @@
 # Ansible Role: Python
 
-Installs any number of Python versions, optionally using system package managers or `pyenv`, which is also used to manage them. `pyenv` is provided as a system installation on MacOS, whereas Linux only supports `/home/$USER/.pyenv` installations. The requested `python` versions are installed under `/home/$USER/.pyenv/versions` for all operating systems.
+Installs any number of Python versions, optionally using system package managers or `pyenv`, which is also used to manage them. `pyenv` is provided as a system installation on MacOS, whereas Linux only supports `/home/$USER/.pyenv` installations. `python` versions are installed under `/home/$USER/.pyenv/versions` for all operating systems, when `python_installation == 'pyenv'`.
 
 Also configures `pip`.
 

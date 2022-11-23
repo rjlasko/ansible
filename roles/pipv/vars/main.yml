@@ -1,3 +1,4 @@
-pipv_home: "{{ ansible_user_dir }}/bin/{{ pipv_package }}"
-pipv_venv: "{{ pipv_home }}/venv"
-pipv_bin: "{{ pipv_home }}/bin"
+---
+pipv_package_specs: "{{ pipv_packages if ( pipv_packages | mandatory | type_debug == 'list') else [pipv_packages] }}"
+pipv_app_home: "{{ pipv_home }}/{{ pipv_name }}"
+pipv_app_venv: "{{ pipv_app_home }}/venv"

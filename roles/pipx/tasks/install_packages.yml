@@ -3,14 +3,15 @@
 ## Installs the given pip packages ##
 ## ------------------------------- ##
 
-- name: install package
+- name: uninstall preexisting application
   community.general.pipx:
-    name: "{{ pipx_package }}"
-    state: present
+    name: "{{ pipx_app_name }}"
+    state: absent
     executable: "{{ pipx_executable }}"
 
-- name: upgrade package
+- name: install package
   community.general.pipx:
-    name: "{{ pipx_package }}"
-    state: upgrade
+    name: "{{ pipx_package_specs[0] }}"
+    inject_packages: "{{ pipx_package_specs[1:] | default(omit) }}"
+    state: present
     executable: "{{ pipx_executable }}"

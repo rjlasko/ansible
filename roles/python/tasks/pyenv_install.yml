@@ -5,7 +5,7 @@
 
 - when: ansible_facts.system == 'Darwin'
   block:
-    - name: "install {{ brew_target }} (MacOS)"
+    - name: "install pyenv (MacOS)"
       loop:
         - pyenv
         - pyenv-virtualenv
@@ -14,13 +14,6 @@
       community.general.homebrew:
         name: "{{ brew_target }}"
         state: present
-
-#    - name: get pyenv root
-#      environment:
-#        PATH: "{{ pyenv_bin }}:{{ ansible_env.PATH }}"
-#      ansible.builtin.command: pyenv root
-#      changed_when: false
-#      register: pyenv_root_cmd
 
 - name: delete pre-existing pyenv config and python installations (MacOS)
   when: pyenv_reset
@@ -38,7 +31,7 @@
     - name: "install pyenv-virtualenv to {{ pyenv_home }} ({{ ansible_facts.os_family }} Linux)"
       ansible.builtin.git:
         repo: https://github.com/pyenv/pyenv-virtualenv.git
-        dest: "{{ pyenv_root }}/plugins/pyenv-virtualenv"
+        dest: "{{ pyenv_home }}/plugins/pyenv-virtualenv"
 
     - name: "add pyenv path to shell initialization script: {{ pyenv_init_file }}"
       when: pyenv_init_file

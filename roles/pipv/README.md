@@ -1,27 +1,30 @@
 # Ansible Role: pipv
 
-Installs `python` package(s) via `pip` into a dedicated virtual environment.
+Installs a `python` application and other specified package(s) into a dedicated virtual environment, using the python interpreter found in the `PATH`.
 
 ## Requirements
 
-`python3` & `pip`
+`python3` & `pip` are accessible from `PATH`
 
 ## Role Variables
 
 #### Settable Variables
 ```yaml
-pipv_package: # required, the name of the python package to install
-pipv_package_version: # optional, the package version
-pipv_executables: # string or list[string], default(<pipv_package>). Used to symlink specific executables into `pipv_bin_path`.
+## `venv` Installation ##
+pipv_home: # string, default("~/bin"). Base directory to install pipv applications to.
+pipv_python: # filepath, default(<resolved by Ansible via PATH>). Path to Python3 interpreter to use to create venv.
+pipv_command: # string, default('<pipv_python> -m venv'). see: https://docs.ansible.com/ansible/latest/collections/ansible/builtin/pip_module.html#parameter-virtualenv_command
 pipv_copies: # boolean, default(false). Prefer file copies over symlinks when building the virtual environment.
 
-pipv_python: # string, default('python3'). Python interpreter to use to create venv. Resolved via PATH, unless absolute filepath is given.
-pipv_command: # default('<pipx_python> -m venv --copies'). see: https://docs.ansible.com/ansible/latest/collections/ansible/builtin/pip_module.html#parameter-virtualenv_command
+# XXX: All `package_spec` strings follow pip requirement specifier format.
+pipv_name: # string, default(<name of pipv_packages[0]>). Used as the name of pipv app directory.
+pipv_packages: # required, string(package_spec) or list(string(package_spec)). All packages to install into pipv application directory
+pipv_executables: # string or list(string), default([]). Applications in pipv app directory to symlink into `pipv_app_bin`.
 ```
 
 #### Set Facts
 ```yaml
-pipv_bin_path: # path to directory containing installed executables
+pipv_app_bin: # path to directory containing linked application executables
 ```
 
 ## Dependencies
@@ -34,11 +37,8 @@ None
   roles:
     - role: pipv
       vars:
-        pipv_package: pipx
-        pipv_copies: true
-        pipv_executables:
-          - pipx
-          - register-python-argcomplete
+        pipv_packages: pipx
+        pipv_executables: register-python-argcomplete
 ```
 
 ## License
