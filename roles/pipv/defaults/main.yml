@@ -5,5 +5,5 @@ pipv_python: "{{ discovered_interpreter_python }}"
 pipv_command: "{{ pipv_python }} -m venv {{ '--copies' if pipv_copies else '' }}"
 pipv_copies: false
 
-pipv_name: "{{ pipv_primary_package_spec | regex_replace('([<=>!,]+)', ',') | split(',') | first }}"
-pipv_executable: []
+pipv_name: "{{ pipv_package_specs[0] | regex_replace('([<=>!,]+)', ',') | split(',') | first }}"
+pipv_executables: []

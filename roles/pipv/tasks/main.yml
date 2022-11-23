@@ -33,7 +33,7 @@
   failed_when: false
 
 - name: create symlink for expected additional executables
-  loop: "{{ pipv_executable if (pipv_executable | type_debug == 'list') else [pipv_executable] }}"
+  loop: "{{ pipv_executables if (pipv_executables | type_debug == 'list') else [pipv_executables] }}"
   loop_control:
     loop_var: pipv_additional_exe
   file:

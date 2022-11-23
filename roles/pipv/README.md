@@ -17,9 +17,9 @@ pipv_command: # string, default('<pipv_python> -m venv'). see: https://docs.ansi
 pipv_copies: # boolean, default(false). Prefer file copies over symlinks when building the virtual environment.
 
 # XXX: All `package_spec` strings follow pip requirement specifier format.
-pipv_name: # string, default(<name of pipv_package[0]>). Used as the name of pipv app directory.
-pipv_package: # required, string(package_spec) or list(string(package_spec)). All packages to install into pipv application directory
-pipv_executable: # string or list(string), default([]). Applications in pipv app directory to symlink into `pipv_app_bin`.
+pipv_name: # string, default(<name of pipv_packages[0]>). Used as the name of pipv app directory.
+pipv_packages: # required, string(package_spec) or list(string(package_spec)). All packages to install into pipv application directory
+pipv_executables: # string or list(string), default([]). Applications in pipv app directory to symlink into `pipv_app_bin`.
 ```
 
 #### Set Facts
@@ -37,11 +37,8 @@ None
   roles:
     - role: pipv
       vars:
-        pipv_package: pipx
-        pipv_copies: true
-        pipv_executables:
-          - pipx
-          - register-python-argcomplete
+        pipv_packages: pipx
+        pipv_executables: register-python-argcomplete
 ```
 
 ## License

@@ -1,5 +1,4 @@
 ---
-pipv_package_specs: "{{ pipv_package if ( pipv_package | mandatory | type_debug == 'list') else [pipv_package] }}"
-pipv_primary_package_spec: "{{ pipv_package_specs[0] }}"
+pipv_package_specs: "{{ pipv_packages if ( pipv_packages | mandatory | type_debug == 'list') else [pipv_packages] }}"
 pipv_app_home: "{{ pipv_home }}/{{ pipv_name }}"
 pipv_app_venv: "{{ pipv_app_home }}/venv"

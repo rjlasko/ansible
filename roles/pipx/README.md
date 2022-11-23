@@ -11,7 +11,7 @@ Also configures `pip`.
   - Linux: ***unsupported***
 
 `venv`
-  - All: `python3` & `pip` must be installed
+  - All: `python3` & `pip` are accessible from `PATH`
 
 ## Role Variables
 
