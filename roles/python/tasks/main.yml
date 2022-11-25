@@ -19,11 +19,24 @@
       ansible.builtin.include_tasks: python_build.yml
 
     - name: set PyEnv global Python version(s)
-      # XXX: add pyenv to PATH when not in an interactive shell
       environment:
         PATH: "{{ pyenv_bin }}:{{ ansible_env.PATH }}"
       ansible.builtin.command: "pyenv global {{ pyenv_global_versions }}"
       changed_when: true
+
+- name: "add python to shell initialization script: {{ python_init_file }}"
+  when: python_init_file and python_exe_dir is defined
+  ansible.builtin.blockinfile:
+    path: "{{ python_init_file }}"
+    create: true
+    insertafter: ".*pyenv\ completions"
+    marker: "# --- {mark} python path ---"
+    block: |
+      if ! $(echo "$PATH" | tr ":" "\n" | grep -qx "{{ python_exe_dir }}") ; then
+        export PATH="{{ python_exe_dir }}:$PATH"
+      fi
+    state: present
+    mode: u=rw,g=r,o-rwx
 
 - name: configure pip
   when: pip_user_cfg and not (pip_config_installed | default(false))

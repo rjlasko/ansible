@@ -39,3 +39,4 @@ python_build_packages:
     - tcl-tk
 
 pip_conf_filepath: ~/.config/pip/pip.conf
+python_exe_dir: "{{ pyenv_shims if python_installation == 'pyenv' else python_home }}"

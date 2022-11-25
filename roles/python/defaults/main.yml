@@ -5,7 +5,4 @@ python_versions: []
 python_system_packages: []
 pyenv_global_versions: "{{ python_versions | join(' ') }}"
 pyenv_install_build_dependencies: false
-
-pyenv_init_file: null
-pyenv_python_init_file: "{{ pyenv_init_file }}"
 pip_user_cfg: false

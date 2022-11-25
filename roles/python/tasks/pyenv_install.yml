@@ -33,10 +33,10 @@
         repo: https://github.com/pyenv/pyenv-virtualenv.git
         dest: "{{ pyenv_home }}/plugins/pyenv-virtualenv"
 
-    - name: "add pyenv path to shell initialization script: {{ pyenv_init_file }}"
-      when: pyenv_init_file
+    - name: "add pyenv path to shell initialization script: {{ python_init_file }}"
+      when: python_init_file
       ansible.builtin.blockinfile:
-        path: "{{ pyenv_init_file }}"
+        path: "{{ python_init_file }}"
         create: true
         insertbefore: ".*pyenv\ completions"
         marker: "# --- {mark} pyenv execpath ---"
@@ -47,10 +47,10 @@
         state: present
         mode: u=rw,go=r
 
-- name: "add pyenv shims & init to shell initialization script: {{ pyenv_init_file }}"
-  when: pyenv_init_file
+- name: "add pyenv init to shell initialization script: {{ python_init_file }}"
+  when: python_init_file
   ansible.builtin.blockinfile:
-    path: "{{ pyenv_init_file }}"
+    path: "{{ python_init_file }}"
     create: true
     insertafter: ".*pyenv\ execpath"
     marker: "# --- {mark} pyenv completions ---"
