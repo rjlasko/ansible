@@ -4,7 +4,7 @@
 ## -------------- ##
 
 - assert:
-    that: (maven_installation in ['system', 'home', 'none']) or ((maven_home | length) > 0)
+    that: (maven_installation in ['system', 'user', 'none']) or ((maven_home | length) > 0)
 
 - when: maven_installation == "system"
   block:
@@ -24,7 +24,7 @@
         name: maven
         state: present
 
-- when: maven_installation == 'home'
+- when: maven_installation == 'user'
   block:
     - name: create temp directory to store download
       ansible.builtin.tempfile:
@@ -62,20 +62,20 @@
     - name: delete preexisting maven installation directory
       when: maven_reset
       ansible.builtin.file:
-        path: "{{ maven_home_dir }}"
+        path: "{{ maven_user_dir }}"
         state: absent
 
-    - name: "create maven installation directory: {{ maven_home_dir }}"
+    - name: "create maven installation directory: {{ maven_user_dir }}"
       ansible.builtin.file:
-        path: "{{ maven_home_dir }}"
+        path: "{{ maven_user_dir }}"
         state: directory
         mode: u=rwx,go-rwx
 
-    - name: "extract archive to installation directory: {{ maven_home_dir }}"
+    - name: "extract archive to installation directory: {{ maven_user_dir }}"
       ansible.builtin.unarchive:
         remote_src: true
         src: "{{ maven_tempdir.path }}/maven.zip"
-        dest: "{{ maven_home_dir }}"
+        dest: "{{ maven_user_dir }}"
 
   always:
     - name: delete temporary directory
@@ -83,21 +83,17 @@
         path: "{{ maven_tempdir.path }}"
         state: absent
 
-# XXX: note that this does double duty for user-provided and `home` installations, by way
-# of the conditional used to pick the default value of `maven_home`
-- when: maven_home | length > 0
+- when: >
+    (maven_installation in ['user', 'none'])
+    and (maven_exe_dir | length > 0)
   block:
     - name: find installed maven executable
       find:
-        path: "{{ maven_installation if maven_installation != 'home' else maven_home_dir }}"
+        path: "{{ maven_exe_dir }}"
         pattern: mvn
         recurse: true
       register: mvn_search
       failed_when: mvn_search.files | length != 1
-
-    - name: record directory with maven executables
-      set_fact:
-        maven_bin: "{{ mvn_search.files[0].path | dirname }}"
 
     - name: "add maven path to shell initialization script: {{ maven_init_file }}"
       when: maven_init_file

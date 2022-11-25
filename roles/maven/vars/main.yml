@@ -1,9 +1,11 @@
 ---
-maven_settings_filepath: ~/.m2/settings.xml
 maven_url_prefix: https://dlcdn.apache.org/maven/maven-3
-maven_home_dir: "{{ ansible_user_dir }}/bin/maven"
-maven_home_bin: "{{ ansible_user_dir }}/bin/mvn"
 maven_target_version: "{{ maven_version if maven_version | length > 0 else maven_repo_version.stdout }}"
-
-# use ZIP file to avoid requiring 'gnu-tar' on MacOS
+# XXX: use ZIP file to avoid requiring 'gnu-tar' on MacOS
 maven_bin_url: "{{ maven_url_prefix }}/{{ maven_target_version }}/binaries/apache-maven-{{ maven_target_version }}-bin.zip"
+
+maven_user_dir: "{{ ansible_user_dir }}/bin/maven"
+maven_exe_dir: "{{ maven_user_dir if maven_installation == 'user' else maven_home }}"
+maven_bin: "{{ mvn_search.files[0].path | dirname }}"
+
+maven_settings_filepath: ~/.m2/settings.xml
