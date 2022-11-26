@@ -34,7 +34,7 @@
         dest: "{{ pyenv_home }}/plugins/pyenv-virtualenv"
 
     - name: "add pyenv path to shell initialization script: {{ python_init_file }}"
-      when: python_init_file
+      when: python_init_file is defined
       ansible.builtin.blockinfile:
         path: "{{ python_init_file }}"
         create: true
@@ -48,7 +48,7 @@
         mode: u=rw,go=r
 
 - name: "add pyenv init to shell initialization script: {{ python_init_file }}"
-  when: python_init_file
+  when: python_init_file is defined
   ansible.builtin.blockinfile:
     path: "{{ python_init_file }}"
     create: true
