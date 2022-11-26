@@ -4,7 +4,7 @@
 ## ------------------- ##
 
 - assert:
-    that: neofetch_installation in ['system', 'home', 'none']
+    that: neofetch_installation in ['system', 'user', 'none']
 
 - when: neofetch_installation == 'system'
   block:
@@ -21,7 +21,7 @@
         name: neofetch
         state: present
 
-- when: neofetch_installation == 'home'
+- when: neofetch_installation == 'user'
   block:
     - name: bin directory must exist
       ansible.builtin.file:
@@ -41,7 +41,7 @@
       ansible.builtin.blockinfile:
         path: "{{ neofetch_init_file }}"
         create: true
-        marker: "# --- {mark} neofetch home bin ---"
+        marker: "# --- {mark} neofetch user bin ---"
         block: |
           if ! $(echo "$PATH" | tr ":" "\n" | grep -qx "{{ neofetch_bin }}") ; then
               export PATH="{{ neofetch_bin }}:$PATH"
@@ -54,7 +54,7 @@
   ansible.builtin.blockinfile:
     path: "{{ neofetch_init_file }}"
     create: true
-    insertafter: ".*neofetch\ home\ bin"
+    insertafter: ".*neofetch\ user\ bin"
     marker: "# --- {mark} neofetch startup ---"
     block: neofetch
     state: present

@@ -14,7 +14,7 @@
         state: absent
 
 - name: test command and autogenerate config
-  # the path is modified in case of home installation
+  # the path is modified in case of user installation
   environment:
     PATH: "{{ neofetch_bin }}:{{ ansible_env.PATH }}"
   ansible.builtin.command: neofetch

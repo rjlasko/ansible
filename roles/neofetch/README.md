@@ -14,14 +14,14 @@ Installs `neofetch` to the host, and facilitates per-user configuration.
 
 #### Settable Variables
 ```yaml
-neofetch_installation: # required. Valid values are 'home', 'system', 'none'
+neofetch_installation: # required. Valid values are 'user', 'system', 'none'
 neofetch_reset: # boolean, default(true). Rebuilds the config
 neofetch_configs: # list of 2-element lists, default([]). configs to update in neofetch config file
 neofetch_image_source: # define image for neofetch to use instead of default
   src: # required, filepath for source image on controller
   dest: # required, filepath for image to be saved on target
   mode: # file permissions string, default('u=r,go-rwx').
-neofetch_init_file: # filepath, optional. filepath to add neofetch to PATH for home installation, and place to install neofetch command when `neofetch_init_start=true`
+neofetch_init_file: # filepath, optional. filepath to add neofetch to PATH for user installation, and place to install neofetch command when `neofetch_init_start=true`
 neofetch_init_start: # boolean, default(false). run neofetch on start of user's interactive shell
 ```
 
@@ -36,7 +36,7 @@ None
   roles:
     - role: neofetch
       vars:
-        neofetch_installation: home
+        neofetch_installation: user
         neofetch_configs:
           - ['color_blocks', '"off"']
         neofetch_init_file: ~/.bashrc

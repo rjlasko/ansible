@@ -5,6 +5,6 @@ neofetch_os_bin:
   Linux: /usr/bin
   Darwin: /usr/local/bin
 neofetch_install_bin:
-  home: "{{ ansible_user_dir }}/bin"
+  user: "{{ ansible_user_dir }}/bin"
   system: "{{ neofetch_os_bin[ansible_facts.system] }}"
 neofetch_bin: "{{ neofetch_install_bin[neofetch_installation] }}"
