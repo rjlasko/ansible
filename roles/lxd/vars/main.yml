@@ -1,4 +1,6 @@
 ---
+lxd_async_clear_timeout: "{{ lxd_async_clear_retries * lxd_async_clear_retry_delay }}"
+lxd_async_start_timeout: "{{ lxd_async_start_retries * lxd_async_start_retry_delay }}"
 lxd_guests_idmap: >
   [
   {% for lxd_guest in lxd_guests %}

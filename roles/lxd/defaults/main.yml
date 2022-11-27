@@ -1,0 +1,5 @@
+---
+lxd_async_clear_retries: 30
+lxd_async_clear_retry_delay: 5
+lxd_async_start_retries: 120
+lxd_async_start_retry_delay: 5

@@ -53,6 +53,11 @@ lxd:
         both: # only for when user and group ID are same  value
         users: # for just user names
         groups: # for just group names
+
+lxd_async_clear_retries: # integer, default(30). number of times to poll for async container stop+delete completion.
+lxd_async_clear_retry_delay: # integer, default(5). number of seconds to wait in between polling for async container stop+delete completion.
+lxd_async_start_retries: # integer, default(120). number of times to poll for async container start completion.
+lxd_async_start_retry_delay: # integer, default(5). number of seconds to wait in between polling for async container  start completion.
 ```
 
 Note: for any pre-existing `lxd.host.preseed.storage_pools` declared, having `driver == 'zfs'`, the entire dataset will be destroyed and recreated in the parent zpool.

@@ -4,8 +4,6 @@
 ## ------------------------- ##
 
 - name: create & start instance
-  async: 10
-  poll: 0
   loop: "{{ lxd_guests_configd }}"
   loop_control:
     loop_var: lxd_guest
@@ -26,23 +24,16 @@
     devices: "{{ lxd_guest.devices | default(omit) }}"
     profiles: "{{ lxd_guest.profiles | default(omit) }}"
     wait_for_ipv4_addresses: true
-    timeout: 600
+    timeout: "{{ lxd_async_start_timeout }}"
+  async: "{{ lxd_async_start_timeout }}"
+  poll: 0
   register: lxd_async_start
 
-- name: Check sync status
+- name: Finish async start LXD instance
   loop: "{{ lxd_async_start.results }}"
   loop_control:
-    loop_var: "lxd_async_start_result"
-  ansible.builtin.async_status:
-    jid: "{{ lxd_async_start_result.ansible_job_id }}"
-  register: async_poll_results
-  until: async_poll_results.finished
-  retries: 30
-
-- name: Clear sync status
-  loop: "{{ lxd_async_start.results }}"
-  loop_control:
-    loop_var: "lxd_async_start_result"
-  ansible.builtin.async_status:
-    jid: "{{ lxd_async_start_result.ansible_job_id }}"
-    mode: cleanup
+    loop_var: lxd_async_result
+  ansible.builtin.include_tasks: finish_async.yml
+  vars:
+    lxd_async_retries: "{{ lxd_async_start_retries }}"
+    lxd_async_retry_delay: "{{ lxd_async_start_retry_delay }}"

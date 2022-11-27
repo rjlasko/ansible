@@ -19,7 +19,7 @@
   ansible.builtin.getent:
     database: group
 
-- name: clear selected guests
+- name: start selected guests
   ansible.builtin.include_tasks: start_guests.yml
 
 - name: "wait for guest(s) to respond with SSHd"
