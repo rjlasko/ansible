@@ -14,7 +14,7 @@ https://github.com/rjlasko/ansible/blob/master/roles/lxd/meta/argument_specs.yml
 
 (link1)[https://github.com/rjlasko/ansible/blob/master/roles/lxd/meta/argument_specs.yml]
 
-(link2)[meta/argument_specs.yml]
+(link2)[./meta/argument_specs.yml]
 
 Note: for any pre-existing `lxd.host.preseed.storage_pools` declared, having `driver == 'zfs'`, the entire dataset will be destroyed and recreated in the parent zpool.
 
