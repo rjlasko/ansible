@@ -1,4 +1,4 @@
-# Ansible Role: LXD
+# Ansible Role: `lxd`
 
 Installs the latest version of `lxd`.
 
@@ -10,6 +10,9 @@ Installs the latest version of `lxd`.
 ## Role Variables
 
 #### Settable Variables
+github.com:rjlasko/ansible/blob/master/roles/lxd/meta/argument_specs.yml
+
+
 ```yaml
 lxd:
   host: # targets a LXD host installation

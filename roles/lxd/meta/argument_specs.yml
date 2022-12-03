@@ -1,0 +1,151 @@
+---
+argument_specs:
+  # tasks/main.yml entry point
+  main:
+    short_description: The main entry point for the `lxd` role.
+    options:
+      lxd_async_clear_retries:
+        description: number of times to poll for async container stop+delete completion
+        type: int
+        default: 30
+      lxd_async_clear_retry_delay:
+        description: number of seconds to wait in between polling for async container stop+delete completion
+        type: int
+        default: 5
+      lxd_async_start_retries:
+        description: number of times to poll for async container start completion
+        type: int
+        default: 120
+      lxd_async_start_retry_delay:
+        description: number of seconds to wait in between polling for async container start completion
+        type: "int"
+        default: 5
+      lxd:
+        description: specification for host and instance(s)
+        required: true
+        type: dict
+        options:
+          host:
+            description: specification for host LXD installation
+            type: dict
+            options:
+              preseed:
+                description: >
+                  the elements found in an LXD preseed configuration.
+                  see: https://linuxcontainers.org/lxd/docs/master/preseed/
+                type: dict
+                # TODO? does this need additional specification, or is the dict fully described in the above URL?
+              extra_profiles:
+                description: >
+                  list of profile objects,
+                  see: https://docs.ansible.com/ansible/latest/collections/community/general/lxd_profile_module.html#parameters
+                type: list
+                elements: dict
+                # TODO? does this need additional specification, or is the dict fully described in the above URL?
+          guests:
+            description: specification for LXD guest container or virtual-machine instances
+            type: list
+#            elements: dict
+            options:
+              create_mode:
+                description: defines mode of building the LXD instance
+                required: true
+                choices:
+                  - skip
+                  - build
+              name:
+                description: the name of the lxc instance
+                required: true # TODO?
+              alias:
+                description: "as listed when running command `lxc image list images:`"
+                default: false
+              dns_address:
+                description: DNS or IP address of the instance
+                required: true # TODO?
+              force_stop:
+                description: Used when clearing any preexisting guest of same name
+                type: bool
+                default: false
+              type:
+                description: >
+                  the name of the lxc instance
+                  see: https://docs.ansible.com/ansible/latest/collections/community/general/lxd_container_module.html#parameter-type
+                required: true # TODO?
+                choices:
+                  - container
+                  - virtual-machine
+              server:
+                description: URL of LXC image host
+                default: https://images.linuxcontainers.org
+              protocol:
+                description: the protocol used to connect with the LXC image server
+                default: simplestreams
+                choices:
+                  - simplestreams
+                  - lxd
+              devices:
+                description: >
+                  see: https://linuxcontainers.org/lxd/docs/master/instances/#devices-configuration
+                  see: https://docs.ansible.com/ansible/latest/collections/community/general/lxd_container_module.html#parameter-devices
+                type: dict
+                required: true # TODO?
+              profiles:
+                description: list of the names of profile names declared on the host
+                type: list
+                elements: str
+              config:
+                description: >
+                  see: https://linuxcontainers.org/lxd/docs/master/instances/#key-value-configuration
+                  see: https://docs.ansible.com/ansible/latest/collections/community/general/lxd_container_module.html#parameter-config
+                type: dict
+                required: true # TODO?
+
+              ## --------------------------------------------------------------------------------------------- ##
+              ## the following fields are mapped onto the above `config`, after converted from human-intuitive ##
+              ## description.  Any preexisting `config` value will be overridden.                              ##
+              ## --------------------------------------------------------------------------------------------- ##
+              cpu_mem:
+                description: information about cpu and memory allocation and prioritization
+                type: dict
+                options:
+                  cpus:
+                    description: >
+                      list of logical core ids
+                      becomes: `config.limits.cpu`
+                      ids increment by logical cores, grouped by physical core
+                      ie. [P0L0,P0L1,P1L0,P1L1] = [0,1,2,3]
+                    type: list
+                    elements: int
+                  memory:
+                    description: >
+                      human friendly amount, eg "4GiB"
+                      becomes: `config.limits.memory`
+                  hugepages:
+                    description: >
+                      source memory from hugepages reservation
+                      becomes: `config.limits.memory.hugepages`
+                    type: bool
+                    default: false
+                  priority:
+                    description: >
+                      1-10, shared CPU scheduling priority
+                      becomes: `config.limits.cpu.priority`
+                    type: int
+              host_idmap:
+                description: >
+                  names of user and group IDs to map from host to guest
+                  becomes: `config.raw.idmap`
+                type: dict
+                options:
+                  both:
+                    description: only for when user and group ID are same  value
+                    type: list
+                    elements: str
+                  users:
+                    description: for just user names
+                    type: list
+                    elements: str
+                  groups:
+                    description: for just group names
+                    type: list
+                    elements: str
