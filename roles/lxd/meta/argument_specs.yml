@@ -33,6 +33,7 @@ argument_specs:
                 description: >
                   the elements found in an LXD preseed configuration.
                   see: https://linuxcontainers.org/lxd/docs/master/preseed/
+                  For any pre-existing `lxd.host.preseed.storage_pools` declared, having `driver == 'zfs'`, the entire dataset will be destroyed and recreated in the parent zpool.
                 type: dict
                 # TODO? does this need additional specification, or is the dict fully described in the above URL?
               extra_profiles:
@@ -48,7 +49,9 @@ argument_specs:
 #            elements: dict
             options:
               create_mode:
-                description: defines mode of building the LXD instance
+                description: >
+                  defines mode of building the LXD instance
+                  For any LXC instance, when `create_mode == 'build'`, any pre-existing instance (vm or container) will be deleted to make way for the new one.
                 required: true
                 choices:
                   - skip

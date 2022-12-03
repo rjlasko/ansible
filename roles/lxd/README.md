@@ -9,16 +9,7 @@ Installs the latest version of `lxd`.
 
 ## Role Variables
 
-#### Settable Variables
-https://github.com/rjlasko/ansible/blob/master/roles/lxd/meta/argument_specs.yml
-
-[link1](./meta/argument_specs.yml)
-
-[./meta/argument_specs.yml]
-
-Note: for any pre-existing `lxd.host.preseed.storage_pools` declared, having `driver == 'zfs'`, the entire dataset will be destroyed and recreated in the parent zpool.
-
-Note: for any LXC instance, when `create_mode == 'build'`, any pre-existing instance (vm or container) will be deleted to make way for the new one.
+#### [Settable Variables](./meta/argument_specs.yml)
 
 ## Dependencies
 Ansible collection `community.general` >= 4.1.0
