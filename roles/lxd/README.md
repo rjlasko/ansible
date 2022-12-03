@@ -10,58 +10,11 @@ Installs the latest version of `lxd`.
 ## Role Variables
 
 #### Settable Variables
-https://github.com/rjlasko/ansible/blob/master/roles/lxd/meta/argument_specs.yml#L1-L6
+https://github.com/rjlasko/ansible/blob/master/roles/lxd/meta/argument_specs.yml
 
+(link1)[https://github.com/rjlasko/ansible/blob/master/roles/lxd/meta/argument_specs.yml]
 
-```yaml
-lxd:
-  host: # targets a LXD host installation
-    preseed:
-      ... # the elements found in an LXD preseed configuration
-      ... # see: https://linuxcontainers.org/lxd/docs/master/preseed/
-    extra_profiles: # list of profile objects
-      ... # see: https://docs.ansible.com/ansible/latest/collections/community/general/lxd_profile_module.html#parameters
-
-  guests: # list of targets for LXD container/virtual-machine installation
-    - create_mode: # mandatory, one of ['skip','build']
-      name: # the name of the lxc instance
-      dns_address: # DNS or IP address of the instance
-      force_stop: # boolean, default(false). Used when clearing any preexisting guest of same name
-      type: # see: https://docs.ansible.com/ansible/latest/collections/community/general/lxd_container_module.html#parameter-type
-      server: # URL of LXC image host, defaults to https://images.linuxcontainers.org
-      alias: # as listed when running command `lxc image list images:`
-      protocol: # defaults to 'simplestreams', one of ['simplestreams','lxd']
-      devices:
-        ... # see: https://linuxcontainers.org/lxd/docs/master/instances/#devices-configuration
-        ... # see: https://docs.ansible.com/ansible/latest/collections/community/general/lxd_container_module.html#parameter-devices
-      profiles: # list of the names of profile names declared on the host
-      config:
-        ... # see: https://linuxcontainers.org/lxd/docs/master/instances/#key-value-configuration
-        ... # see: https://docs.ansible.com/ansible/latest/collections/community/general/lxd_container_module.html#parameter-config
-
-      # note that the following fields are mapped onto the above `config`, after converted from human-intuitive description.  Any preexisting `config` value will be overridden.
-      cpu_mem:
-         cpus: # list of logical core ids
-           # becomes: `config.limits.cpu`
-           # ids increment by logical cores, grouped by physical core
-           # ie. [P0L0,P0L1,P1L0,P1L1] = [0,1,2,3]
-         memory: # human friendly amount, eg 4GiB
-           # becomes: `config.limits.memory`
-         hugepages: # boolean, source memory from hugepages reservation
-           # becomes: `config.limits.memory.hugepages`
-         priority: # 1-10, shared CPU scheduling priority
-           # becomes: `config.limits.cpu.priority`
-      host_idmap: # names of user and group IDs to map from host to guest
-        # becomes: `config.raw.idmap`
-        both: # only for when user and group ID are same  value
-        users: # for just user names
-        groups: # for just group names
-
-lxd_async_clear_retries: # integer, default(30). number of times to poll for async container stop+delete completion.
-lxd_async_clear_retry_delay: # integer, default(5). number of seconds to wait in between polling for async container stop+delete completion.
-lxd_async_start_retries: # integer, default(120). number of times to poll for async container start completion.
-lxd_async_start_retry_delay: # integer, default(5). number of seconds to wait in between polling for async container  start completion.
-```
+(link2)[meta/argument_specs.yml]
 
 Note: for any pre-existing `lxd.host.preseed.storage_pools` declared, having `driver == 'zfs'`, the entire dataset will be destroyed and recreated in the parent zpool.
 
