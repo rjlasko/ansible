@@ -10,7 +10,7 @@ Installs the latest version of `lxd`.
 ## Role Variables
 
 #### Settable Variables
-https://github.com/rjlasko/ansible/blob/bc2865aeffe0b9803c58db383b2b916958ae0e46/roles/lxd/meta/argument_specs.yml#L1-L6
+https://github.com/rjlasko/ansible/blob/master/roles/lxd/meta/argument_specs.yml#L1-L6
 
 
 ```yaml
