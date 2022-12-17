@@ -1,17 +1,31 @@
 ---
-## ------------------- ##
-## Installs LXD guests ##
-## ------------------- ##
+## ---------------- ##
+## Build LXD guests ##
+## ---------------- ##
 
-- name: check invalid create mode
-  loop: "{{ lxd.guests }}"
+- name: clear selected guests
+  ansible.builtin.include_tasks: clear_guests.yml
+
+- name: get /proc/cpuinfo
+  ansible.builtin.command: cat /proc/cpuinfo
+  changed_when: false
+  register: proc_cpuinfo
+
+- name: load UID map
+  ansible.builtin.getent:
+    database: passwd
+
+- name: load GID map
+  ansible.builtin.getent:
+    database: group
+
+- name: start selected guests
+  ansible.builtin.include_tasks: start_guests.yml
+
+- name: "wait for guest(s) to respond with SSHd"
+  loop: "{{ lxd_guests }}"
   loop_control:
     loop_var: lxd_guest
-  ansible.builtin.assert:
-    that: lxd_guest.create_mode in ['skip', 'build']
-    quiet: true
-
-- name: (re)build guests
-  vars:
-    lxd_guests: "{{ lxd.guests | selectattr('create_mode', 'eq', 'build') }}"
-  ansible.builtin.include_tasks: instance.yml
+  ansible.builtin.wait_for:
+    host: "{{ lxd_guest.dns_address | mandatory }}"
+    port: 22

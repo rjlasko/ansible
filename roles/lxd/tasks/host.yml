@@ -17,7 +17,7 @@
   changed_when: true
 
 - name: clear preseed storage_pools
-  loop: "{{ lxd.host.preseed.storage_pools | default([]) }}"
+  loop: "{{ lxd_host.preseed.storage_pools | default([]) }}"
   loop_control:
     loop_var: lxd_storage_pool
   ansible.builtin.include_tasks: reset_storage.yml
@@ -85,17 +85,17 @@
         snap_app_path: "{{ lxc_path }}"
 
 - name: init LXD without preseed
-  when: not lxd.host.preseed is defined
+  when: not lxd_host.preseed is defined
   ansible.builtin.command: lxd init --auto
 
 - name: init LXD from preseed
-  when: lxd.host.preseed is defined
+  when: lxd_host.preseed is defined
   ansible.builtin.command: "lxd init --preseed < "
   args:
-    stdin: "{{ lxd.host.preseed }}"
+    stdin: "{{ lxd_host.preseed }}"
 
 - name: apply extra profiles
-  loop: "{{ lxd.host.extra_profiles | default([]) }}"
+  loop: "{{ lxd_host.extra_profiles | default([]) }}"
   loop_control:
     loop_var: lxd_profile
   community.general.lxd_profile:

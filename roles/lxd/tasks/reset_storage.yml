@@ -11,7 +11,7 @@
         name: zfs
         tasks_from: destroy_dataset
       vars:
-        zfs_target_dataset: "{{ lxd_storage_pool.config.source }}"
+        zfs_target_dataset: "{{ lxd_storage_pool.config.source | mandatory }}"
         zfs_expected_children:
           - images
           - containers

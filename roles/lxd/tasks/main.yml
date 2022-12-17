@@ -6,7 +6,7 @@
 # XXX: https://github.com/lxc/lxd/tree/master/doc
 
 - name: install LXD to the host
-  when: lxd.host is defined
+  when: lxd_host is defined
   ansible.builtin.include_tasks: host.yml
 
 # XXX: externally add user to 'lxd' group
@@ -14,7 +14,7 @@
 # TODO: permissions supporting running docker in LXC
 
 - name: install LXD guests
-  when: lxd.guests is defined
+  when: lxd_guests is defined
   ansible.builtin.include_tasks: guests.yml
 
 # TODO: https://lxd.readthedocs.io/en/latest/backup/#container-backup-and-restore
