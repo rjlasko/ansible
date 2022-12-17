@@ -1,0 +1,352 @@
+---
+argument_specs:
+  # tasks/main.yml entry point
+  main:
+    short_description: The main entry point for the `libvirt` role.
+    options:
+      libvirt_host:
+        # TODO: haven't rebuilt a host yet, verify host fields when we do!
+        description: specification for host libvirt hypervisor installation
+        type: dict
+        options:
+          default_uri:
+            description: the default URI to access guests under
+            required: true
+          bridge:
+            description: the name of a network bridge available to be used
+            required: true
+          users:
+            description: a list usernames to add as VM admins
+            type: list
+            required: true
+          pools:
+            description: a list of file system locations that libvirt can use to store VMs and access ISOs
+            type: dict
+            required: true
+            options:
+              name:
+                description: the name of the pool - `default` is the first location that libvirt looks at
+                required: true
+              path:
+                description: the location of the pool
+                required: true
+          backport:
+            description: flag to indicate install the latest software versions available through backports
+            type: bool
+      libvirt_guests:
+        description: The guest VMs to build and run.
+        type: list
+        elements: dict
+        options:
+          name:
+            description: the name of the libvirt vm
+            required: true
+          create_mode:
+            description: >
+              Defines mode of building the libvirt VM.
+              For any libvirt VM, when `create_mode in ['restore', 'build'], any pre-existing vm
+              with the same name will be deleted to make way for the new one.
+            required: true
+            choices:
+              - skip
+              - build
+              - restore
+          dns_address:
+            description: >
+              expected DNS or IP address of the vm used to confirm guest is running after start
+            required: true
+          force_stop:
+            description: Used when clearing any preexisting guest of same name
+            type: bool
+            default: false
+          backup_dir:
+            description: location to backup/restore VM to/from
+          check_manual:
+            description: VM restart waits for manual input to continue
+            type: bool
+            default: false
+          check_ssh:
+            description: VM start waits for SSH response to continue, requires `dns_address`
+            type: bool
+            default: true
+          virt_install:
+            description: Parameters used build a VM (+image) from scratch.
+            type: dict
+            required: true
+            options:
+              iso:
+                description: location of the OS installation ISO file
+                required: true
+              args:
+                description: command line arguments to pass to `virt-install`
+                type: list
+                required: true
+                elements: str
+              preseed:
+                description: parameters to be passed into preseed template
+                type: dict
+                options:
+                  template:
+                    description:
+                    required: true
+                  vars:
+                    description:
+                    type: dict
+          hooks:
+            description:
+            type: list
+            default: []
+            elements: dict
+            options:
+              name:
+                description: filename the hook will be given upon installation
+                required: true
+              src:
+                description: source file path of the hook script. This file may also be a Jinja template.
+                required: true
+          alter_domain:
+            description: alters VM's domain XML definition
+            type: dict
+            options:
+              cpu_mem:
+                description: defines guest CPU topology and host affinities
+                type: dict
+                options:
+                  cpus:
+                    description: list of natural (not native) cpu ids to assign the VM
+                    type: list
+                    elements: int
+                  io_cpus:
+                    description: list of natural (not native) cpu ids to assign the VM's IO processes
+                    type: list
+                    elements: int
+                  emulator_cpus:
+                    description: list of natural (not native) cpu ids to assign the VM's emulator processes
+                    type: list
+                    elements: list
+                  memory:
+                    description: >
+                      amount of memory to assign to the VM.  This value is passed directly to `virsh`,
+                      which can interpret human readable scales. (eg. GiB, GB)
+                  hugepages:
+                    description: indication of whether the memory should be pulled from hugepages pool
+                    type: bool
+                    default: false
+              disks:
+                description: defines disk devices to attach to the guest VM
+                type: list
+                elements: dict
+                options:
+                  host:
+                    description: details about device, from host perspective
+                    type: dict
+                    required: true
+                    options:
+                      path:
+                        description: >
+                          The path to the source "device" on the host, and can be a block device or image file.
+
+                          In the case of a block device, it can be the path to a whole block device or partition,
+                          and must be prefixed with '/dev/'.
+
+                          In the case of an image file, the file will be interpreted to be a RAW type unless the
+                          filename suffix is `.qcow2`. In this case, additional configurations are available.
+                        required: true
+                      rebuild:
+                        description: >
+                          will rebuild the host's image file underpinning the guest disk device.
+                          This is constrained by the `path` not being prefixed by `/dev`, and not
+                          being indicated as a (host) block device.
+                        type: bool
+                        default: false
+                      preallocation:
+                        description: method to allocate space for disk image initialization and runtime
+                        choices:
+                          - off
+                          - metadata
+                            # allocates the space required by the metadata but doesn’t allocate any space
+                            # for the data. This is the quickest to provision but the slowest for guest writes.
+                            # Not available for RAW image types.
+                          - falloc
+                            # allocates space for the metadata and data but marks the blocks as unallocated.
+                            # This will provision slower than metadata but quicker than full. Guest write
+                            # performance will be much quicker than metadata and similar to full.
+                          - full
+                            # allocates space for the metadata and data and will therefore consume all the
+                            # physical space that you allocate (not sparse). All empty allocated space will
+                            # be set as a zero. This is the slowest to provision and will give similar guest
+                            # write performance to falloc.
+                      cluster_size:
+                        description: >
+                          Size of the clusters in a QCOW2 image. Must be between 512 & 2M, or have value 'inherit'.
+                          When 'inherit' is used, the image cluster size will be set to the block size of the
+                          filesystem it will reside on.
+                        default: 64K
+                      capacity:
+                        description: >
+                          The disk capacity provided by a file image, in bytes.
+                          This is required='true' when using a disk image
+                          Optional suffixes supported:
+                            k or K (kilobyte, 1024)
+                            M (megabyte, 1024k)
+                            G (gigabyte, 1024M)
+                            T (terabyte, 1024G)
+                            b is ignored.
+                        required: false
+                  guest:
+                    description: details about device, from guest perspective
+                    type: dict
+                    required: true
+                    options:
+                      dev:
+                        description: >
+                          the (legacy) device name assigned in the guest
+                          (eg. vda, sda)
+                        required: true
+                      bus:
+                        description: target bus of the disk device
+                        choices:
+                          - virtio
+                          - ide
+                          - scsi
+                          - xen
+                          - usb
+                          - sata
+                          - sd
+                      io:
+                        description: controls specific policies on I/O
+                        choices:
+                          - threads
+                            # tends to be better
+                          - native
+                          - io_uring
+                      iothread:
+                        description: >
+                          The number within the range of domain IOThreads to which this disk may be attached.
+                          This can only be used if guest.io='threads' and guest.alter_domain.cpu_mem.io_cpus has
+                          been defined, where the IOthread is tied to the cpu indexed by this thread ID.
+                        type: str
+                      cache:
+                        description: >
+                          The method by which libvirt caches read and write info from a disk device
+                        choices:
+                          - default
+                            # If no cache mode is specified, the system's default settings are chosen.
+                            # (typically 'writethrough')
+                          - none
+                            # I/O from the guest is not cached on the host, but may be kept in a writeback disk
+                            # cache. Use this option for guests with large I/O requirements. This option is
+                            # generally the best choice, and is the only option to support migration.
+                            # This actually requires direct i/o to the device, and so image files stored on ZFS
+                            # datasets using this mode are not viable because ZFS does not support O_DIRECT.
+                          - writethrough
+                            # I/O from the guest is cached on the host but written through to the physical medium.
+                            # This mode is slower and prone to scaling problems. Best used for small number of
+                            # guests with lower I/O requirements. Suggested for guests that do not support a
+                            # writeback cache (such as Red Hat Enterprise Linux 5.5 and earlier), where migration
+                            # is not needed.
+                          - writeback
+                            # I/O from the guest is cached on the host.
+                            # This is the best option for image files stored on ZFS datasets.
+                          - directsync
+                            # Similar to writethrough, but I/O from the guest bypasses the host page cache.
+                          - unsafe
+                            # The host may cache all disk I/O, and sync requests from guest are ignored.
+                      serial:
+                        description: the serial ID of disk device, as observed in the guest
+                      logical_block_size:
+                        description: >
+                          The native logical block size of the block device seen by guest.
+                          Typically, actual devices have 512/4K block sizes.
+                          QEMU doesn't accept sizes greater than 32K.
+                          It is best to align as close to source as possible.
+                        type: int
+                      physical_block_size:
+                        description: >
+                          The physical logical block size of the block device seen by guest.
+                          Typically, actual devices have 512/4K block sizes.
+                          QEMU doesn't accept sizes greater than 32K.
+                          It is best to align as close to source as possible.
+                        type: int
+
+              hostdevs:
+                description: List of host devices to passthrough to guest
+                type: list
+                elements: dict
+                options:
+                  bus:
+                    description: Bus address of device on host, as hex string (eg. '0x0f')
+                    required: true
+                  slot:
+                    description: Slot address of device on host, as hex string (eg. '0x0f')
+                    required: true
+                  function:
+                    description: Slot address of device on host, as hex string (eg. '0x0f')
+                    required: true
+                  rom:
+                    description: ROM filepath for device bootstrapping
+              xpaths:
+                description: >
+                  list of XML modifications to perform directly to guest VM's domain XML
+                  see: https://docs.ansible.com/ansible/latest/collections/community/general/xml_module.html
+                type: list
+                elements: dict
+                options:
+                  xpath:
+                    description: A valid XPath expression describing the item(s) you want to manipulate.
+                    required: true
+                  add_children:
+                    description: >
+                      Add additional child-element(s) to a selected element for a given xpath.
+                      Child elements must be given in a list and each item may be either a string
+                        (eg. children=ansible to add an empty <ansible/> child element), or a hash where the key is
+                        an element name and the value is the element value.
+                      This parameter requires xpath to be set.
+                    type: list
+                    elements: dict
+                  attribute:
+                    description: >
+                      The attribute to select when using parameter value.
+                      This is a string, not prepended with `@`.
+                  value:
+                    description: >
+                      Desired state of the selected attribute.
+                      Either a string, or to unset a value, the Python None keyword (YAML Equivalent, null).
+                      Elements default to no value (but present).
+                      Attributes default to an empty string.
+                  state:
+                    description: Add or remove entries matching the XPATH
+                    choices:
+                      - present
+                      - absent
+                    default: present
+                  defer:
+                    description: >
+                      Optionally defer persist domain XML to libvirt.
+                      This can be useful if multiple XML elements must be added simultaneously or be
+                      rejected/ignored when ingested by libvirt.
+                    choices:
+                      - initial
+                        # begins the deferral process. Persistence of the given edit is deferred.
+                      - defer
+                        # sustains the deferral process through the given edit
+                      - apply
+                        # ends the deferral process after the given edit
+      libvirt_isolate:
+            description: >
+              Setup cpu isolation for indicated cores to ensure system does not assign any processes to them.
+              Used to ensure indicated cores can be used exclusively by assigned guests.
+            type: dict
+            options:
+              reset:
+                description: uninstall all qemu isolation scripts
+                type: bool
+                default: false
+              names:
+                description: the unique set of guest names, when started/stopped will enable/disable cpu isolation
+                type: list
+                elements: str
+              cpuset:
+                description: the unique set of (intuitive) cpuids to isolate from host
+                type: list
+                elements: int

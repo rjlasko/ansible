@@ -11,7 +11,7 @@
 - name: install packages
   vars:
     libvirt_backported_install: "{{
-      (libvirt.host.backport | default(false))
+      (libvirt_host.backport | default(false))
       and (libvirt_host_packages[ansible_facts['distribution']].backports is defined)
     }}"
   block:

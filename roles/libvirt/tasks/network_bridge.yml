@@ -30,7 +30,7 @@
 
 - name: create bridge network config
   ansible.builtin.lineinfile:
-    line: "allow {{ libvirt.host.bridge }}"
+    line: "allow {{ libvirt_host.bridge }}"
     path: /etc/qemu/bridge.conf
     create: true
     state: present

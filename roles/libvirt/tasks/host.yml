@@ -39,20 +39,20 @@
       delay: 2
 
     - name: define LIBVIRT_DEFAULT_URI in all environments
-      when: libvirt.host.default_uri is defined
+      when: libvirt_host.default_uri is defined
       ansible.builtin.include_role:
         name: global_environment
       vars:
         global_env_vars:
           # https://libvirt.org/uri.html#URI_default
-          - ["LIBVIRT_DEFAULT_URI", "{{ libvirt.host.default_uri }}"]
+          - ["LIBVIRT_DEFAULT_URI", "{{ libvirt_host.default_uri }}"]
 
     - name: install network bridge
-      when: libvirt.host.bridge is defined
+      when: libvirt_host.bridge is defined
       ansible.builtin.include_tasks: network_bridge.yml
 
     - name: manage storage pools
-      loop: "{{ libvirt.host.pools | default([]) }}"
+      loop: "{{ libvirt_host.pools | default([]) }}"
       loop_control:
         loop_var: libvirt_pool_item
       ansible.builtin.include_tasks: manage_pool.yml

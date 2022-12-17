@@ -6,14 +6,20 @@
 - name: do all tasks as super user
   become: true
   block:
-    - name: skip cpu isolation definition
-      when: libvirt.isolate is not defined or (libvirt.isolate | length) == 0
+    - name: reset cpu isolation definition
+      when: libvirt_isolate.reset | default(false)
+      loop:
+        - "{{ qemu_hooks_path }}"
+        - "{{ qemu_isolated_guests_path }}"
+      loop_control:
+        loop_var: libvirt_isolation_file
       ansible.builtin.file:
-        path: "{{ qemu_isolated_guests_path }}"
+        path: "{{ libvirt_isolation_file }}"
         state: absent
+      register: lv_isolate_reset
 
     - name: apply cpu isolation definitions
-      when: libvirt.isolate is defined and (libvirt.isolate | length) > 0
+      when: libvirt_isolate.cpuset is defined and libvirt_isolate.names is defined
       block:
         - name: install python3 pip
           ansible.builtin.package:
@@ -29,24 +35,31 @@
           register: proc_cpuinfo
 
         - name: apply vfio-isolate from template
+          vars:
+            lv_isolate:
+              vm_cpus: "{{ libvirt_isolate.cpuset | asNative(proc_cpuinfo.stdout_lines) }}"
+              host_cpus: "{{ range(0, ansible_facts.processor_vcpus) | difference(libvirt_isolate.cpuset) | asNative(proc_cpuinfo.stdout_lines) }}"
+              max_cpu_id: "{{ ansible_facts.processor_vcpus - 1 }}"
+              isolated_guests_filepath: "{{ qemu_isolated_guests_path }}"
           ansible.builtin.template:
             src: isolate.sh.j2
             dest: "{{ qemu_isolate_hook_path }}"
             mode: ug=rx,o=r
-          vars:
-            libvirt_isolate:
-              vm_cpus: "{{ libvirt.isolate.cpuset | asNative(proc_cpuinfo.stdout_lines) }}"
-              host_cpus: "{{ range(0, ansible_facts.processor_vcpus) | difference(libvirt.isolate.cpuset) | asNative(proc_cpuinfo.stdout_lines) }}"
-              max_cpu_id: "{{ ansible_facts.processor_vcpus - 1 }}"
-              isolated_guests_filepath: "{{ qemu_isolated_guests_path }}"
+          register: lv_template_install
 
         - name: create file with VMs to isolate from host
           ansible.builtin.copy:
             dest: "{{ qemu_isolated_guests_path }}"
-            content: "{{ libvirt.isolate.names | sort | unique | join('\n') }}\n"
+            content: "{{ libvirt_isolate.names | sort | unique | join('\n') }}\n"
             mode: a=r
+          register: lv_isolated_guests
 
+#    TODO: only do this if there is a change to any of the isolation parameters: cpuset + names
     - name: restart libvirtd
+      when: >
+        lv_isolate_reset.changed
+        or lv_template_install.changed
+        or lv_isolated_guests.changed
       ansible.builtin.service:
         name: libvirtd
         state: restarted

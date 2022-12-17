@@ -7,15 +7,15 @@
   when: libvirt_cpumem.memory is defined
   block:
     - name: set maximum memory to {{ libvirt_cpumem.memory }}
-      ansible.builtin.command: "virsh setmaxmem {{ libvirt.vm.name }} {{ libvirt_cpumem.memory }} --config"
+      ansible.builtin.command: "virsh setmaxmem {{ libvirt_guest.name }} {{ libvirt_cpumem.memory }} --config"
       changed_when: true
 
     - name: set current memory to {{ libvirt_cpumem.memory }}
-      ansible.builtin.command: "virsh setmem {{ libvirt.vm.name }} {{ libvirt_cpumem.memory }} --config"
+      ansible.builtin.command: "virsh setmem {{ libvirt_guest.name }} {{ libvirt_cpumem.memory }} --config"
       changed_when: true
 
 - name: enable hugepages
-  when: libvirt_cpumem.hugepages is defined and libvirt_cpumem.hugepages
+  when: libvirt_cpumem.hugepages | default(false)
   ansible.builtin.include_tasks: alter_domain_xpaths.yml
   vars:
     alter_domain_xpaths:
@@ -29,7 +29,7 @@
         defer: 'apply'
 
 - name: disable hugepages
-  when: libvirt_cpumem.hugepages is not defined or not libvirt_cpumem.hugepages
+  when: not (libvirt_cpumem.hugepages | default(false))
   ansible.builtin.include_tasks: alter_domain_xpath.yml
   vars:
     libvirt_xpath:

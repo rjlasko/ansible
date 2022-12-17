@@ -3,41 +3,49 @@
 ## Shutdown Guest VM ##
 ## ----------------- ##
 
-- name: "detect VM state before attempt restart: {{ libvirt.vm.name }}"
+- name: "detect VM state before attempt restart: {{ libvirt_guest.name }}"
   community.libvirt.virt:
     command: status
-    name: "{{ libvirt.vm.name }}"
-  register: libvirt_vm_status
+    name: "{{ libvirt_guest.name }}"
+  register: libvirt_guest_status
 
 - name: error out if VM is in unacceptable state
   when: >
-    libvirt_vm_status.status != 'running'
+    libvirt_guest_status.status != 'running'
     and
-    libvirt_vm_status.status != 'shutdown'
+    libvirt_guest_status.status != 'shutdown'
   ansible.builtin.fail:
-    msg: "Cannot shutdown {{ libvirt.vm.name }} from state: {{ libvirt_vm_status.status }}"
+    msg: "Cannot shutdown {{ libvirt_guest.name }} from state: {{ libvirt_guest_status.status }}"
 
 - name: shutdown from running state
-  when: libvirt_vm_status.status == 'running'
+  when: libvirt_guest_status.status == 'running'
   block:
-    - name: "Hit [enter] to initiate shutdown of guest: {{ libvirt.vm.name }}"
-      when: libvirt.vm.check_manual | default(false)
+    - name: "Hit [enter] to initiate shutdown of guest: {{ libvirt_guest.name }}"
+      when: libvirt_guest.check_manual | default(false)
       ansible.builtin.pause:
         prompt: "Continue when ready for shutdown"
 
-    - name: shutdown VM
-      community.libvirt.virt:
-        # XXX: Windows guests need to have the VirtIO Guest Tools installed
-        # Linux guests should shutdown cleanly without any special attention
-        command: shutdown
-        name: "{{ libvirt.vm.name }}"
+    - when: not (libvirt_guest.force_stop | default(false))
+      block:
+        - name: shutdown VM
+          community.libvirt.virt:
+            # XXX: Windows guests need to have the VirtIO Guest Tools installed
+            # Linux guests should shutdown cleanly without any special attention
+            command: shutdown
+            name: "{{ libvirt_guest.name }}"
 
-    - name: "waiting for shutdown: {{ libvirt.vm.name }}"
+        - name: "waiting for shutdown: {{ libvirt_guest.name }}"
+          community.libvirt.virt:
+            command: status
+            name: "{{ libvirt_guest.name }}"
+          register: libvirt_guest_shutdown_status
+          until: libvirt_guest_shutdown_status.status == 'shutdown'
+          # check for desired status for 5 minutes
+          delay: 3
+          retries: 100
+
+    - name: force stop vm
+      when: libvirt_guest.force_stop | default(false)
       community.libvirt.virt:
-        command: status
-        name: "{{ libvirt.vm.name }}"
-      register: libvirt_vm_status
-      until: libvirt_vm_status.status == 'shutdown'
-      # check for desired status for 5 minutes
-      delay: 3
-      retries: 100
+        command: destroy
+        name: "{{ libvirt_guest.name }}"

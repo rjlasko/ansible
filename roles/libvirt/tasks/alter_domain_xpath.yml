@@ -17,7 +17,7 @@
     - name: get XML of current VM definition
       community.libvirt.virt:
         command: get_xml
-        name: "{{ libvirt.vm.name }}"
+        name: "{{ libvirt_guest.name }}"
       register: current_domain_xml
 
     - name: get current domain XML content

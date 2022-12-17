@@ -10,27 +10,27 @@
   become: true
   ansible.builtin.file:
     state: absent
-    path: "{{ qemu_hooks_path }}/{{ libvirt.vm.name }}"
+    path: "{{ qemu_hooks_path }}/{{ libvirt_guest.name }}"
 
 - name: install VM hooks
-  when: libvirt.vm.hooks is defined
+  when: libvirt_guest.hooks is defined
   become: true
   block:
-    - name: "create hooks directory for VM {{ libvirt.vm.name }}"
+    - name: "create hooks directory for VM {{ libvirt_guest.name }}"
       ansible.builtin.file:
         state: directory
-        path: "{{ qemu_hooks_path }}/{{ libvirt.vm.name }}"
+        path: "{{ qemu_hooks_path }}/{{ libvirt_guest.name }}"
         mode: ug=rx,o-rwx
         owner: root
         group: root
 
-    - name: "install hook for VM {{ libvirt.vm.name }}"
-      loop: "{{ libvirt.vm.hooks | default([]) }}"
+    - name: "install hook for VM {{ libvirt_guest.name }}"
+      loop: "{{ libvirt_guest.hooks }}"
       loop_control:
-        loop_var: libvirt_vm_hook
+        loop_var: libvirt_guest_hook
       ansible.builtin.template:
-        src: "{{ libvirt_vm_hook.src }}"
-        dest: "{{ qemu_hooks_path }}/{{ libvirt.vm.name }}/{{ libvirt_vm_hook.name }}"
+        src: "{{ libvirt_guest_hook.src }}"
+        dest: "{{ qemu_hooks_path }}/{{ libvirt_guest.name }}/{{ libvirt_guest_hook.name }}"
         mode: u=rx,go-rwx
         owner: root
         group: root

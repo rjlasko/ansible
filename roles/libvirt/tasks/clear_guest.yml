@@ -13,25 +13,25 @@
   when: >
     libvirt_existing_vms.list_vms | length > 0
     and
-    libvirt.vm.name in libvirt_existing_vms.list_vms
+    libvirt_guest.name in libvirt_existing_vms.list_vms
   block:
     - name: shutdown VM
       ansible.builtin.include_tasks: shutdown_guest.yml
 
     # XXX: the "nvram" option was introduced to delete VMs using UEFI
-    - name: "undefine VM: {{ libvirt.vm.name }}"
-      ansible.builtin.command: virsh undefine --nvram {{ libvirt.vm.name }}
+    - name: "undefine VM: {{ libvirt_guest.name }}"
+      ansible.builtin.command: virsh undefine --nvram {{ libvirt_guest.name }}
       changed_when: true
 
 # FIXME: for some reason, sometimes this doesn't find everything
 # XXX: maybe it never does.  Does the QEMU URI have something to do with it? Is that properly set for this call?
 # Handle like-named VM volume
 - name: list volumes
-  ansible.builtin.shell:
+  ansible.builtin.shell: >
     set -o pipefail
     && virsh vol-list --pool default
     | tail -n+3
-    | grep {{ libvirt.vm.name }}
+    | grep {{ libvirt_guest.name }}
     | awk '{print $1}'
   args:
     executable: bash
@@ -51,4 +51,4 @@
   become: true
   ansible.builtin.file:
     state: absent
-    path: "{{ qemu_hooks_path }}/{{ libvirt.vm.name }}"
+    path: "{{ qemu_hooks_path }}/{{ libvirt_guest.name }}"

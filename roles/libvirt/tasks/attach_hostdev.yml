@@ -17,8 +17,8 @@
         dest: "{{ temp_xml.path }}"
         mode: u=rw,go-rwx
 
-    - name: "attach device to {{ libvirt.vm.name }}"
-      ansible.builtin.command: "virsh attach-device {{ libvirt.vm.name }} --file {{ temp_xml.path }} --config"
+    - name: "attach device to {{ libvirt_guest.name }}"
+      ansible.builtin.command: "virsh attach-device {{ libvirt_guest.name }} --file {{ temp_xml.path }} --config"
       changed_when: true
 
   always:

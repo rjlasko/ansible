@@ -16,10 +16,10 @@ set -x
 # see: https://github.com/PassthroughPOST/VFIO-Tools
 # see: https://passthroughpo.st/simple-per-vm-libvirt-hooks-with-the-vfio-tools-hook-helper/
 
-HCPUS={{ libvirt_isolate.host_cpus | sort | unique | join(',') }}
-MCPUS={{ libvirt_isolate.vm_cpus | sort | unique | join(',') }}
+HCPUS={{ lv_isolate.host_cpus | sort | unique | join(',') }}
+MCPUS={{ lv_isolate.vm_cpus | sort | unique | join(',') }}
 
-ISOLATED_GUESTS_FILE={{ libvirt_isolate.isolated_guests_filepath }}
+ISOLATED_GUESTS_FILE={{ lv_isolate.isolated_guests_filepath }}
 ACTIVE_GUESTS_FILE="/var/run/libvirt/qemu/active_guests.txt"
 UNDOFILE="/var/run/libvirt/qemu/vfio-isolate-undo.bin"
 
@@ -39,7 +39,7 @@ function disable_isolation () {
 	rm "${UNDOFILE}"
 
 	#taskset -pc 0-31 2  # kthreadd reset
-	taskset -pc 0-{{ libvirt_isolate.max_cpu_id }} 2  # kthreadd reset
+	taskset -pc 0-{{ lv_isolate.max_cpu_id }} 2  # kthreadd reset
 }
 
 function enable_isolation () {

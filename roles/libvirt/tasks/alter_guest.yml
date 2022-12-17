@@ -7,7 +7,7 @@
   ansible.builtin.include_tasks: shutdown_guest.yml
 
 - name: apply CPU and Memory definitions
-  when: libvirt.vm.alter_domain.cpu_mem is defined
+  when: libvirt_guest.alter_domain.cpu_mem is defined
   block:
     - name: alter cpu topology and affinity
       ansible.builtin.include_tasks: alter_cpus.yml
@@ -15,11 +15,11 @@
     - name: alter memory configuration
       ansible.builtin.include_tasks: alter_memory.yml
   vars:
-    libvirt_cpumem: "{{ libvirt.vm.alter_domain.cpu_mem }}"
+    libvirt_cpumem: "{{ libvirt_guest.alter_domain.cpu_mem }}"
 
 - name: attach disks
-  when: libvirt.vm.alter_domain.disks is defined
-  loop: "{{ libvirt.vm.alter_domain.disks }}"
+  when: libvirt_guest.alter_domain.disks is defined
+  loop: "{{ libvirt_guest.alter_domain.disks }}"
   loop_control:
     loop_var: alter_domain_disk
   ansible.builtin.include_tasks: attach_disk.yml
@@ -27,19 +27,19 @@
     libvirt_disk: "{{ alter_domain_disk }}"
 
 - name: attach host devices
-  when: libvirt.vm.alter_domain.hostdevs is defined
-  loop: "{{ libvirt.vm.alter_domain.hostdevs | dict2items }}"
+  when: libvirt_guest.alter_domain.hostdevs is defined
+  loop: "{{ libvirt_guest.alter_domain.hostdevs }}"
   loop_control:
     loop_var: alter_domain_hostdev
   ansible.builtin.include_tasks: attach_hostdev.yml
   vars:
-    libvirt_hostdev: "{{ alter_domain_hostdev.value }}"
+    libvirt_hostdev: "{{ alter_domain_hostdev }}"
 
 - name: alter VM by XPath
-  when: libvirt.vm.alter_domain.xpaths is defined
+  when: libvirt_guest.alter_domain.xpaths is defined
   ansible.builtin.include_tasks: alter_domain_xpaths.yml
   vars:
-    alter_domain_xpaths: "{{ libvirt.vm.alter_domain.xpaths }}"
+    alter_domain_xpaths: "{{ libvirt_guest.alter_domain.xpaths }}"
 
 # - fail:
 #     msg: boom

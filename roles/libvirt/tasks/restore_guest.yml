@@ -5,43 +5,43 @@
 
 - name: restore VM from XML
   # TODO: look into using "virt" module to do this
-  ansible.builtin.command: virsh define --file {{ libvirt.vm.backup_dir | mandatory }}/domain.xml
+  ansible.builtin.command: virsh define --file {{ libvirt_guest.backup_dir | mandatory }}/domain.xml
   changed_when: true
 
 - name: get XML of restored VM definition
   community.libvirt.virt:
     command: get_xml
-    name: "{{ libvirt.vm.name }}"
+    name: "{{ libvirt_guest.name }}"
   register: restored_domain_xml
 
 - name: list expected VM block devices
   ansible.builtin.shell: >
     set -o pipefail
-    && virsh domblklist {{ libvirt.vm.name }}
+    && virsh domblklist {{ libvirt_guest.name }}
     | tail -n+3
     | awk '{print $2}'
     | sed '/^$/d'
   args:
     executable: bash
   changed_when: false
-  register: libvirt_vm_domblklist_vols
+  register: libvirt_guest_domblklist_vols
 
 - name: list files in backup directory
   ansible.builtin.find:
-    paths: "{{ libvirt.vm.backup_dir }}"
+    paths: "{{ libvirt_guest.backup_dir }}"
     file_type: file
-  register: libvirt_vm_backup_dir_listing
+  register: libvirt_guest_backup_dir_listing
 
 - name: set fact for files to backup
   ansible.builtin.set_fact:
-    libvirt_vm_backup_files: "{{ libvirt_vm_backup_dir_listing.files | map(attribute='path') | map('basename') | map('splitext') | map('first') | list }}"
+    libvirt_guest_backup_files: "{{ libvirt_guest_backup_dir_listing.files | map(attribute='path') | map('basename') | map('splitext') | map('first') | list }}"
 
 - name: restore each disk associated with the restored VM definition
-  loop: "{{ libvirt_vm_domblklist_vols.stdout_lines }}"
+  loop: "{{ libvirt_guest_domblklist_vols.stdout_lines }}"
   loop_control:
-    loop_var: libvirt_vm_domblklist_vol
-  when: libvirt_vm_domblklist_vol | basename | splitext | first in libvirt_vm_backup_files
+    loop_var: libvirt_guest_domblklist_vol
+  when: libvirt_guest_domblklist_vol | basename | splitext | first in libvirt_guest_backup_files
   ansible.builtin.include_tasks: restore_disk_image.yml
   vars:
-    libvirt_vm_vol: "{{ libvirt_vm_domblklist_vol }}"
-    libvirt_vm_xml: "{{ restored_domain_xml.get_xml }}"
+    libvirt_guest_vol: "{{ libvirt_guest_domblklist_vol }}"
+    libvirt_guest_xml: "{{ restored_domain_xml.get_xml }}"

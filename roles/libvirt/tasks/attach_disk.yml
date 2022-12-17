@@ -5,7 +5,7 @@
 
 - name: build attach-disk base command
   ansible.builtin.set_fact:
-    virt_attach: "virsh attach-disk {{ libvirt.vm.name | mandatory }} {{ libvirt_disk.host.path }} {{ libvirt_disk.guest.dev | mandatory }}"
+    virt_attach: "virsh attach-disk {{ libvirt_guest.name }} {{ libvirt_disk.host.path }} {{ libvirt_disk.guest.dev }}"
 
 - name: add target_bus to base command
   when: libvirt_disk.guest.bus is defined
@@ -14,7 +14,7 @@
 
 - name: stat the path to determine if it is a device or file, or even exists
   ansible.builtin.stat:
-    path: "{{ libvirt_disk.host.path | mandatory }}"
+    path: "{{ libvirt_disk.host.path }}"
     follow: true
     get_checksum: false
   register: libvirt_disk_path_stat
@@ -46,6 +46,11 @@
       ansible.builtin.set_fact:
         virt_attach: "{{ virt_attach }} --driver qemu --subdriver {{ libvirt_disk.host.path.split('.') | last }}"
 
+- name: add io to base command
+  when: libvirt_disk.guest.io is defined
+  ansible.builtin.set_fact:
+    virt_attach: "{{ virt_attach }} --io {{ libvirt_disk.guest.io }}"
+
 - name: add iothread to base command
   when: libvirt_disk.guest.iothread is defined
   ansible.builtin.set_fact:
@@ -56,17 +61,12 @@
   ansible.builtin.set_fact:
     virt_attach: "{{ virt_attach }} --cache {{ libvirt_disk.guest.cache }}"
 
-- name: add io to base command
-  when: libvirt_disk.guest.io is defined
-  ansible.builtin.set_fact:
-    virt_attach: "{{ virt_attach }} --io {{ libvirt_disk.guest.io }}"
-
 - name: add serial to base command
   when: libvirt_disk.guest.serial is defined
   ansible.builtin.set_fact:
     virt_attach: "{{ virt_attach }} --serial {{ libvirt_disk.guest.serial }}"
 
-- name: "attach disk to {{ libvirt.vm.name }}"
+- name: "attach disk to {{ libvirt_guest.name }}"
   ansible.builtin.command: "{{ virt_attach }} --config"
   changed_when: true
 

@@ -8,20 +8,19 @@
 
 - name: clear existing backup directory
   ansible.builtin.file:
-    path: "{{ libvirt.vm.backup_dir }}"
+    path: "{{ libvirt_guest.backup_dir }}"
     state: absent
 
 - name: remake backup directory
   ansible.builtin.file:
-    path: "{{ libvirt.vm.backup_dir }}"
+    path: "{{ libvirt_guest.backup_dir }}"
     state: directory
     mode: u=rwx,g=rx,o-rwx
 
 - name: backup XML
-  ansible.builtin.shell:
+  ansible.builtin.shell: >
     set -o pipefail
-    && virsh dumpxml {{ libvirt.vm.name }}
-    > {{ libvirt.vm.backup_dir }}/domain.xml
+    && virsh dumpxml {{ libvirt_guest.name }} > {{ libvirt_guest.backup_dir }}/domain.xml
   args:
     executable: bash
   changed_when: true
@@ -29,13 +28,13 @@
 - name: list VM block devices
   ansible.builtin.shell: >
     set -o pipefail
-    && virsh domblklist {{ libvirt.vm.name }}
+    && virsh domblklist {{ libvirt_guest.name }}
     | tail -n+3
     | awk '{print $2}'
   args:
     executable: bash
   changed_when: false
-  register: libvirt_vm_domblklist_vols
+  register: libvirt_guest_domblklist_vols
 
 - name: list volumes
   ansible.builtin.shell: >
@@ -51,9 +50,9 @@
   register: libvirt_existing_vols
 
 - name: backup VM associated volumes
-  loop: "{{ libvirt_vm_domblklist_vols.stdout_lines }}"
+  loop: "{{ libvirt_guest_domblklist_vols.stdout_lines }}"
   loop_control:
-    loop_var: libvirt_vm_vol
-  when: libvirt_vm_vol in libvirt_existing_vols.stdout_lines
+    loop_var: libvirt_guest_vol
+  when: libvirt_guest_vol in libvirt_existing_vols.stdout_lines
   become: true
-  ansible.builtin.command: qemu-img convert -O qcow2 {{ libvirt_vm_vol }} {{ libvirt.vm.backup_dir }}/{{ libvirt_vm_vol | basename | splitext | first }}.qcow2
+  ansible.builtin.command: qemu-img convert -O qcow2 {{ libvirt_guest_vol }} {{ libvirt_guest.backup_dir }}/{{ libvirt_guest_vol | basename | splitext | first }}.qcow2

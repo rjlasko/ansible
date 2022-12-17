@@ -4,14 +4,17 @@
 ## ---------------------------------------------------------------- ##
 
 - name: setup target as libvirt host
-  when: libvirt.host is defined
+  when: libvirt_host is defined
   ansible.builtin.include_tasks: host.yml
 
 # XXX: isolation is supplied for all guests simultaneously,
 # which is why it isn't tied to the host or guest
 - name: setup isolation
+  when: libvirt_isolate is defined
   ansible.builtin.include_tasks: isolate.yml
 
 - name: setup targets as libvirt guests
-  when: libvirt.vm is defined
+  loop: "{{ libvirt_guests | default([]) }}"
+  loop_control:
+    loop_var: libvirt_guest
   ansible.builtin.include_tasks: guest.yml

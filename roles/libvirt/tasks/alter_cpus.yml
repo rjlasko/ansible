@@ -40,7 +40,7 @@
       loop_control:
         loop_var: vcpupin_cpuset
         index_var: vcpupin_idx
-      ansible.builtin.command: "virsh vcpupin {{ libvirt.vm.name }} {{ vcpupin_idx }} {{ vcpupin_cpuset }} --config"
+      ansible.builtin.command: "virsh vcpupin {{ libvirt_guest.name }} {{ vcpupin_idx }} {{ vcpupin_cpuset }} --config"
       changed_when: true
 
 - name: configure iothread pinning
@@ -50,7 +50,7 @@
       loop: "{{ libvirt_cpumem.io_cpus }}"
       loop_control:
         index_var: iothread_idx
-      ansible.builtin.command: "virsh iothreadadd {{ libvirt.vm.name }} {{ iothread_idx + 1 }} --config"
+      ansible.builtin.command: "virsh iothreadadd {{ libvirt_guest.name }} {{ iothread_idx + 1 }} --config"
       changed_when: true
 
     - name: pin iothread
@@ -58,7 +58,7 @@
       loop_control:
         loop_var: iothread_cpuset
         index_var: iothread_idx
-      ansible.builtin.command: "virsh iothreadpin {{ libvirt.vm.name }} {{ iothread_idx + 1 }} {{ iothread_cpuset }} --config"
+      ansible.builtin.command: "virsh iothreadpin {{ libvirt_guest.name }} {{ iothread_idx + 1 }} {{ iothread_cpuset }} --config"
       changed_when: true
 
 - name: configure emulator emulator
@@ -66,7 +66,7 @@
   block:
     - name: pin emulator
       ansible.builtin.command: >
-        virsh emulatorpin {{ libvirt.vm.name }}
+        virsh emulatorpin {{ libvirt_guest.name }}
         {{ libvirt_cpumem.emulator_cpus | asNative(proc_cpuinfo.stdout_lines) | sort | unique | join(',') }}
         --config
       changed_when: true

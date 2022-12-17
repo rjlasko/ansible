@@ -5,8 +5,8 @@
 
 - name: find original type of image file
   community.general.xml:
-    xmlstring: "{{ libvirt_vm_xml }}"
-    xpath: "/domain/devices/disk[@device='disk' and @type='file' and ./source/@file='{{ libvirt_vm_vol }}']/driver"
+    xmlstring: "{{ libvirt_guest_xml }}"
+    xpath: "/domain/devices/disk[@device='disk' and @type='file' and ./source/@file='{{ libvirt_guest_vol }}']/driver"
     content: 'attribute'
     pretty_print: true
   register: libvirt_disk_driver
@@ -30,7 +30,7 @@
   ansible.builtin.command: >
     qemu-img
     convert -O {{ libvirt_image_type }}
-    {{ libvirt.vm.backup_dir }}/{{ libvirt_vm_vol | basename | splitext | first }}.qcow2 {{ libvirt_vm_vol }}
+    {{ libvirt_guest.backup_dir }}/{{ libvirt_guest_vol | basename | splitext | first }}.qcow2 {{ libvirt_guest_vol }}
   changed_when: true
 
 # FIXME? does this file need proper owner/group? libvirt-qemu?
