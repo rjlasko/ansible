@@ -48,7 +48,6 @@ argument_specs:
               with the same name will be deleted to make way for the new one.
             required: true
             choices:
-              - skip
               - build
               - restore
           dns_address:

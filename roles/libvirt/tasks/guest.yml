@@ -4,36 +4,32 @@
 ## ------------------- ##
 
 # XXX: intuitive behavior follows precedence, unless declared:
-# 1. (skip) use existing VM unaltered
-# 2. (restore) restore from backup
-# 3. (build) build from ISO, if given
+# 1. (restore) restore from backup
+# 2. (build) build from ISO, if given
 
-- name: handle create VM
-  when: libvirt_guest.create_mode != 'skip'
+- name: clear pre-existing VM
+  ansible.builtin.include_tasks: clear_guest.yml
+
+- name: vm creation
+  when: libvirt_guest.create_mode == 'build'
   block:
-    - name: clear pre-existing VM
-      ansible.builtin.include_tasks: clear_guest.yml
+    - name: handle VM 'build' (slow)
+      ansible.builtin.include_tasks: build_guest.yml
 
-    - name: vm creation
-      when: libvirt_guest.create_mode == 'build'
-      block:
-        - name: handle VM 'build' (slow)
-          ansible.builtin.include_tasks: build_guest.yml
+    - name: backup newly built guest VM
+      when: libvirt_guest.backup_dir is defined
+      ansible.builtin.include_tasks: backup_guest.yml
 
-        - name: backup newly built guest VM
-          when: libvirt_guest.backup_dir is defined
-          ansible.builtin.include_tasks: backup_guest.yml
+- name: handle VM 'restore' (fast)
+  when: libvirt_guest.create_mode == 'restore'
+  ansible.builtin.include_tasks: restore_guest.yml
 
-    - name: handle VM 'restore' (fast)
-      when: libvirt_guest.create_mode == 'restore'
-      ansible.builtin.include_tasks: restore_guest.yml
+- name: install hooks for VM
+  ansible.builtin.include_tasks: guest_hooks.yml
 
-    - name: install hooks for VM
-      ansible.builtin.include_tasks: guest_hooks.yml
-
-    - name: alter VM machine definition
-      when: libvirt_guest.alter_domain is defined
-      ansible.builtin.include_tasks: alter_guest.yml
+- name: alter VM machine definition
+  when: libvirt_guest.alter_domain is defined
+  ansible.builtin.include_tasks: alter_guest.yml
 
 - name: "complete with {{ libvirt_guest.name }} in running state"
   ansible.builtin.include_tasks: start_guest.yml
