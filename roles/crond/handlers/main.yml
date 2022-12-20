@@ -1,0 +1,10 @@
+---
+- name: handler_restart_crond
+  ansible.builtin.service:
+    name: cron
+    state: restarted
+    enabled: true
+  register: crond_service_restart
+  until: crond_service_restart.status.ActiveState == "active"
+  retries: 15
+  delay: 1

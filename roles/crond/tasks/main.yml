@@ -1,0 +1,11 @@
+---
+## ----------------------- ##
+## Install the cron daemon ##
+## ----------------------- ##
+
+- name: install crond
+  ansible.builtin.package:
+    name: cron
+    state: present
+  notify:
+    - "handler_restart_crond"

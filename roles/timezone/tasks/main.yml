@@ -6,8 +6,5 @@
 - name: set the timezone
   community.general.timezone:
     name: "{{ timezone | mandatory }}"
-
-- name: restart crond
-  ansible.builtin.service:
-    name: cron
-    state: restarted
+  notify:
+    - "crond : handler_restart_crond"
