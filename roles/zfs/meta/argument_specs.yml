@@ -1,0 +1,36 @@
+---
+argument_specs:
+  # tasks/main.yml entry point
+  main:
+    short_description: The main entry point for the `zfs` role.
+    options:
+      zfs:
+        description: specification for building and mounting standard linux filesystems
+        type: dict
+        options:
+          conf:
+            description: >
+              Properties to define in 'zfs.conf'. Valid key/values can be found
+              here: https://openzfs.github.io/openzfs-docs/Performance%20and%20Tuning/Module%20Parameters.html
+            type: dict
+            default: {}
+          email:
+            description: Address to send automated emails to
+          pools:
+            description: a list of ZFS pools to import
+            type: list
+            elements: str
+  destroy_dataset:
+    short_description: destroys a ZFS dataset
+    options:
+      zfs_target_dataset:
+        description: >
+          Fully qualified name of the dataset to delete.
+          It must exist, and cannot be a zpool.
+        required: true
+      zfs_expected_children:
+        description: >
+          List of expected child datasets, which must exist or
+          the delete will abort.
+        type: list
+        elements: str

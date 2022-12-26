@@ -12,3 +12,12 @@ zfs_dkms_plus_dependencies:
   Pop!_OS:
     - dpkg-dev
     - "linux-headers-{{ ansible_facts['kernel'] }}"
+
+zpool_names: "{{ ansible_zfs_pools | map(attribute='name') | list }}"
+zfs_expected_zpool: "{{ zfs_target_dataset.split('/')[0] }}"
+zfs_expected_datasets: >
+  [
+  {% for child in zfs_expected_children %}
+    "{{ zfs_target_dataset }}/{{ child }}",
+  {% endfor %}
+  ]
