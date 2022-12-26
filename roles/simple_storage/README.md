@@ -14,24 +14,7 @@ Single-disk+partition filesystems as well as labeled filesystems can be mounted 
 
 ## Role Variables
 
-#### Settable Variables
-
-```yaml
-simple_storage: # list whose entries can match either of the following instances
-  - disk_id: # string, matching files under /dev/disk/by-id/
-    rebuild: # boolean, optional, default: false
-    partitions: # list
-      - mount: # path in host filesystem to mount to
-        fstype: # type of filesystem
-        state: # optional, default: mounted, one of [mounted, unmounted, present, absemt, remounted]
-        opts: # string, optional comma separated list of mount options
-        format: # boolean, optional, default: false
-  - label: # string, matching name of filesystem of given LABEL
-    mount: # path in host filesystem to mount to
-    fstype: # type of filesystem
-    state: # optional, default: mounted, one of [mounted, unmounted, present, absemt, remounted]
-    opts: # string, optional comma separated list of mount options
-```
+#### [Settable Variables](./meta/argument_specs.yml)
 
 ## Dependencies
 

@@ -1,0 +1,51 @@
+---
+## ----------------------------------- ##
+## Configure BTRFS maintenance scripts ##
+## ----------------------------------- ##
+
+- name: "backup & restore {{ simple_storage_btrfs_maintenance.config_path }}"
+  ansible.builtin.include_role:
+    name: backup_restore
+  vars:
+    br_target: "{{ simple_storage_btrfs_maintenance.config_path }}"
+
+- name: set configs
+  loop: "{{ simple_storage_btrfs_maintenance.config | dict2items }}"
+  loop_control:
+    loop_var: btrfs_maint_conf
+  community.general.ini_file:
+    path: "{{ simple_storage_btrfs_maintenance.config_path }}"
+    section: null
+    option: "{{ btrfs_maint_conf.key }}"
+    # double quote all values in this file
+    value: '"{{ btrfs_maint_conf.value }}"'
+    no_extra_spaces: true
+
+- name: copy scrub notification script
+  ansible.builtin.copy:
+    src: btrfs-scrub-notify.sh
+    dest: "{{ btrfs_scrub_notify_path }}"
+    owner: root
+    group: root
+    mode: u=rwx,g=r,o-rwx
+
+- name: update btrfs maintenance service unit configurations
+  loop: "{{ simple_storage_btrfs_maintenance.systemd.units | dict2items | selectattr('value.config', 'defined') | subelements('value.config') }}"
+  loop_control:
+    loop_var: btrfs_unit
+  community.general.ini_file:
+    path: "{{ simple_storage_btrfs_maintenance.systemd.unit_path }}/{{ btrfs_unit.0.key }}"
+    section: "{{ btrfs_unit.1[0] }}"
+    option: "{{ btrfs_unit.1[1] }}"
+    value: "{{ btrfs_unit.1[2] }}"
+    no_extra_spaces: true
+
+- name: update btrfs maintenance timer units
+  loop: "{{ simple_storage_btrfs_maintenance.systemd.units | dict2items }}"
+  loop_control:
+    loop_var: btrfs_unit
+  when: (btrfs_unit.state is defined) or (btrfs_unit.enable is defined)
+  ansible.builtin.service:
+    name: "{{ btrfs_unit.key }}"
+    state: "{{ btrfs_unit.value.state | default(omit) }}"
+    enabled: "{{ btrfs_unit.value.enable | default(omit) }}"

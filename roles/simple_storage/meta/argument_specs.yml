@@ -1,0 +1,212 @@
+---
+argument_specs:
+  # tasks/main.yml entry point
+  main:
+    short_description: The main entry point for the `simple_storage` role.
+    options:
+      simple_storage:
+        description: specification for building and mounting standard linux filesystems
+        type: dict
+        options:
+          disks:
+            description: per-disk specifications
+            type: list
+            elements: dict
+            options:
+              disk_id:
+                description: >
+                  matching devices found under /dev/disk/by-id/
+                required: true
+              rebuild:
+                description: repartition the disk, and reformat all partitions
+                type: bool
+                default: false
+              partitions:
+                description: partitioning specification
+                type: list
+                required: true
+                elements: dict
+                options:
+                  mount:
+                    description: path in host filesystem to mount to
+                    required: true
+                  fstype:
+                    description: path in host filesystem to mount to
+                    required: true
+                    choices:
+                      - xfs
+                      - ext4
+                  state:
+                    description: state of partition
+                    default: mounted
+                    choices:
+                      - mounted
+                      - unmounted
+                      - present
+                      - absent
+                      - remounted
+                  opts:
+                    description: comma separated list of additional mount options
+                  format:
+                    description: formats the partition with the specified fstype
+                    type: bool
+                    default: false
+          labels:
+            description: preexisting labeled filesystems
+            type: list
+            elements: dict
+            options:
+              label:
+                description: LABEL value of preexisting filesystem
+                required: true
+              mount:
+                description: path in host filesystem to mount to
+                required: true
+              fstype:
+                description: path in host filesystem to mount to
+                required: true
+                choices:
+                  - btrfs
+              state:
+                description: state of partition
+                default: mounted
+                choices:
+                  - mounted
+                  - unmounted
+                  - present
+                  - absent
+                  - remounted
+              opts:
+                description: comma separated list of additional mount options
+
+      btrfs_maintenance:
+        description: BTRFS maintenance utility configuration
+        type: dict
+        options:
+          balance:
+            description: BTRFS (re)balance configuration
+            type: dict
+            options:
+              state:
+                description: state of systemd btrfs-balance.timer
+                default: restarted
+                choices:
+                  - reloaded
+                  - restarted
+                  - started
+                  - stopped
+              enable:
+                description: start btrfs-balance.timer on boot
+                type: bool
+                default: true
+              period:
+                description: Frequency of periodic balance
+                default: monthly
+                choices:
+                  - none
+                  - daily
+                  - weekly
+                  - monthly
+              mountpoints:
+                description: >
+                  Which mountpoints/filesystems to balance periodically. This may reclaim unused
+                  portions of the filesystem and make the rest more compact.
+                  The special word/mountpoint "auto" will evaluate all mounted btrfs
+                  filesystems
+                default: [ 'auto' ]
+                type: list
+                elements: str
+          scrub:
+            description: BTRFS scrub configuration
+            type: dict
+            options:
+              state:
+                description: state of systemd btrfs-scrub.timer
+                default: restarted
+                choices:
+                  - reloaded
+                  - restarted
+                  - started
+                  - stopped
+              enable:
+                description: start btrfs-scrub.timer on boot
+                type: bool
+                default: true
+              period:
+                description: Frequency of periodic scrub
+                default: monthly
+                choices:
+                  - none
+                  - weekly
+                  - monthly
+              mountpoints:
+                description: >
+                  Which mountpoints/filesystems to scrub periodically.
+                  The special word/mountpoint "auto" will evaluate all mounted btrfs
+                  filesystems
+                default: ['auto']
+                type: list
+                elements: str
+          defrag:
+            description: BTRFS defrag configuration
+            type: dict
+            options:
+              state:
+                description: state of systemd btrfs-defrag.timer
+                default: restarted
+                choices:
+                  - reloaded
+                  - restarted
+                  - started
+                  - stopped
+              enable:
+                description: start btrfs-defrag.timer on boot
+                type: bool
+                default: true
+              period:
+                description: Frequency of defrag
+                default: monthly
+                choices:
+                  - none
+                  - daily
+                  - weekly
+                  - monthly
+              paths:
+                description: >
+                  Run periodic defrag on selected paths. The files from a given path do not
+                  cross mount points or other subvolumes/snapshots. If you want to defragment
+                  nested subvolumes, all have to be listed in this variable.
+                type: list
+                default: []
+                elements: str
+          trim:
+            description: configure BTRFS trim timer
+            type: dict
+            options:
+              state:
+                description: >
+                  State of systemd btrfs-trim.timer.  Stopped by default to avoid collisions
+                  with fstrim.timer, because it does the same exact thing
+                default: stopped
+                choices:
+                  - reloaded
+                  - restarted
+                  - started
+                  - stopped
+              enable:
+                description: >
+                  Start btrfs-trim.timer on boot. Disabled by default to avoid collisions with
+                  fstrim.timer, because it does the exact same thing.
+                type: bool
+                default: false
+              period:
+                description: >
+                  Frequency of periodic trim. Off by default so it does not collide with
+                  fstrim.timer . If you do not use the timer, turn it on here. The recommended
+                  period is 'weekly'.
+                default: none
+                choices:
+                  - none
+                  - daily
+                  - weekly
+                  - monthly

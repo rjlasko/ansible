@@ -3,12 +3,11 @@
 ## Create, Format and Mount a partition ##
 ## ------------------------------------ ##
 
-
-- name: "Create partition: {{ simple_disk_partition_path | mandatory }}"
+- name: "Create partition: {{ simple_disk_partition_path }}"
   when: simple_disk.rebuild | default(false)
   community.general.parted:
-    device: "{{ simple_disk_device_path | mandatory }}"
-    number: "{{ simple_disk_partition_index | mandatory + 1 }}"
+    device: "{{ simple_disk_device_path }}"
+    number: "{{ simple_disk_partition_index + 1 }}"
     part_start: "{{ simple_disk_partition.start | default(omit) }}"
     part_end: "{{ simple_disk_partition.end | default(omit) }}"
     label: "{{ simple_disk.partition_table | default('gpt') }}"
@@ -16,7 +15,7 @@
     # XXX: 'fs_type' only seems to work on the first partition
     # fs_type: "{{ simple_disk_partition.fstype | default(omit) }}"
 
-- name: "Format partition: {{ simple_disk_partition_path | mandatory }} as {{ simple_disk_partition.fstype | default('None') }}"
+- name: "Format partition: {{ simple_disk_partition_path }} as {{ simple_disk_partition.fstype | default('None') }}"
   when: >
     simple_disk_partition.fstype is defined
     and (

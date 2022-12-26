@@ -1,0 +1,128 @@
+---
+simple_storage_fstypes: "{{
+  (
+    ((simple_storage.disks | default([]))
+      | selectattr('partitions', 'defined')
+      | map(attribute='partitions')
+      | flatten
+      | selectattr('fstype', 'defined')
+      | map(attribute='fstype')
+    ) + ((simple_storage.labels | default([]))
+      | selectattr('fstype', 'defined')
+      | map(attribute='fstype')
+    )
+  ) | unique }}"
+
+simple_storage_repartitions: >
+  [
+  {% for disk in simple_storage.disks | default([]) %}
+    {% if disk.rebuild is defined %}
+      {{ disk.rebuild }},
+    {% endif %}
+  {% endfor %}
+  ]
+
+btrfs_scrub_notify_path: /usr/local/bin/btrfs-scrub-notify.sh
+simple_storage_btrfs_maintenance:
+  config:
+    BTRFS_BALANCE_PERIOD: "{{ btrfs_maintenance.balance.period | default('monthly') }}"
+    BTRFS_BALANCE_MOUNTPOINTS: "{{ btrfs_maintenance.balance.mountpoints | default(['auto']) | join(':') }}"
+    BTRFS_SCRUB_PERIOD: "{{ btrfs_maintenance.scrub.period | default('monthly') }}"
+    BTRFS_SCRUB_MOUNTPOINTS: "{{ btrfs_maintenance.scrub.mountpoints | default(['auto']) | join(':') }}"
+    BTRFS_DEFRAG_PERIOD: "{{ btrfs_maintenance.defrag.period | default('monthly') }}"
+    BTRFS_DEFRAG_PATHS: "{{ btrfs_maintenance.defrag.paths | default([]) | join(':') }}"
+    BTRFS_TRIM_PERIOD: "{{ btrfs_maintenance.trim.period | default('none') }}"
+  config_path: /etc/default/btrfsmaintenance
+  systemd:
+    unit_path: /usr/lib/systemd/system
+    units:
+      btrfs-balance.timer:
+        state: "{{ btrfs_maintenance.balance.state | default('restarted') }}"
+        enable: "{{ btrfs_maintenance.balance.enable | default(true) }}"
+      btrfs-scrub.service:
+        config:
+          - ['Service', 'ExecStopPost', '{{ btrfs_scrub_notify_path }}' ]
+      btrfs-scrub.timer:
+        state: "{{ btrfs_maintenance.scrub.state | default('restarted') }}"
+        enable: "{{ btrfs_maintenance.scrub.enable | default(true) }}"
+      btrfs-defrag.timer:
+        state: "{{ btrfs_maintenance.defrag.state | default('restarted') }}"
+        enable: "{{ btrfs_maintenance.defrag.enable | default(true) }}"
+      btrfs-trim.timer:
+        state: "{{ btrfs_maintenance.trim.state | default('stopped') }}"
+        enable: "{{ btrfs_maintenance.trim.enable | default(false) }}"
+
+# declared paths to dismount
+dismount_paths: >
+  [
+  {% for disk in simple_storage.disks | default([]) %}
+    {% set rebuild_disk = disk.rebuild | default(false) %}
+    {% set modern_device_id = disk.disk_id %}
+    {% set legacy_device_id = modern_to_legacy_id_map[modern_device_id] %}
+
+    ## The *existing* partitions on a disk may exceed those listed in any *prospective*
+    ## definition. So, if asking for full disk rebuild just include them all.
+    {% if rebuild_disk %}
+      {% for partition in (ansible_facts.devices[legacy_device_id].partitions | dict2items) %}
+        {% set legacy_partition_path = '/dev/' + partition.key %}
+        {% if legacy_partition_path in legacy_partition_path_to_mounted_fs %}
+          "{{ legacy_partition_path_to_mounted_fs[legacy_partition_path] }}",
+        {% endif %}
+      {% endfor %}
+    {% endif %}
+
+    ## Use *prospective* partitioning scheme to identify all remaining partitions to dismount
+    {% for partition in disk.partitions %}
+      {% set format_partition = partition.format | default(false) %}
+      {% if rebuild_disk or format_partition %}
+
+        ## All *prospective* mount points, whether by full disk rebuild or partition reformat
+        {% if partition.mount in legacy_partition_path_to_mounted_fs %}
+          "{{ partition.mount }}",
+        {% endif %}
+
+        {% set modern_partition_id = modern_device_id + '-part' + (loop.index | string) %}
+        {% set legacy_partition_id = modern_to_legacy_id_map[modern_partition_id] %}
+
+        ## All *existing* mount points tied to partitions getting reformat
+        {% set legacy_partition_path = '/dev/' + legacy_partition_id %}
+        {% if legacy_partition_path in legacy_partition_path_to_mounted_fs %}
+          "{{ legacy_partition_path_to_mounted_fs[legacy_partition_path] }}",
+        {% endif %}
+
+      {% endif %}
+    {% endfor %}
+  {% endfor %}
+  ]
+
+# create legacy block device path id to mountpoint map
+legacy_partition_path_to_mounted_fs: >
+  {
+  {% for mnt in ansible_facts.mounts %}
+    "{{ mnt.device }}": "{{ mnt.mount }}",
+  {% endfor %}
+  }
+
+# map of device ids found under `/dev/disk/by-id/` to legacy (eg. sda)
+modern_to_legacy_id_map: >
+  {
+  {% for device in ansible_facts.devices | dict2items %}
+    {% set legacy_device_id = device.key %}
+
+    ## add device ids to map
+    {% for modern_device_id in device.value.links.ids %}
+      "{{ modern_device_id }}": "{{ legacy_device_id }}",
+    {% endfor %}
+
+    {% for partition in device.value.partitions | dict2items %}
+      {% set legacy_partition_id = partition.key %}
+      {% for modern_partition_id in partition.value.links.ids %}
+        "{{ modern_partition_id }}": "{{ legacy_partition_id }}",
+      {% endfor %}
+    {% endfor %}
+  {% endfor %}
+  }
+
+
+# set fs path for disk device
+simple_disk_device_path: "/dev/disk/by-id/{{ simple_disk.disk_id }}"
