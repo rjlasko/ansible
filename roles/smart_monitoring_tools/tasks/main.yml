@@ -2,117 +2,21 @@
 ## ----------------------------------------------------------------- ##
 ## Installs SMART monitoring tools, and configures smartd as desired ##
 ## ----------------------------------------------------------------- ##
-# https://www.smartmontools.org
-# https://www.lisenet.com/2014/using-smartctl-smartd-and-hddtemp-on-debian/
-# https://help.ubuntu.com/community/Smartmontools#Advanced:_Running_as_Smartmontools_as_a_Daemon
-# https://wiki.archlinux.org/index.php/S.M.A.R.T.
 
 - name: install smartmontools
   ansible.builtin.package:
     name: smartmontools
     state: present
 
-- name: backup and restore smartd config
-  ansible.builtin.include_role:
-    name: backup_restore
-  vars:
-    br_target: /etc/smartd.conf
+- name: configure smartd
+  ansible.builtin.include_tasks: config_smartd.yml
 
-# Notes on scheduling choices:
-# "DEVICESCAN" - scans all connected disk devices
-# "-a" - monitors all attributes
-# "-d sat" - includes devices connected via "SCSI to ATA Translation"
-# "-S on" - enable attribute auto-save
-# "-o off" - disable SMART Automatic Offline Testing (in favor of daily short tests)
-# "-R 190 -R 194 -R 231" - use raw values (celsius) for Airflow Temp and Temperature for monitoring
-# "-W 4,40,45" - track temperature changes (log 4deg changes, log hit 40deg, log & email warning @ 45deg)
-# "-m ${ALERT_EMAIL}" - email alerts to that account
-# "-M test" - send test email for each device on SMART daemon restart
-# "-s (S/../(02|10|18|26)/./03|L/../28/./03)" - short @ 3am (2nd,10th,18th,26th of the month), long @ 3am (28th of the month)
-
-- name: build smartd parameters for DEVICESCAN
-  ansible.builtin.set_fact:
-    smartd_params: >
-      -a -d sat -S on -o off -R 190 -R 194 -R 231 -W 4,40,45
-      -m {{ smartmontools_email | mandatory }}
-      -s (S/../(02|10|18|26)/./03|L/../28/./03)
-
-- name: common smartd scheduling
-  ansible.builtin.lineinfile:
-    dest: /etc/smartd.conf
-    state: present
-    regexp: '^DEVICESCAN'
-    line: "DEVICESCAN {{ smartd_params }}"
-
-- name: smartd scheduling for SCSI attached ATA (sat) devices
-  loop: "{{ smartd_sat_devices | default([]) }}"
-  loop_control:
-    loop_var: device_path
-  ansible.builtin.lineinfile:
-    dest: /etc/smartd.conf
-    state: present
-    insertbefore: BOF
-    line: "{{ device_path }} {{ smartd_params }}"
-
-- name: find location of environment file
-  ansible.builtin.shell: >
-    set -o pipefail
-    && systemctl cat smartd
-    | grep -i EnvironmentFile
-    | sed -n -e 's/^.*=-//p'
-  args:
-    executable: bash
-  changed_when: false
-  register: smartd_env_file
-
-- name: find if environment file exists
-  ansible.builtin.stat:
-    path: "{{ smartd_env_file.stdout }}"
-  register: stat_envfile
-
-  # XXX: only bother to change this property if the env file and property exists,
-  # as it is removed in newer versions
-- name: configure startup
-  when: stat_envfile.stat.exists
-  ansible.builtin.lineinfile:
-    dest: "{{ smartd_env_file.stdout }}"
-    state: present
-    # backrefs=true will prevent adding if no regexp match
-    backrefs: true
-    regexp: '.*?start_smartd'
-    line: 'start_smartd=yes'
-
-# smartd monitoring will poll the devices every 30 mins, by default
-# otherwise uncomment & change the smartd_opts="--interval=1800"
-# in "{{ smartd_env_file.stdout }}"
-
-# XXX: this works for Debian
-- name: restart smartd
+- name: restart smart service
   ansible.builtin.service:
-    name: smartd
-    state: restarted
-    enabled: true
-  register: smartd_service
-  ignore_errors: true
-
-# XXX: this works for Ubuntu 20.10
-- name: restart smartmontools
-  when: not smartd_service.changed
-  ansible.builtin.service:
-    name: smartmontools
+    name: "{{ smartd_service_name[ansible_facts.distribution] }}"
     state: restarted
     enabled: true
   register: smartmontools_service
-  ignore_errors: true
-
-- name: detect failure to restart SMART daemon
-  when: not smartd_service.changed and not smartmontools_service.changed
-  ansible.builtin.fail:
-    msg: could not restart SMART daemon
-
-# FIXME: better way than 'pause' to wait for smartmontools daemon to come back up
-# XXX: we do this because we think that we've had problems with certain tasks
-# immediately following the restart of this daemon, probably after install
-- name: wait for smartmontools to restart
-  ansible.builtin.pause:
-    seconds: 10
+  until: smartmontools_service.status.ActiveState == "active"
+  retries: 15
+  delay: 2

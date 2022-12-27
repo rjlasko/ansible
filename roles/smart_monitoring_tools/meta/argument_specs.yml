@@ -1,0 +1,21 @@
+---
+argument_specs:
+  # tasks/main.yml entry point
+  main:
+    short_description: The main entry point for the `smart_monitoring_tools` role.
+    options:
+      smartd_email:
+        description: Address for smartmontools to send notifications to
+        required: true
+      smartd_ignore_devices:
+        description: List of block devices under `/dev/disk/by-id/` to exclude from DEVICESCAN.
+        type: list
+        default: []
+        elements: str
+      smartd_sat_devices:
+        description: >
+          List of block devices under `/dev/disk/by-id/` using SCSI to ATA
+          translation layer.
+        type: list
+        default: []
+        elements: str

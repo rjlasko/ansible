@@ -1,0 +1,13 @@
+---
+smartd_conf_filepath: /etc/smartd.conf
+
+smartd_service_name:
+  Debian: smartd
+  Ubuntu: smartmontools
+  Pop!_OS: smartmontools
+
+# smartd parameters for DEVICESCAN
+smartd_params: >
+  -a -d sat -S on -o off -R 190 -R 194 -R 231 -W 4,40,45
+  -m {{ smartd_email | mandatory }}
+  -s (S/../(02|10|18|26)/./03|L/../28/./03)

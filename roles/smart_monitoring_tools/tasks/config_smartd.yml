@@ -1,0 +1,69 @@
+---
+## ---------------- ##
+## Configure SMARTd ##
+## ---------------- ##
+
+- name: backup and restore smartd config
+  ansible.builtin.include_role:
+    name: backup_restore
+  vars:
+    br_target: "{{ smartd_conf_filepath }}"
+
+- name: common smartd scheduling
+  ansible.builtin.lineinfile:
+    dest: "{{ smartd_conf_filepath }}"
+    state: present
+    regexp: '^DEVICESCAN'
+    line: "DEVICESCAN {{ smartd_params }}"
+
+- name: smartd scheduling for SCSI attached ATA (sat) devices
+  loop: "{{ smartd_sat_devices }}"
+  loop_control:
+    loop_var: device_path
+  ansible.builtin.lineinfile:
+    dest: "{{ smartd_conf_filepath }}"
+    state: present
+    insertbefore: BOF
+    line: "{{ device_path }} {{ smartd_params }}"
+
+- name: smartd ignored devices
+  loop: "{{ smartd_ignore_devices }}"
+  loop_control:
+    loop_var: device_path
+  ansible.builtin.lineinfile:
+    dest: "{{ smartd_conf_filepath }}"
+    state: present
+    insertbefore: BOF
+    line: "{{ device_path }} -d ignore"
+
+- name: find location of environment file
+  ansible.builtin.shell: >
+    set -o pipefail
+    && systemctl cat smartd
+    | grep -i EnvironmentFile
+    | sed -n -e 's/^.*=-//p'
+  args:
+    executable: bash
+  changed_when: false
+  register: smartd_env_file
+
+- name: find if environment file exists
+  ansible.builtin.stat:
+    path: "{{ smartd_env_file.stdout }}"
+  register: stat_envfile
+
+  # XXX: only bother to change this property if the env file and property exists,
+  # as it is removed in newer versions
+- name: configure startup
+  when: stat_envfile.stat.exists
+  ansible.builtin.lineinfile:
+    dest: "{{ smartd_env_file.stdout }}"
+    state: present
+    # backrefs=true will prevent adding if no regexp match
+    backrefs: true
+    regexp: '.*?start_smartd'
+    line: 'start_smartd=yes'
+
+# smartd monitoring will poll the devices every 30 mins, by default
+# otherwise uncomment & change the smartd_opts="--interval=1800"
+# in "{{ smartd_env_file.stdout }}"
