@@ -18,11 +18,11 @@ argument_specs:
           users:
             description: a list usernames to add as VM admins
             type: list
-            required: true
           pools:
             description: a list of file system locations that libvirt can use to store VMs and access ISOs
-            type: dict
+            type: list
             required: true
+            elements: dict
             options:
               name:
                 description: the name of the pool - `default` is the first location that libvirt looks at
@@ -33,6 +33,7 @@ argument_specs:
           backport:
             description: flag to indicate install the latest software versions available through backports
             type: bool
+            default: false
       libvirt_guests:
         description: The guest VMs to build and run.
         type: list
