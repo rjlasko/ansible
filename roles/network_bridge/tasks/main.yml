@@ -63,4 +63,3 @@
 
     - name: reboot with bridge network enabled
       ansible.builtin.reboot:
-        reboot_timeout: 120
