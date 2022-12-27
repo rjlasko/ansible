@@ -38,8 +38,11 @@ None
         boot_manager:
           cmdline:
             present:
-              amd_iommu: 'on'
               iommu: pt
+              # ex. boolean key as a string
+              amd_iommu: 'on'
+              # ex. kernel option key without value
+              delayacct:
             absent:
               - quiet
 ```
