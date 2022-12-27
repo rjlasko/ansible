@@ -5,7 +5,7 @@ Performs the following operations, for filesystems that live on a single partiti
 - Create partitions on given disks
 - Install filesystem on partition
 
-Single-disk+partition filesystems as well as labeled filesystems can be mounted to the host and persisted via `/etc/fstab`.
+Single-disk+partition filesystems as well as labeled filesystems are mounted to the host and persisted via `/etc/fstab`.
 
 ## Requirements
 

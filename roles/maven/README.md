@@ -20,7 +20,7 @@ Installs Maven, and configures its repository settings. This role provides syste
 ```yaml
 maven_installation: # required. Valid values are ['user', 'system', 'none'].
 maven_home: # pathname, default(null). The path to a preexisting maven installation. Only used when `maven_installation=none`.
-maven_version: # string, default(<latest>). the Maven version to use for a user installation. Only used when `maven_home_install=true`.
+maven_version: # string, default(<latest>). the Maven version to use for a user installation. Only used when `maven_installation=user`.
 maven_reset: # boolean, default(false). When true, will delete `~/.m2` when true and preexisting maven user installation.
 maven_init_file: # filepath, optional. filepath to add maven to shell environment when not a system installation. also includes optional maven aliases when `maven_init_aliases=true`
 maven_init_aliases: # boolean, default(false). Adds helper aliases to `maven_init_file`
