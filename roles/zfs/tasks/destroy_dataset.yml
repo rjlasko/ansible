@@ -35,7 +35,7 @@
         loop_var: zfs_expected_dataset
       assert:
         that: zfs_expected_dataset in zfs_zpool_children
-        fail_ msg: "Could not find expected ZFS child dataset: {{ zfs_expected_dataset }}"
+        fail_msg: "Could not find expected ZFS child dataset: {{ zfs_expected_dataset }}"
 
     - name: "remove ZFS dataset: {{ zfs_target_dataset }}"
       community.general.zfs:
