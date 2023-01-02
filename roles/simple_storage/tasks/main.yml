@@ -3,12 +3,12 @@
 ## Perform simple disk partition/format/mount ##
 ## ------------------------------------------ ##
 
-#- name: install required packages
-#  ansible.builtin.include_tasks: install_dependencies.yml
-#
-#- name: configure btrfs maintenance
-#  when: "'btrfs' in simple_storage_fstypes"
-#  ansible.builtin.include_tasks: config_btrfs_maintenance.yml
+- name: install required packages
+  ansible.builtin.include_tasks: install_dependencies.yml
+
+- name: configure btrfs maintenance
+  when: "'btrfs' in simple_storage_fstypes"
+  ansible.builtin.include_tasks: config_btrfs_maintenance.yml
 
 - name: dismount disks being updated or rebuilt
   ansible.builtin.include_tasks: dismount_disk_partitions.yml
