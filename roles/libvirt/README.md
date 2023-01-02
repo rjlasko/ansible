@@ -74,7 +74,6 @@ libvirt_guests:
         io_cpus: [15]
         memory: "32GiB"
         hugepages: true
-        isolate: true
       xpaths:
         - xpath: /domain/devices/disk[@device='cdrom']
           state: absent
@@ -113,7 +112,6 @@ libvirt:
           io_cpus: [15]
           memory: "32GiB"
           hugepages: true
-          isolate: true
         xpaths:
           - xpath: /domain/devices/disk[@device='cdrom']
             state: absent

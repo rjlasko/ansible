@@ -268,7 +268,6 @@ argument_specs:
                           QEMU doesn't accept sizes greater than 32K.
                           It is best to align as close to source as possible.
                         type: int
-
               hostdevs:
                 description: List of host devices to passthrough to guest
                 type: list
