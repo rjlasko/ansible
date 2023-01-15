@@ -1,0 +1,55 @@
+---
+## ---------------- ##
+## Installs Ansible ##
+## ---------------- ##
+
+- assert:
+    that: ansible_installation in ['system', 'pipv', 'pipx']
+
+- when: ansible_installation == 'system'
+  block:
+    - name: install ansible (MacOS)
+      when: ansible_facts.system == 'Darwin'
+      community.general.homebrew:
+        name: ansible
+        state: present
+
+    - name: "install ansible ({{ ansible_facts.os_family }} Linux)"
+      when: ansible_facts.system == 'Linux'
+      become: true
+      ansible.builtin.package:
+        name: ansible
+        state: present
+
+- name: install ansible (pipx)
+  when: ansible_installation == 'pipx'
+  ansible.builtin.include_role:
+    name: pipx
+  vars:
+    pipx_packages: ansible-base
+
+# TODO: i don't think that i want to install Ansible using pipv
+- when: ansible_installation == 'pipv'
+  block:
+    - name: install ansible (pipv)
+      ansible.builtin.include_role:
+        name: pipv
+      vars:
+        pipv_packages: ansible
+#        pipv_executables:
+#          - icdiff
+#          - git-icdiff
+#        pipv_package_version: "{{ icdiff_version | default(omit) }}"
+
+    - name: "add ansible exe path to shell initialization script: {{ ansible_init_file }}"
+      when: ansible_init_file
+      ansible.builtin.blockinfile:
+        path: "{{ ansible_init_file }}"
+        create: true
+        marker: "# --- {mark} ansible exe path ---"
+        block: |
+          if ! $(echo "$PATH" | tr ":" "\n" | grep -qx "{{ ansible_bin_path }}") ; then
+          	export PATH="{{ ansible_bin_path }}:$PATH"
+          fi
+        state: present
+        mode: u=rw,go=r
