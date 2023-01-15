@@ -3,10 +3,21 @@
 ## Restore VM from backup ##
 ## ---------------------- ##
 
+#- name: restore VM from XML
+#  # TODO: look into using "virt" module to do this
+#  ansible.builtin.command: virsh define --file {{ libvirt_guest.backup_dir | mandatory }}/domain.xml
+#  changed_when: true
+
+- name: slurp xml from backup
+  slurp:
+    src: "{{ libvirt_guest.backup_dir | mandatory }}/domain.xml"
+  register: slurped_xml
+
 - name: restore VM from XML
-  # TODO: look into using "virt" module to do this
-  ansible.builtin.command: virsh define --file {{ libvirt_guest.backup_dir | mandatory }}/domain.xml
-  changed_when: true
+  community.libvirt.virt:
+    command: define
+    autostart: false # TODO: as property
+    xml: "{{ slurped_xml.content | b64decode }}"
 
 - name: get XML of restored VM definition
   community.libvirt.virt:

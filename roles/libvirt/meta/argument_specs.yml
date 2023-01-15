@@ -54,7 +54,6 @@ argument_specs:
           dns_address:
             description: >
               expected DNS or IP address of the vm used to confirm guest is running after start
-            required: true
           force_stop:
             description: Used when clearing any preexisting guest of same name
             type: bool

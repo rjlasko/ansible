@@ -1,6 +1,39 @@
 ---
+libvirt_host_packages:
+  Debian:
+    backports:
+      - qemu-kvm
+      - qemu-utils
+      - libvirt-daemon-system
+      - libvirt-clients
+    stable:
+      - python3-lxml
+      - python3-libvirt
+      - virtinst
+      - virt-manager
+      - ovmf
+
+  Pop!_OS:
+    stable:
+      - qemu-kvm
+      - qemu-utils
+      - libvirt-daemon-system
+      - libvirt-clients
+      - python3-lxml
+      - python3-libvirt
+      - virtinst
+      - virt-manager
+      - ovmf
+
+libvirt_user: root
+libvirt_group: libvirt
+
+libvirtd_cfg_path: /etc/libvirt/libvirtd.conf
+qemu_cfg_path: /etc/libvirt/qemu.conf
+
 libvirt_hooks_path: /etc/libvirt/hooks
 qemu_hooks_path: "{{ libvirt_hooks_path }}/qemu.d"
+
 qemu_guest_hook_path: "{{ qemu_hooks_path }}/01_guest_hooks.sh"
 qemu_isolate_hook_path: "{{ qemu_hooks_path }}/02_isolation_hook.sh"
 qemu_isolated_guests_path: "{{ libvirt_hooks_path }}/isolated_guests.txt"
