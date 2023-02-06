@@ -60,7 +60,6 @@
         force: true
 
     - name: delete preexisting maven installation directory
-      when: maven_reset
       ansible.builtin.file:
         path: "{{ maven_user_dir }}"
         state: absent
