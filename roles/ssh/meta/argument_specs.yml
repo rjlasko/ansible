@@ -1,0 +1,85 @@
+---
+argument_specs:
+  # tasks/main.yml entry point
+  main:
+    short_description: The main entry point for the `ssh` role.
+    options:
+      key_definitions:
+        description: individual definitions used to create or copy keys
+        type: list
+        default: []
+        elements: dict
+        options:
+          type:
+            description: >
+              The type of public key encryption type use for the ssh connection
+              Required when key_definitions[n].source is indicated.
+            default: ed25519
+            choices:
+              - dsa
+              - ecdsa
+              - ecdsa-sk
+              - ed25519
+              - ed25519-sk
+              - rsa
+          name:
+            description: >
+              Used as filename for private + public keys.
+              A named keydef cannot also be the primary keydef.
+            default: id_<type>
+          replace:
+            description: overwrite any preexisting instance of the same key
+            type: bool
+            default: false
+          comment:
+            description: used as the public key-file's comment field
+            default: <user>@<hostname>
+          source:
+            description: indicates a predefined key
+            type: dict
+            options:
+              public:
+                type: dict
+                options:
+                  key:
+                    # TODO: path: # optional, path to pubkey file
+                    description: plaintext of public key, omitting type prefix or comment suffix
+                    required: true
+              private:
+                type: dict
+                options:
+                  path:
+                    description: path to private key file
+                    required: true
+                  decrypt:
+                    # TODO: key: string, plaintext of private key
+                    # TODO: determine how to format this
+                    description: indicates that provided private key file needs decryption
+                    type: bool
+                    default: true
+      purge_keys:
+        description: removes all key files in `~/.ssh`
+        type: bool
+        default: false
+      known_hosts:
+        description: fqdn of hosts to seed on target by key-scanning for machine public key
+        type: list
+        elements: str
+      purge_known_hosts:
+        description: removes `~/.ssh/known_hosts`
+        type: bool
+        default: false
+      authorize_keys:
+        description: >
+          Public key strings to add to ~/.ssh/authorized_keys.
+          Pre-existing keys having the same comment field will be replaced.
+        type: list
+        elements: str
+      authorize_self:
+        description: add user's public key to their own `~/.ssh/authorized_keys`
+        type: bool
+        default: false
+      purge_authorized_keys:
+        description: removes `~/.ssh/authorized_keys`
+        type: bool
+        default: false

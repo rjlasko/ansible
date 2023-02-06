@@ -1,0 +1,4 @@
+---
+ssh_key_user: "{{ whoami_result.stdout }}"
+ssh_key_name: "{{ ssh_key_def.name | default(ssh_key_default_name) }}"
+ssh_key_comment: "{{ ssh_key_def.comment | default(ssh_key_default_comment) }}"

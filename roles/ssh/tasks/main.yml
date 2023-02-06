@@ -7,11 +7,24 @@
   when: ssh.purge_keys | default(false)
   ansible.builtin.include_tasks: purge_keys.yml
 
-- name: loop over given key definitions
+- name: install key definitions
   loop: "{{ ssh.key_definitions | default([]) }}"
   loop_control:
     loop_var: ssh_key_def
   ansible.builtin.include_tasks: define_key.yml
+
+- name: purge existing SSH configuration
+  when: ssh.purge_config | default(false)
+  ansible.builtin.file:
+    path: ~/.ssh/config
+    state: absent
+
+- name: install configurations
+  loop: "{{ ssh.config_definitions | default([]) }}"
+  loop_control:
+    loop_var: ssh_cfg_def
+  ansible.builtin.include_tasks: define_config.yml
+
 
 - name: purge known_hosts
   when: ssh.purge_known_hosts | default(false)
