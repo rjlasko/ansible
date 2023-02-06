@@ -1,13 +1,8 @@
 #!/usr/bin/env bash
+set -ueo pipefail
 
 # {{ ansible_managed }}
 
-set -ueo pipefail
-# set -x
-
-# determine likely VPN network device
-# XXX: probably not necessary
-# VPN_DEV="$(grep -f <(networksetup -listallhardwareports | grep Device | awk '{print $2}' | tr ' ' '\n') -v <(scutil --nwi | tail -n1 | cut -d':' -f2 | xargs | tr ' ' '\n'))"
 
 {% if aws_gimme_creds_pretest is defined %}
 if ! {{ aws_gimme_creds_pretest }} ; then
@@ -17,4 +12,4 @@ fi
 {% endif %}
 
 export PATH="{{ aws_bin_path }}:{{ aws_creds_bin_path }}:$PATH"
-gimme-aws-creds $@
+gimme-aws-creds "$@"
