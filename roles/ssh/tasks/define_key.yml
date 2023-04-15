@@ -17,7 +17,7 @@
     - name: validate provided keys are declared with a type
       ansible.builtin.assert:
         that: ssh_key_def.type is defined
-        failed_msg: "Keys with provided source files must declare a type, even if bogus!"
+        fail_msg: "Keys with provided source files must declare a type, even if bogus!"
 
     - name: "handle provided key insertion for '{{ ssh_key_user }}'"
       when: ssh_key_def.source is defined
