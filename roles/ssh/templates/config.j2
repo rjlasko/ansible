@@ -1,0 +1,11 @@
+{% for global_opt in (ssh_config.global_opts | dict2items | default([])) %}
+{{ global_opt.key }} {{ global_opt.value }}
+{% endfor %}
+
+{% for host in (ssh_config.hosts | default([])) %}
+Host {{ host.patterns | join(' ') }}
+{% for host_opt in host.host_opts | dict2items %}
+	{{ host_opt.key }} {{ host_opt.value }}
+{% endfor %}
+
+{% endfor %}

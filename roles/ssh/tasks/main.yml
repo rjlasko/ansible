@@ -19,12 +19,15 @@
     path: ~/.ssh/config
     state: absent
 
-- name: install configurations
-  loop: "{{ ssh.config_definitions | default([]) }}"
-  loop_control:
-    loop_var: ssh_cfg_def
-  ansible.builtin.include_tasks: define_config.yml
-
+- name: install ~/.ssh/config
+  when: ssh.config is defined
+  vars:
+    ssh_config: "{{ ssh.config }}"
+  ansible.builtin.template:
+    src: config.j2
+    dest: "~/.ssh/config"
+    mode: u=rw,go-rwx
+    force: true
 
 - name: purge known_hosts
   when: ssh.purge_known_hosts | default(false)
