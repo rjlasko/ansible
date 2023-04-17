@@ -110,7 +110,7 @@ argument_specs:
             type: bool
             default: false
 
-          authorize_keys:
+          authorized_keys:
             description: >
               Public key strings to add to ~/.ssh/authorized_keys.
               Pre-existing keys having the same comment field will be replaced.
