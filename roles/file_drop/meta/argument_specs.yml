@@ -1,0 +1,146 @@
+---
+argument_specs:
+  # tasks/main.yml entry point
+  main:
+    short_description: The main entry point for the `file_drop` role.
+    options:
+      file_drop:
+        description: specification for making adding or modifying files
+        type: dict
+        options:
+          empty:
+            description: >
+              List of directory paths. Directories in this list will be emptied
+              of all files, yet remain present.
+            type: list
+            default: []
+            elements: str
+          files:
+            description: >
+              Invokes the `ansible.builtin.file` module on each item in the list.
+            type: list
+            default: []
+            elements: dict
+            options:
+              path:
+                description: Path to the file being managed.
+                required: true
+              state:
+                description: what to do with the file
+                required: true
+                choices:
+                  - absent
+                  - directory
+                  - file
+                  - hard
+                  - link
+                  - touch
+              src:
+                description: >
+                  Path of the file to link to.
+                  This applies only to state=link and state=hard.
+                  For state=link, this will also accept a non-existing path.
+              force:
+                description: >
+                  Force the creation of the symlinks in two cases:
+                    - the source file does not exist (but will appear later)
+                    - the destination exists and is a file (so, we need to unlink
+                      the path file and create symlink to the src file in place of it).
+                type: bool
+                default: false
+              owner:
+                description: >
+                  Name of the user that should own the filesystem object, as would be fed to chown.
+                  When left unspecified, it uses the current user unless you are root, in which case
+                    it can preserve the previous ownership.
+                  Specifying a numeric username will be assumed to be a user ID and not a username.
+                    Avoid numeric usernames to avoid this confusion.
+              group:
+                description: >
+                  Name of the group that should own the filesystem object, as would be fed to chown.
+                  When left unspecified, it uses the current group of the current user unless you are
+                    root, in which case it can preserve the previous ownership.
+              mode:
+                description: The permissions the resulting filesystem object should have.
+                default: u=r,g-rwx,o-rwx
+          templates:
+            description: >
+              Invokes the `ansible.builtin.template` module on each item in the list.
+            type: list
+            default: []
+            elements: dict
+            options:
+              src:
+                description: Path of a Jinja2 formatted template on the Ansible controller.
+                required: true
+              dest:
+                description: Location to render the template to on the remote machine.
+                required: true
+              owner:
+                description: >
+                  Name of the user that should own the filesystem object, as would be fed to chown.
+                  When left unspecified, it uses the current user unless you are root, in which case
+                    it can preserve the previous ownership.
+                  Specifying a numeric username will be assumed to be a user ID and not a username.
+                    Avoid numeric usernames to avoid this confusion.
+              group:
+                description: >
+                  Name of the group that should own the filesystem object, as would be fed to chown.
+                  When left unspecified, it uses the current group of the current user unless you are
+                    root, in which case it can preserve the previous ownership.
+              force:
+                description: >
+                  Determine when the file is being transferred if the destination already exists.
+                  When set to true, replace the remote file when contents are different than the source.
+                  When set to false, the file will only be transferred if the destination does not exist.
+                type: bool
+                default: true
+              mode:
+                description: The permissions the resulting filesystem object should have.
+                default: u=r,g-rwx,o-rwx
+          copies:
+            description: >
+              Invokes the `ansible.builtin.copy` module on each item in the list.
+            type: list
+            default: []
+            elements: dict
+            options:
+              remote_src:
+                description: >
+                  Influence whether src needs to be transferred or already is present remotely.
+                  If false, it will search for src on the controller node.
+                  If true it will search for src on the managed (remote) node.
+                  remote_src supports recursive copying as of version 2.8.
+                  remote_src only works with mode=preserve as of version 2.6.
+                type: bool
+                default: false
+              src:
+                description: Local path to a file to copy to the remote server.
+                required: true
+              dest:
+                description: >
+                  Remote absolute path where the file should be copied to.
+                  If src is a directory, this must be a directory too.
+                  If dest is a non-existent path and if either dest ends with “/” or src is a directory, dest is created.
+                  If dest is a relative path, the starting directory is determined by the remote host.
+                  If src and dest are files, the parent directory of dest is not created and the task fails if it does not already exist.
+                required: true
+              owner:
+                description: >
+                  Name of the user that should own the filesystem object, as would be fed to chown.
+                  When left unspecified, it uses the current user unless you are root, in which case it can preserve the previous ownership.
+                  Specifying a numeric username will be assumed to be a user ID and not a username. Avoid numeric usernames to avoid this confusion.
+              group:
+                description: >
+                  Name of the group that should own the filesystem object, as would be fed to chown.
+                  When left unspecified, it uses the current group of the current user unless you are root, in which case it can preserve the previous ownership.
+              force:
+                description: >
+                  Influence whether the remote file must always be replaced.
+                  If true, the remote file will be replaced when contents are different than the source.
+                  If false, the file will only be transferred if the destination does not exist.
+                type: bool
+                default: true
+              mode:
+                description: The permissions of the destination file or directory.
+                default: u=r,g-rwx,o-rwx

@@ -14,8 +14,7 @@ argument_specs:
             elements: dict
             options:
               disk_id:
-                description: >
-                  matching devices found under /dev/disk/by-id/
+                description: matching devices found under /dev/disk/by-id/
                 required: true
               rebuild:
                 description: repartition the disk, and reformat all partitions

@@ -7,34 +7,7 @@ None
 
 ## Role Variables
 
-#### Settable Variables
-```yaml
-file_drop:
-  empty: # list of directory paths, default([]). Directories in this list will be emptied of all files, yet remain present.
-  files: # default([]). Invokes the `ansible.builtin.file` module on each item in the list.
-    - path: # required
-      state: # required
-      src: # optional
-      force: # optional
-      owner: # optional
-      group: # optional
-      mode: # default('u=r,g-rwx,o-rwx')
-  templates: # default([]). Invokes the `ansible.builtin.template` module on each item in the list.
-    - src: # required
-      dest: # required
-      owner: # optional
-      group: # optional
-      force: # optional
-      mode: # default('u=r,g-rwx,o-rwx')
-  copies: # default([]). Invokes the `ansible.builtin.copy` module on each item in the list.
-    - remote_src: # optional
-      src: # required
-      dest: # required
-      owner: # optional
-      group: # optional
-      force: # optional
-      mode: # default('u=r,g-rwx,o-rwx')
-```
+#### [Settable Variables](./meta/argument_specs.yml)
 
 ## Dependencies
 
