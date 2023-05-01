@@ -1,0 +1,33 @@
+---
+## ------------------------- ##
+## Loads a trust certificate ##
+## ------------------------- ##
+
+- name: create temp directory
+  ansible.builtin.tempfile:
+    state: directory
+  register: tempdir
+
+- block:
+    - name: download certificate to temp directory
+      ansible.builtin.copy:
+        src: "{{ lxd_trust_cert.src }}"
+        dest: "{{ tempdir.path }}"
+        decrypt: "{{ lxd_trust_cert.decrypt }}"
+
+    - name: apply trust certificate
+      ansible.builtin.command:
+        argv:
+          - lxc
+          - config
+          - trust
+          - add
+          - "{{ tempdir.path }}/{{ lxd_trust_cert.src | basename }}"
+          - "--name {{ lxd_trust_cert.name }}"
+          - "--type {{ lxd_trust_cert.type }}"
+
+  always:
+    - name: delete temp directory
+      ansible.builtin.file:
+        path: "{{ tempdir.path }}"
+        state: absent

@@ -104,3 +104,9 @@
     state: "{{ lxd_profile.state | default(omit) }}"
     config: "{{ lxd_profile.config | default(omit) }}"
     devices: "{{ lxd_profile.devices | default(omit) }}"
+
+- name: apply trust certificates
+  loop: "{{ lxd_host.trust_certs | default([]) }}"
+  loop_control:
+    loop_var: lxd_trust_cert
+  ansible.builtin.include_tasks: trust_certificate.yml
