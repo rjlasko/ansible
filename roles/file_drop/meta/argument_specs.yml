@@ -144,3 +144,7 @@ argument_specs:
               mode:
                 description: The permissions of the destination file or directory.
                 default: u=r,g-rwx,o-rwx
+              decrypt:
+                description: Whether the source file needs to be decrypted onto the target
+                type: bool
+                default: false

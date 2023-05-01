@@ -47,4 +47,5 @@
     owner: "{{ fd_copy.owner | default(omit) }}"
     group: "{{ fd_copy.group | default(omit) }}"
     force: "{{ fd_copy.force | default(omit) }}"
+    decrypt: "{{ fd_copy.decrypt | default(omit) }}"
     mode: "{{ fd_copy.mode | default('u=r,g-rwx,o-rwx') }}"
