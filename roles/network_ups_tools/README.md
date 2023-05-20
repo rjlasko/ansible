@@ -11,14 +11,7 @@ The server configuration only supports a single UPS
 
 ## Role Variables
 
-#### Settable Variables
-```yaml
-nut:
-  mode: # `standalone` or `netclient`, but really only works for `standalone`
-  email: # target for email notifications
-  user: # name of the monitor user
-  upsname: # name of the ups used by a client
-```
+#### [Settable Variables](./meta/argument_specs.yml)
 
 ## Dependencies
 

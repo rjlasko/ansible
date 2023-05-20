@@ -8,11 +8,6 @@
 # https://unix.stackexchange.com/questions/164788/run-various-shell-commands-when-nut-reports-a-low-ups-battery
 
 
-- name: validate mode is supported
-  when: nut.mode != "standalone" and nut.mode != "netclient"
-  ansible.builtin.fail:
-    msg: "Only supports 'standalone' and 'netclient' modes of operation."
-
 - name: autogenerate totally random password
   ansible.builtin.set_fact:
     nut_default_password: "{{ 9999999999999999999999 | random | to_uuid }}"

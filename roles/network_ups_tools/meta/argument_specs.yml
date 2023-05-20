@@ -1,0 +1,31 @@
+---
+argument_specs:
+  # tasks/main.yml entry point
+  main:
+    short_description: The main entry point for the `network_ups_tools` role.
+    options:
+      nut:
+        description: specification for a host's NUT configuration
+        type: dict
+        options:
+          mode:
+            description: Mode that NUT is running in.
+            choices:
+              - standalone # gets signaling directly from attached UPS
+              - netclient # gets NUT signaling from network
+            required: true
+          email:
+            description: Target for email notifications
+            required: true
+          user:
+            description: Name of the UPS monitor user.
+            required: true
+          upsname:
+            description: >
+              Name of the UPS used by a client.
+              This must match the value of the 'product' entry returned by `nut-scanner`.
+              This value is required when NUT is in `netclient` mode.
+          server:
+            description: >
+              Name of the UPS NUT server.
+              This value is required when NUT is in `netclient` mode.
