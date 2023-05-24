@@ -1,0 +1,14 @@
+---
+argument_specs:
+  # tasks/main.yml entry point
+  main:
+    short_description: The main entry point for the `aws_cli` role.
+    options:
+      aws_completions_filepath:
+        description: >
+          Script that loads aws completions.
+          Can be preexisting file, or dedicated to purpose.
+        default: ~/.bashrc
+      aws_config_src:
+        description: source file to copy into ~/.aws/config
+        required: true

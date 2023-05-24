@@ -1,0 +1,2 @@
+---
+aws_completions_filepath: "{{ ansible_user_dir }}/.bashrc"
