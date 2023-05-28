@@ -1,6 +1,7 @@
 ---
 nut_config_path: /etc/nut
 
+# https://networkupstools.org/docs/man/ups.conf.html
 nut_ups_conf:
   chroot:
   driverpath:
@@ -11,6 +12,7 @@ nut_ups_conf:
   synchronous:
   user:
 
+# https://networkupstools.org/docs/man/upsd.conf.html
 nut_upsd_conf:
   MAXAGE:
   STATEPATH:
@@ -21,6 +23,7 @@ nut_upsd_conf:
   CERTIDENT:
   CERTREQUEST:
 
+# https://networkupstools.org/docs/man/upsd.users.html
 nut_upsd_users:
   monuser:
     password: "{{ nut_default_password | mandatory }}"
@@ -30,6 +33,7 @@ nut_upsd_users:
       - fsd
     instcmds: all
 
+# https://networkupstools.org/docs/man/upsmon.conf.html
 nut_upsmon_conf:
   DEADTIME: 15
   FINALDELAY: 60
