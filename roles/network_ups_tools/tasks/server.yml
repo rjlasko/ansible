@@ -10,7 +10,7 @@
 
 - name: scan for UPS devices and drivers
   ansible.builtin.shell: >
-    set -o pipefail
+    set -eo pipefail
     && nut-scanner -q
     | grep -v 'product '
     | grep -v 'vendor '
