@@ -12,17 +12,6 @@
   ansible.builtin.set_fact:
     nut_default_password: "{{ 9999999999999999999999 | random | to_uuid }}"
 
-- name: set to self-monitor
-  when: nut.mode == "standalone"
-  ansible.builtin.set_fact:
-    nut_monitor_mode: "master"
-
-- name: set name of UPS attached to client, managed by server
-  when: nut.mode == "netclient"
-  ansible.builtin.set_fact:
-    nut_monitor_name: "{{ nut.upsname | mandatory }}@{{ nut.server | mandatory }}"
-    nut_monitor_mode: "slave"
-
 - name: install network UPS tools
   ansible.builtin.package:
     name: nut
@@ -42,10 +31,13 @@
   ansible.builtin.include_tasks: monitor.yml
 
 - name: check ups connection
+  loop: "{{ nut_monitor_names }}"
+  loop_control:
+    loop_var: nut_monitor_name
   ansible.builtin.command: "upsc {{ nut_monitor_name }}"
   changed_when: false
   register: upsc_out
 
 - name: display ups info
   ansible.builtin.debug:
-    msg: "{{ upsc_out.stdout_lines }}"
+    msg: "{{ upsc_out }}"

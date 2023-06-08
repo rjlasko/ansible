@@ -1,16 +1,16 @@
 # {{ ansible_managed }}
 
-{% for user in nut_upsd_users %}
+{% for user in _nut_upsd_users %}
 [{{ user }}]
-{% for option in nut_upsd_users[user] %}
-{%- if nut_upsd_users[user][option] is iterable and not nut_upsd_users[user][option] is string %}
-{%- for repeat in nut_upsd_users[user][option] %}
+{% for option in _nut_upsd_users[user] %}
+{%- if _nut_upsd_users[user][option] is iterable and not _nut_upsd_users[user][option] is string %}
+{%- for repeat in _nut_upsd_users[user][option] %}
   {{ option }} = {{ repeat }}{{ '\n' }}
 {%- endfor %}
 {%- elif option == 'upsmon' %}
-  upsmon {{ nut_upsd_users[user][option] }}{{ '\n' }}
+  upsmon {{ _nut_upsd_users[user][option] }}{{ '\n' }}
 {%- else %}
-  {{ option }} = {{ nut_upsd_users[user][option] }}{{ '\n' }}
+  {{ option }} = {{ _nut_upsd_users[user][option] }}{{ '\n' }}
 {%- endif %}
 {% endfor %}
 {% endfor %}

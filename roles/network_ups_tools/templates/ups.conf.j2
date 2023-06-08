@@ -1,8 +1,17 @@
 # {{ ansible_managed }}
 
-{% for global in nut_ups_conf %}
-{% if nut_ups_conf[global] != none %}{{ global }} = {{ nut_ups_conf[global] }}
-{% endif %}
+{% if 'global' in _nut_ups_conf %}
+{% for kv in _nut_ups_conf['global'] | dict2items %}
+{{ kv.key }} = {{ kv.value }}
 {% endfor %}
+{% endif %}
 
-{{ nut_scan_results.stdout }}
+{% for section in _nut_ups_conf | dict2items %}
+{% if section.key != 'global' %}
+[{{ section.key }}]
+{% for kv in section.value | dict2items %}
+	{{ kv.key }} = {{ kv.value }}
+{% endfor %}
+{% endif %}
+
+{% endfor %}

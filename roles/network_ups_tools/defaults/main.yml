@@ -1,72 +1,14 @@
 ---
 nut_config_path: /etc/nut
 
-# https://networkupstools.org/docs/man/ups.conf.html
-nut_ups_conf:
-  chroot:
-  driverpath:
-  maxstartdelay:
-  maxretry: 3
-  retrydelay:
-  pollinterval:
-  synchronous:
-  user:
-
-# https://networkupstools.org/docs/man/upsd.conf.html
-nut_upsd_conf:
-  MAXAGE:
-  STATEPATH:
-  LISTEN: []
-  MAXCONN:
-  CERTFILE:
-  CERTPATH:
-  CERTIDENT:
-  CERTREQUEST:
-
-# https://networkupstools.org/docs/man/upsd.users.html
-nut_upsd_users:
-  monuser:
-    password: "{{ nut_default_password | mandatory }}"
-    upsmon: "{{ nut_monitor_mode | mandatory }}"
-    actions:
-      - set
-      - fsd
-    instcmds: all
-
-# https://networkupstools.org/docs/man/upsmon.conf.html
-nut_upsmon_conf:
-  DEADTIME: 15
-  FINALDELAY: 60
-  HOSTSYNC: 15
-  MINSUPPLIES: 1
-  MONITOR: >
-    {{ nut_monitor_name | mandatory }}
-    1
-    {{ nut.user | mandatory }}
-    {{ nut_upsd_users[nut.user].password | mandatory }}
-    {{ nut_monitor_mode | mandatory }}
-  NOCOMMWARNTIME: 300
-  NOTIFYCMD: '"/etc/nut/notify.sh"'
-  NOTIFYMSG: []
-  NOTIFYFLAG:
-    - "ONLINE    SYSLOG+WALL+EXEC"
-    - "ONBATT    SYSLOG+WALL+EXEC"
-    - "LOWBATT   SYSLOG+WALL+EXEC"
-    - "FSD       SYSLOG+WALL+EXEC"
-    - "COMMOK    SYSLOG+WALL+EXEC"
-    - "COMMBAD   SYSLOG+WALL+EXEC"
-    - "SHUTDOWN  SYSLOG+WALL+EXEC"
-    - "REPLBATT  SYSLOG+WALL+EXEC"
-    - "NOCOMM    SYSLOG+WALL+EXEC"
-    - "NOPARENT  SYSLOG+WALL+EXEC"
-  POLLFREQ: 5
-  POLLFREQALERT: 5
-  POWERDOWNFLAG: '"/etc/killpower"'
-  RBWARNTIME: 43200
-  RUN_AS_USER:
-  SHUTDOWNCMD: "{{ nut.shutdown_cmd | default('\"/sbin/shutdown -h +0\"') }}"
-  CERTPATH:
-  CERTIDENT:
-  CERTHOST:
-  CERTVERIFY:
-  FORCESSL:
+nut_monitor_mode: "{{ 'master' if nut.mode == 'standalone' else 'slave' }}"
+nut_monitor_names: >
+  [
+  {% if nut.mode == 'netclient' -%}
+    {{ nut.upsname | mandatory }}@{{ nut.server | mandatory }}
+  {%- else -%}
+    {% for nutdev in nut_server_devices.stdout_lines | mandatory %}
+      '{{ nutdev }}',
+    {% endfor %}
+  {%- endif %}
+  ]

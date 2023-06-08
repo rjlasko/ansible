@@ -1,0 +1,81 @@
+---
+_nut_ups_conf: "{{ _nut_scanner_ups_conf | combine(_nut_ups_conf_overrides, recursive=True) }}"
+_nut_ups_conf_overrides: >
+  {
+  {% if nut.ups_conf is defined %}
+    {% if nut.ups_conf.global is defined %}
+      'global': {{ nut.ups_conf.global }},
+    {% endif %}
+    {% for device in nut.ups_conf.devices %}
+      {% set device_mod = device.copy() %}
+      {% set device_name = device_mod.pop('name') %}
+      '{{ device_name }}': {{ device_mod }},
+    {% endfor %}
+  {% endif %}
+  }
+_nut_scanner_ups_conf: >
+  {
+  {% for section in (nut_scan_results.stdout | from_ini | dict2items) %}
+    {% set hasname = (section.value.serial is defined) and (section.value.product is defined) %}
+    {% set upsname = (section.value.product.strip() + '_' + section.value.serial.strip()) if hasname else section.key %}
+    '{{ upsname }}': {
+      {% for kv in (section.value | dict2items) if kv.key not in ['product', 'vendor'] %}
+        '{{ kv.key }}': '{{ kv.value }}',
+      {% endfor %}
+    },
+  {% endfor %}
+  }
+
+# https://networkupstools.org/docs/man/upsd.conf.html
+_nut_upsd_conf: "{{ nut.upsd_conf | default({}) }}"
+
+# https://networkupstools.org/docs/man/upsd.users.html
+_nut_upsd_users:
+  monuser:
+    password: "{{ nut_default_password | mandatory }}"
+    upsmon: "{{ nut_monitor_mode | mandatory }}"
+    actions:
+      - set
+      - fsd
+    instcmds: all
+
+# https://networkupstools.org/docs/man/upsmon.conf.html
+_nut_upsmon_conf: "{{ _nut_upsmon_conf_defaults | combine(nut.upsmon_conf | default({}), recursive=True) }}"
+_nut_upsmon_conf_defaults:
+#  DEADTIME: 15
+  FINALDELAY: 60
+#  HOSTSYNC: 15
+#  MINSUPPLIES: 1
+  MONITOR: "{{ _nut_upsmon_conf_default_monitor }}"
+#  NOCOMMWARNTIME: 300
+  NOTIFYCMD: '"/etc/nut/notify.sh"'
+#  NOTIFYMSG: []
+  NOTIFYFLAG:
+    - "ONLINE    SYSLOG+WALL+EXEC"
+    - "ONBATT    SYSLOG+WALL+EXEC"
+    - "LOWBATT   SYSLOG+WALL+EXEC"
+    - "FSD       SYSLOG+WALL+EXEC"
+    - "COMMOK    SYSLOG+WALL+EXEC"
+    - "COMMBAD   SYSLOG+WALL+EXEC"
+    - "SHUTDOWN  SYSLOG+WALL+EXEC"
+    - "REPLBATT  SYSLOG+WALL+EXEC"
+    - "NOCOMM    SYSLOG+WALL+EXEC"
+    - "NOPARENT  SYSLOG+WALL+EXEC"
+#  POLLFREQ: 5
+#  POLLFREQALERT: 5
+  POWERDOWNFLAG: '"/etc/killpower"'
+#  RBWARNTIME: 43200
+#  RUN_AS_USER:
+  SHUTDOWNCMD: "{{ nut.shutdown_cmd | default('\"/sbin/shutdown -h +0\"') }}"
+#  CERTPATH:
+#  CERTIDENT:
+#  CERTHOST:
+#  CERTVERIFY:
+#  FORCESSL:
+
+_nut_upsmon_conf_default_monitor: >
+  [
+  {% for nutmon in nut_monitor_names %}
+    "{{ nutmon | mandatory }} 1 {{ nut.user | mandatory }} {{ nut_upsd_users[nut.user].password | mandatory }} {{ nut_monitor_mode | mandatory }}",
+  {% endfor %}
+  ]

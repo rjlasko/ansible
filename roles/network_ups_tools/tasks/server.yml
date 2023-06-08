@@ -9,15 +9,16 @@
   ignore_errors: true
 
 - name: scan for UPS devices and drivers
-  ansible.builtin.shell: >
-    set -eo pipefail
-    && nut-scanner -q
-    | grep -v 'product '
-    | grep -v 'vendor '
-  args:
-    executable: bash
+  ansible.builtin.shell: nut-scanner -q
   changed_when: false
   register: nut_scan_results
+
+- name: Validate ups_conf override devices
+  vars:
+    expected_keys: "{{ (_nut_scanner_ups_conf.keys() | list) + ['global'] }}"
+  assert:
+    that: (_nut_ups_conf_overrides.keys() | difference(expected_keys) | length) == 0
+    fail_msg: "Illegal devices: {{ _nut_ups_conf_overrides.keys() | difference(expected_keys) | string }}"
 
 - name: ups.conf
   become: true
@@ -28,10 +29,10 @@
     group: nut
     mode: u=rw,g=r,o-rwx
 
-# Need to install ups.conf and reboot, before attempting to restart the nut services.
-# Upon reboot, the NUT-installed udev rules will assign correct group ownership to the device
-# file handle based upon the manufacturer & model information accessed by the device driver.
-# https://askubuntu.com/questions/113994/trouble-starting-network-ups-tools-with-a-eaton-3s-ups
+## Need to install ups.conf and reboot, before attempting to restart the nut services.
+## Upon reboot, the NUT-installed udev rules will assign correct group ownership to the device
+## file handle based upon the manufacturer & model information accessed by the device driver.
+## https://askubuntu.com/questions/113994/trouble-starting-network-ups-tools-with-a-eaton-3s-ups
 
 - name: restart UPS driver
   ansible.builtin.command: upsdrvctl start
@@ -70,9 +71,4 @@
   failed_when: >
     (nut_server_devices.rc != 0)
     or
-    (nut_server_devices.stdout_lines | length != 1)
-
-- name: standalone mode monitors itself
-  when: nut.mode == "standalone"
-  ansible.builtin.set_fact:
-    nut_monitor_name: "{{ nut_server_devices.stdout }}"
+    (nut_server_devices.stdout_lines | length == 0)
