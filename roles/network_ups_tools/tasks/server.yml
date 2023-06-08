@@ -18,7 +18,9 @@
     expected_keys: "{{ (_nut_scanner_ups_conf.keys() | list) + ['global'] }}"
   assert:
     that: (_nut_ups_conf_overrides.keys() | difference(expected_keys) | length) == 0
-    fail_msg: "Illegal devices: {{ _nut_ups_conf_overrides.keys() | difference(expected_keys) | string }}"
+    fail_msg: |
+      Illegal devices: {{ _nut_ups_conf_overrides.keys() | difference(expected_keys) | string }}
+      Valid devices are: {{ expected_keys }}
 
 - name: ups.conf
   become: true
