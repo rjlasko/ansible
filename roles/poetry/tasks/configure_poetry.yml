@@ -17,7 +17,7 @@
 
         - name: set credentials for custom-mirror
           environment:
-            # disables the keyring backend, as MacOS wants a password-approval popup, but throws an exception
+            # disables the keyring backend, to ensure that password goes into the auth.toml file
             PYTHON_KEYRING_BACKEND: keyring.backends.fail.Keyring
           ansible.builtin.command: "poetry config http-basic.custom-mirror {{ poetry_pip_username | mandatory }} {{ poetry_pip_password | mandatory }}"
           changed_when: true
