@@ -19,9 +19,9 @@
   when: >
     detected_filepath.rc != 0
     or
-    detected_version.stdout is not search(unison.versions.unison | mandatory)
+    detected_version.stdout is not search(unison.versions.unison)
     or
-    detected_version.stdout is not search(unison.versions.ocaml | mandatory)
+    detected_version.stdout is not search(unison.versions.ocaml)
   block:
     - name: delete prior install
       when: detected_filepath.rc == 0

@@ -23,19 +23,6 @@
         suffix: unison
       register: work_base_dir
 
-    - name: set source directory and versions
-      ansible.builtin.set_fact:
-        work_src_dir: "{{ work_base_dir.path }}/src"
-        ocaml_minor_version: "{{ unison.versions.ocaml | regex_replace('^([0-9])\\.([0-9]*).*', '\\1.\\2') }}"
-        ocaml_install_dir: "{{ work_base_dir.path }}/ocaml"
-
-    - name: set source and extract directory locations
-      ansible.builtin.set_fact:
-        ocaml_extract_dir: "{{ work_src_dir }}/ocaml"
-        ocaml_src_dir: "{{ work_src_dir }}/ocaml/ocaml-{{ unison.versions.ocaml }}"
-        unison_extract_dir: "{{ work_src_dir }}/unison"
-        unison_src_dir: "{{ work_src_dir }}/unison/src"
-
     - name: create output target directories
       loop:
         - "{{ ocaml_extract_dir }}"
@@ -47,15 +34,21 @@
         state: directory
         mode: u=rw,go-rwx
 
-    #########
-    # OCaml #
-    #########
-
     - name: download OCaml
       ansible.builtin.unarchive:
         remote_src: true
         src: "http://caml.inria.fr/pub/distrib/ocaml-{{ ocaml_minor_version }}/ocaml-{{ unison.versions.ocaml }}.tar.gz"
         dest: "{{ ocaml_extract_dir }}"
+
+    - name: download Unison
+      ansible.builtin.unarchive:
+        remote_src: true
+        src: "https://github.com/bcpierce00/unison/archive/refs/tags/v{{ unison.versions.unison }}.tar.gz"
+        dest: "{{ unison_extract_dir }}"
+
+    #########
+    # OCaml #
+    #########
 
     - name: configure OCaml build
       ansible.builtin.command:
@@ -83,12 +76,6 @@
     ##########
     # Unison #
     ##########
-
-    - name: download Unison
-      ansible.builtin.unarchive:
-        remote_src: true
-        src: "http://www.seas.upenn.edu/~bcpierce/unison/download/releases/unison-{{ unison.versions.unison }}/unison-{{ unison.versions.unison }}.tar.gz"
-        dest: "{{ unison_extract_dir }}"
 
     # XXX: if we were installing to Alpine Linux, we would want to consider the following:
     # Unison's build process was not designed with musl libc in mind. As a result, when it searches

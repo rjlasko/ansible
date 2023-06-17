@@ -1,0 +1,10 @@
+---
+work_src_dir: "{{ work_base_dir.path }}/src"
+
+ocaml_minor_version: "{{ unison.versions.ocaml | regex_replace('^([0-9])\\.([0-9]*).*', '\\1.\\2') }}"
+ocaml_install_dir: "{{ work_base_dir.path }}/ocaml"
+ocaml_extract_dir: "{{ work_src_dir }}/ocaml"
+ocaml_src_dir: "{{ ocaml_extract_dir }}/ocaml-{{ unison.versions.ocaml }}"
+
+unison_extract_dir: "{{ work_src_dir }}/unison"
+unison_src_dir: "{{ unison_extract_dir }}/unison-{{ unison.versions.unison }}/src"

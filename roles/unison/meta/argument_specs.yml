@@ -1,0 +1,21 @@
+---
+argument_specs:
+  # tasks/main.yml entry point
+  main:
+    short_description: The main entry point for the `unison` role.
+    options:
+      unison:
+        description: specification for building Unison from source
+        type: dict
+        required: true
+        options:
+          versions:
+            description: the version of Unison & OCaml to install
+            required: true
+            options:
+              unison:
+                description: the version of Unison to install
+                required: true
+              ocaml:
+                description: the version of OCaml to install
+                required: true
