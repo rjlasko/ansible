@@ -1,0 +1,27 @@
+---
+argument_specs:
+  # tasks/main.yml entry point
+  main:
+    short_description: The main entry point for the `modprobe` role.
+    options:
+      modprobe:
+        description: list of module specifications
+        required: true
+        type: list
+        options:
+          name:
+            description: The name of the kernel module
+            required: true
+          params:
+            description: Modules parameters
+          persistent:
+            description: Persistency between reboots for configured module.
+            choices:
+              - disabled
+              - absent
+              - present
+          state:
+            description: Whether the module should be present or absent.
+            choices:
+              - absent
+              - present

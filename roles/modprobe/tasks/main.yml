@@ -1,0 +1,14 @@
+---
+## ---------------------- ##
+## Enables kernel modules ##
+## ---------------------- ##
+
+- name: manage kernel module
+  loop: "{{ modprobe }}"
+  loop_control:
+    loop_var: module
+  community.general.modprobe:
+    name: "{{ module.name }}"
+    params: "{{ module.params | default(omit) }}"
+    persistent: "{{ module.persistent | default(omit) }}"
+    state: "{{ module.state | default(omit) }}"
